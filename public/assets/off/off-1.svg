@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" fill="none">
+  <rect width="800" height="800" fill="#eceee7"/>
+  <g stroke="#b4bcb2" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="290" y="300" width="220" height="160" rx="16"/>
+    <path d="M308 452 366 386 406 426 448 380 500 452"/>
+  </g>
+  <circle cx="342" cy="352" r="16" fill="#b4bcb2"/>
+  <text x="400" y="548" font-family="system-ui, sans-serif" font-size="30" fill="#9aa39a" text-anchor="middle">Off the clock · 1</text>
+</svg>

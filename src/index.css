@@ -1,0 +1,158 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./styles/fonts.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* ---------- Fontes ---------- */
+  --font-sans: "Switzer", system-ui, -apple-system, sans-serif;
+  --font-display: "Advercase", "Switzer", system-ui, sans-serif;
+  --font-heading: "Switzer", system-ui, sans-serif;
+  --font-mono: "Switzer", system-ui, sans-serif;
+
+  /* ---------- Rampa tipográfica (fluida, clamp) ---------- */
+  --text-display: clamp(3.5rem, 9vw, 8rem);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -0.03em;
+  --text-h1: clamp(2.25rem, 5vw, 4rem);
+  --text-h1--line-height: 1;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: clamp(1.6rem, 3.4vw, 2.5rem);
+  --text-h2--line-height: 1.05;
+  --text-h2--letter-spacing: -0.015em;
+  --text-h3: clamp(1.15rem, 1.6vw, 1.45rem);
+  --text-h3--line-height: 1.2;
+  --text-h3--letter-spacing: -0.01em;
+  --text-body-lg: clamp(1.0625rem, 1.1vw, 1.3rem);
+  --text-body-lg--line-height: 1.55;
+  --text-label: 0.78rem;
+  --text-label--line-height: 1;
+  --text-label--letter-spacing: 0.16em;
+
+  /* ---------- Cores de marca (viram utilitários: bg-lime, text-forest...) ---------- */
+  --color-paper: #f5f6f2;
+  --color-paper-raised: #ffffff;
+  --color-paper-sunken: #eceee7;
+  --color-ink: #0e1410;
+  --color-ink-muted: #5c6b60;
+  --color-ink-subtle: #8a968c;
+  --color-lime: #aaee86;
+  --color-lime-strong: #97e06a;
+  --color-lime-ink: #14200f;
+  --color-forest: #2c4136;
+  --color-forest-deep: #11160f;
+  --color-periwinkle: #6f79dd;
+  --color-line: color-mix(in srgb, #0e1410 12%, transparent);
+  --color-line-strong: color-mix(in srgb, #0e1410 24%, transparent);
+
+  /* ---------- Semânticos shadcn -> marca ---------- */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* ---------- Raio (arredondamento da marca) ---------- */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-card: 22px;
+  --radius-pill: 999px;
+
+  /* ---------- Motion (consumido pela Fase 4 via lib/motion.ts) ---------- */
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --duration-fast: 200ms;
+  --duration-base: 500ms;
+  --duration-slow: 800ms;
+}
+
+/* ---------- Modo claro (padrão do portfólio) ---------- */
+:root {
+  --radius: 0.875rem; /* 14px, raio de pílula/botão da marca */
+
+  --background: #f5f6f2;
+  --foreground: #0e1410;
+  --card: #ffffff;
+  --card-foreground: #0e1410;
+  --popover: #ffffff;
+  --popover-foreground: #0e1410;
+  --primary: #0e1410;
+  --primary-foreground: #f5f6f2;
+  --secondary: #eceee7;
+  --secondary-foreground: #0e1410;
+  --muted: #eceee7;
+  --muted-foreground: #5c6b60;
+  --accent: #aaee86;
+  --accent-foreground: #14200f;
+  --destructive: #c0402e;
+  --border: color-mix(in srgb, #0e1410 12%, transparent);
+  --input: color-mix(in srgb, #0e1410 16%, transparent);
+  --ring: #2c4136;
+}
+
+/* ---------- Modo escuro (bônus, pronto pra usar) ---------- */
+.dark {
+  --background: #090d0b;
+  --foreground: #e6ece6;
+  --card: #141a16;
+  --card-foreground: #e6ece6;
+  --popover: #141a16;
+  --popover-foreground: #e6ece6;
+  --primary: #aaee86;
+  --primary-foreground: #14200f;
+  --secondary: #1b241e;
+  --secondary-foreground: #e6ece6;
+  --muted: #1b241e;
+  --muted-foreground: #7e8b82;
+  --accent: #aaee86;
+  --accent-foreground: #14200f;
+  --destructive: #e5674f;
+  --border: color-mix(in srgb, #ffffff 8%, transparent);
+  --input: color-mix(in srgb, #ffffff 12%, transparent);
+  --ring: #aaee86;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  /* Grid de pontos sutil (pegada da referência), levíssimo no papel */
+  body {
+    background-image: radial-gradient(
+      color-mix(in srgb, #0e1410 6%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 22px 22px;
+  }
+}
+
+@layer components {
+  /* Label limpo: sentence case, sem uppercase forçado nem kerning excessivo */
+  .label {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    line-height: 1.2;
+    font-weight: 500;
+    color: var(--color-ink-muted);
+  }
+}
