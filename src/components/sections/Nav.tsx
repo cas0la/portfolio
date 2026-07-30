@@ -1,24 +1,25 @@
 import { useState } from 'react'
 import { motion, AnimatePresence, type Variants } from 'motion/react'
+import { Download } from 'lucide-react'
 import { Container } from '@/components/primitives/Container'
+import { LangPlate } from '@/components/LangPlate'
+import { useLocale } from '@/lib/i18n'
+import { copyFor } from '@/content'
 
-const links = [
-  { label: 'Work', href: '#work' },
-  { label: 'About', href: '#about' },
-  { label: "Let's talk", href: '#contact' },
-]
+const EASE = [0.22, 1, 0.36, 1] as const
 
-const EASE = [0.16, 1, 0.3, 1] as const
-
-// Cascata leve dos itens do menu ao abrir.
 const itemV: Variants = {
   hidden: { opacity: 0, y: -6 },
   show: { opacity: 1, y: 0 },
 }
 
-// Uma barrinha do hambúrguer (posição base via `top`, animação só via transform
-// pra não conflitar). As duas convergem pro centro e giram formando o X.
-function Bar({ open, base, openY, openRot }: {
+/** Uma barra do hambúrguer. As duas convergem e giram formando o X. */
+function Bar({
+  open,
+  base,
+  openY,
+  openRot,
+}: {
   open: boolean
   base: string
   openY: number
@@ -27,7 +28,7 @@ function Bar({ open, base, openY, openRot }: {
   return (
     <motion.span
       aria-hidden
-      className="absolute left-0 h-[2px] w-5 rounded-full bg-current"
+      className="absolute left-0 h-[1.5px] w-4 rounded-full bg-current"
       style={{ top: base }}
       initial={false}
       animate={open ? { y: openY, rotate: openRot } : { y: 0, rotate: 0 }}
@@ -36,71 +37,94 @@ function Bar({ open, base, openY, openRot }: {
   )
 }
 
+/**
+ * Cabeçalho. O menu é o de menos: o que importa é o botão de currículo e o
+ * seletor de idioma, e os dois ficam visíveis em qualquer largura, fora do
+ * hambúrguer.
+ */
 export function Nav() {
   const [open, setOpen] = useState(false)
+  const { locale } = useLocale()
+  const t = copyFor(locale)
   const close = () => setOpen(false)
 
+  const links = [
+    { label: t.nav.builds, href: '#cases' },
+    { label: t.nav.inventory, href: '#about' },
+    { label: t.nav.contact, href: '#contact' },
+  ]
+
   return (
-    <header className="relative z-50">
-      <Container className="flex items-center justify-between py-6">
+    <header className="sticky top-0 z-50 border-b border-hairline bg-page/85 backdrop-blur-md">
+      <a
+        href="#top"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-gap focus:top-2 focus:z-50 focus:rounded-sm focus:bg-surface focus:px-3 focus:py-1.5 focus:text-body-sm focus:font-semibold focus:shadow-soft"
+      >
+        {t.nav.skipToContent}
+      </a>
+
+      <Container className="flex items-center justify-between gap-gap py-3.5">
         <a
           href="#top"
           onClick={close}
-          className="font-display text-xl leading-none tracking-tight text-ink"
+          className="whitespace-nowrap font-display text-body-sm font-extrabold tracking-tight text-ink sm:text-h3"
         >
-          Your Name
+          Lucas Casanova
         </a>
 
-        {/* Desktop: links inline */}
-        <nav className="hidden items-center gap-6 sm:flex sm:gap-8">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-sm font-medium text-ink-muted transition-colors hover:text-ink"
-            >
-              {l.label}
-            </a>
-          ))}
-          <a
-            href="/resume.pdf"
-            download
-            className="text-sm font-medium text-ink-muted transition-colors hover:text-ink"
-          >
-            Résumé
-          </a>
-        </nav>
+        <div className="flex items-center gap-2.5">
+          <nav className="hidden items-center gap-gap md:flex">
+            {links.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                className="text-body-sm font-medium text-ink-soft transition-colors hover:text-royal"
+              >
+                {l.label}
+              </a>
+            ))}
+          </nav>
 
-        {/* Mobile: hambúrguer animado (morfa pra X) */}
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          className="inline-flex size-10 items-center justify-center rounded-pill text-ink transition-colors hover:bg-paper-sunken sm:hidden"
-        >
-          <span aria-hidden className="relative block h-4 w-5">
-            <Bar open={open} base="4px" openY={3} openRot={45} />
-            <Bar open={open} base="10px" openY={-3} openRot={-45} />
-          </span>
-        </button>
+          <LangPlate />
+
+          <a
+            href={t.nav.resumeFile}
+            download
+            className="hidden h-9 items-center gap-2 rounded-pill border border-hairline-strong bg-surface px-3.5 text-body-sm font-semibold text-ink transition-colors hover:border-royal hover:text-royal sm:inline-flex"
+          >
+            <Download className="size-4" aria-hidden />
+            {t.nav.resume}
+          </a>
+
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? t.nav.closeMenu : t.nav.openMenu}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            className="tap inline-flex size-9 items-center justify-center rounded-pill border border-hairline text-ink transition-colors hover:border-hairline-strong md:hidden"
+          >
+            <span aria-hidden className="relative block h-3.5 w-4">
+              <Bar open={open} base="3px" openY={3} openRot={45} />
+              <Bar open={open} base="9px" openY={-3} openRot={-45} />
+            </span>
+          </button>
+        </div>
       </Container>
 
-      {/* Mobile: painel que desce do topo, com fade + slide */}
       <AnimatePresence>
         {open && (
           <motion.div
             id="mobile-menu"
-            className="absolute inset-x-0 top-full sm:hidden"
-            initial={{ opacity: 0, y: -10 }}
+            className="absolute inset-x-0 top-full md:hidden"
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.26, ease: EASE }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.24, ease: EASE }}
           >
             <Container>
               <motion.div
-                className="mb-2 flex flex-col rounded-card border border-line bg-paper-raised p-2 shadow-[0_12px_34px_-14px_rgba(14,20,16,0.28)]"
+                className="mb-2 flex flex-col rounded-lg border border-hairline bg-surface p-2 shadow-soft"
                 initial="hidden"
                 animate="show"
                 variants={{
@@ -113,19 +137,20 @@ export function Nav() {
                     variants={itemV}
                     href={l.href}
                     onClick={close}
-                    className="rounded-xl px-4 py-3 text-base font-medium text-ink transition-colors hover:bg-paper-sunken"
+                    className="rounded-sm px-3 py-3 text-h3 font-semibold text-ink transition-colors hover:bg-page"
                   >
                     {l.label}
                   </motion.a>
                 ))}
                 <motion.a
                   variants={itemV}
-                  href="/resume.pdf"
+                  href={t.nav.resumeFile}
                   download
                   onClick={close}
-                  className="rounded-xl px-4 py-3 text-base font-medium text-ink-muted transition-colors hover:bg-paper-sunken"
+                  className="flex items-center gap-2 rounded-sm px-3 py-3 text-h3 font-semibold text-royal transition-colors hover:bg-royal-wash"
                 >
-                  Résumé
+                  <Download className="size-4" aria-hidden />
+                  {t.nav.resume}
                 </motion.a>
               </motion.div>
             </Container>

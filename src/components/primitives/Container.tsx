@@ -1,10 +1,22 @@
 import type { ReactNode } from 'react'
 
 /**
- * Largura total com padding lateral fluido: ~124px em desktop/notebook,
- * encolhendo no mobile. Sem max-width central: o layout ocupa quase toda a
- * largura. Quebras de linha de texto são controladas por max-width no próprio
- * elemento de texto, não no container.
+ * Container de leitura. Teto de 1280px, centrado, com respiro lateral de 24px no
+ * telefone e 48px acima de md.
+ *
+ * O template original era de largura total sem teto. O requisito de leitura
+ * limpa pede medida controlada: linha longa demais é o jeito mais rápido de
+ * tornar texto denso cansativo.
+ *
+ * O respiro vem da classe `container-pad` (em index.css) e não de utilitários,
+ * porque ele precisa respeitar `env(safe-area-inset-*)` com media query. Feito em
+ * estilo inline, ele anulava o padding maior do desktop, já que inline não tem
+ * breakpoint.
+ *
+ * Histórico que vale guardar: uma versão usava `px-stud`, token que foi
+ * renomeado, e as classes viraram inválidas. O container ficou sem padding
+ * nenhum, e isso só aparecia abaixo de 1280px de viewport, porque acima disso o
+ * próprio teto de largura cria a margem.
  */
 export function Container({
   children,
@@ -14,7 +26,7 @@ export function Container({
   className?: string
 }) {
   return (
-    <div className={`w-full px-[clamp(1.25rem,_10vw,_124px)] ${className}`}>
+    <div className={`container-pad mx-auto w-full max-w-[1280px] ${className}`}>
       {children}
     </div>
   )

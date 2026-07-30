@@ -1,53 +1,74 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "./styles/fonts.css";
 
-@custom-variant dark (&:is(.dark *));
+/*
+ * Portfólio de Lucas Casanova. A autoridade é o DESIGN.md na raiz de 0-pessoal;
+ * este arquivo é a implementação dele.
+ *
+ * Restrições vinculantes do autor: azul royal como cor de destaque, roxo em
+ * elemento pequeno, layout limpo e de fácil leitura, tipografia do Google Fonts,
+ * sem malha de fundo, e sem o aspecto blocado de borda grossa.
+ *
+ * Régua de acabamento: portfólio pessoal sênior. Leitura confortável, pouca
+ * decoração, personalidade no detalhe.
+ *
+ * Sem modo escuro: a cena de uso é leitura de dia, na mesa, durante um processo
+ * seletivo, ao lado de uma planilha de candidatos.
+ */
 
 @theme inline {
   /* ---------- Fontes ---------- */
-  --font-sans: "Switzer", system-ui, -apple-system, sans-serif;
-  --font-display: "Advercase", "Switzer", system-ui, sans-serif;
-  --font-heading: "Switzer", system-ui, sans-serif;
-  --font-mono: "Switzer", system-ui, sans-serif;
+  /* Bricolage Grotesque no display: caráter real sem custar legibilidade.
+     Public Sans no corpo: dos mais neutros e legíveis para texto longo. */
+  --font-sans: "Public Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Bricolage Grotesque", "Public Sans", system-ui, sans-serif;
+  --font-heading: "Bricolage Grotesque", "Public Sans", system-ui, sans-serif;
+  --font-mono: "Public Sans", system-ui, sans-serif;
 
-  /* ---------- Rampa tipográfica (fluida, clamp) ---------- */
-  --text-display: clamp(3.5rem, 9vw, 8rem);
-  --text-display--line-height: 0.9;
-  --text-display--letter-spacing: -0.03em;
-  --text-h1: clamp(2.25rem, 5vw, 4rem);
-  --text-h1--line-height: 1;
-  --text-h1--letter-spacing: -0.02em;
-  --text-h2: clamp(1.6rem, 3.4vw, 2.5rem);
-  --text-h2--line-height: 1.05;
-  --text-h2--letter-spacing: -0.015em;
-  --text-h3: clamp(1.15rem, 1.6vw, 1.45rem);
-  --text-h3--line-height: 1.2;
-  --text-h3--letter-spacing: -0.01em;
-  --text-body-lg: clamp(1.0625rem, 1.1vw, 1.3rem);
-  --text-body-lg--line-height: 1.55;
-  --text-label: 0.78rem;
-  --text-label--line-height: 1;
-  --text-label--letter-spacing: 0.16em;
+  /* ---------- Rampa tipográfica ---------- */
+  --text-display: clamp(2.375rem, 5.2vw, 4.25rem);
+  --text-display--line-height: 1.02;
+  --text-display--letter-spacing: -0.032em;
+  --text-h1: clamp(1.75rem, 3.2vw, 2.5rem);
+  --text-h1--line-height: 1.1;
+  --text-h1--letter-spacing: -0.025em;
+  --text-h2: clamp(1.25rem, 2vw, 1.5rem);
+  --text-h2--line-height: 1.2;
+  --text-h2--letter-spacing: -0.018em;
+  --text-h3: 1.0625rem;
+  --text-h3--line-height: 1.4;
+  --text-h3--letter-spacing: -0.006em;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.68;
+  --text-body-sm: 0.9375rem;
+  --text-body-sm--line-height: 1.62;
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.25;
+  --text-label--letter-spacing: 0.09em;
+  --text-num: clamp(1.75rem, 2.6vw, 2.25rem);
+  --text-num--line-height: 1;
+  --text-num--letter-spacing: -0.028em;
 
-  /* ---------- Cores de marca (viram utilitários: bg-lime, text-forest...) ---------- */
-  --color-paper: #f5f6f2;
-  --color-paper-raised: #ffffff;
-  --color-paper-sunken: #eceee7;
-  --color-ink: #0e1410;
-  --color-ink-muted: #5c6b60;
-  --color-ink-subtle: #8a968c;
-  --color-lime: #aaee86;
-  --color-lime-strong: #97e06a;
-  --color-lime-ink: #14200f;
-  --color-forest: #2c4136;
-  --color-forest-deep: #11160f;
-  --color-periwinkle: #6f79dd;
-  --color-line: color-mix(in srgb, #0e1410 12%, transparent);
-  --color-line-strong: color-mix(in srgb, #0e1410 24%, transparent);
+  /* ---------- Papel e tinta ---------- */
+  --color-page: #f7f8fb;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f0f3f9;
+  --color-hairline: #e3e7f0;
+  --color-hairline-strong: #ccd3e2;
+  --color-ink: #10131f;
+  --color-ink-soft: #5a6480;
 
-  /* ---------- Semânticos shadcn -> marca ---------- */
+  /* ---------- Azul royal: destaque principal ---------- */
+  --color-royal: #1e40c8;
+  --color-royal-deep: #142a85;
+  --color-royal-wash: #eaeefc;
+
+  /* ---------- Roxo: destaque de elemento pequeno ---------- */
+  --color-violet: #6d28d9;
+  --color-violet-deep: #4c1d95;
+
+  /* ---------- Semânticos shadcn ---------- */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -67,92 +88,260 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* ---------- Raio (arredondamento da marca) ---------- */
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 6px);
-  --radius-card: 22px;
+  /* ---------- Forma: canto mole, nada de quadrado duro ---------- */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
   --radius-pill: 999px;
 
-  /* ---------- Motion (consumido pela Fase 4 via lib/motion.ts) ---------- */
-  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
-  --duration-fast: 200ms;
-  --duration-base: 500ms;
-  --duration-slow: 800ms;
+  /* ---------- Ritmo ----------
+     `beat` é o intervalo entre momentos da narrativa, e é deliberadamente
+     grande: cada seção conta uma parte da história e precisa de ar antes da
+     seguinte. Referência de respiro é o template original, que usava de 112 a
+     164px entre seções e um hero de quase uma tela inteira. No telefone o
+     intervalo cai para 88px, porque 160px lá viraria tela vazia. */
+  --spacing-gap: 24px;
+  --spacing-half-gap: 12px;
+  --spacing-block: 48px;
+  --spacing-section: 96px;
+  /*
+   * Intervalo entre seções. Subiu de 160 para 208px porque com 160 o autor
+   * apontou que o pé do hero, o clarão e a seção seguinte ficavam apertados: o
+   * conteúdo da próxima seção começava ainda dentro da luz do clarão, e a página
+   * lia como um bloco só. É o passo mais alto do ritmo e existe para separar
+   * assunto de assunto, não linha de linha.
+   */
+  --spacing-beat: 208px;
+
+  /* ---------- Motion: suave, sem exagero ---------- */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 180ms;
+  --duration-base: 420ms;
+  --duration-slow: 700ms;
 }
 
-/* ---------- Modo claro (padrão do portfólio) ---------- */
 :root {
-  --radius: 0.875rem; /* 14px, raio de pílula/botão da marca */
+  --radius: 0.625rem;
 
-  --background: #f5f6f2;
-  --foreground: #0e1410;
+  --background: #f7f8fb;
+  --foreground: #10131f;
   --card: #ffffff;
-  --card-foreground: #0e1410;
+  --card-foreground: #10131f;
   --popover: #ffffff;
-  --popover-foreground: #0e1410;
-  --primary: #0e1410;
-  --primary-foreground: #f5f6f2;
-  --secondary: #eceee7;
-  --secondary-foreground: #0e1410;
-  --muted: #eceee7;
-  --muted-foreground: #5c6b60;
-  --accent: #aaee86;
-  --accent-foreground: #14200f;
-  --destructive: #c0402e;
-  --border: color-mix(in srgb, #0e1410 12%, transparent);
-  --input: color-mix(in srgb, #0e1410 16%, transparent);
-  --ring: #2c4136;
-}
-
-/* ---------- Modo escuro (bônus, pronto pra usar) ---------- */
-.dark {
-  --background: #090d0b;
-  --foreground: #e6ece6;
-  --card: #141a16;
-  --card-foreground: #e6ece6;
-  --popover: #141a16;
-  --popover-foreground: #e6ece6;
-  --primary: #aaee86;
-  --primary-foreground: #14200f;
-  --secondary: #1b241e;
-  --secondary-foreground: #e6ece6;
-  --muted: #1b241e;
-  --muted-foreground: #7e8b82;
-  --accent: #aaee86;
-  --accent-foreground: #14200f;
-  --destructive: #e5674f;
-  --border: color-mix(in srgb, #ffffff 8%, transparent);
-  --input: color-mix(in srgb, #ffffff 12%, transparent);
-  --ring: #aaee86;
+  --popover-foreground: #10131f;
+  --primary: #1e40c8;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f3f9;
+  --secondary-foreground: #10131f;
+  --muted: #f0f3f9;
+  --muted-foreground: #5a6480;
+  --accent: #1e40c8;
+  --accent-foreground: #ffffff;
+  --destructive: #b3261e;
+  --border: #e3e7f0;
+  --input: #ccd3e2;
+  --ring: #1e40c8;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-page text-ink font-sans antialiased;
+    font-size: var(--text-body);
+    line-height: 1.68;
+    -webkit-font-smoothing: antialiased;
   }
-  /* Grid de pontos sutil (pegada da referência), levíssimo no papel */
-  body {
-    background-image: radial-gradient(
-      color-mix(in srgb, #0e1410 6%, transparent) 1px,
-      transparent 1px
-    );
-    background-size: 22px 22px;
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+
+  /* Foco de teclado sempre visível, e não só por cor. */
+  :focus-visible {
+    outline: 2px solid var(--color-royal);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+
+  ::selection {
+    background: var(--color-royal);
+    color: #ffffff;
   }
 }
 
 @layer components {
-  /* Label limpo: sentence case, sem uppercase forçado nem kerning excessivo */
+  /* Rótulo pequeno. Usado com parcimônia, não acima de toda seção. */
   .label {
-    font-family: var(--font-sans);
-    font-size: 0.8rem;
-    line-height: 1.2;
-    font-weight: 500;
-    color: var(--color-ink-muted);
+    font-size: var(--text-label);
+    line-height: 1.25;
+    letter-spacing: 0.09em;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  /*
+   * Respiro lateral do container. Em CSS, e não em utilitário, porque precisa
+   * respeitar a área segura do aparelho: em paisagem, num telefone com notch,
+   * 24px fixos deixariam texto embaixo do recorte.
+   */
+  .container-pad {
+    padding-left: max(var(--spacing-gap), env(safe-area-inset-left));
+    padding-right: max(var(--spacing-gap), env(safe-area-inset-right));
+  }
+  @media (min-width: 768px) {
+    .container-pad {
+      padding-left: max(var(--spacing-block), env(safe-area-inset-left));
+      padding-right: max(var(--spacing-block), env(safe-area-inset-right));
+    }
+  }
+
+  /* Medida de leitura: 65 a 72 caracteres. */
+  .measure {
+    max-width: 66ch;
+  }
+  .measure-wide {
+    max-width: 78ch;
+  }
+
+  /* Numeral tabular: número precisa alinhar em coluna. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* Sombra suave, com deslocamento e blur de verdade. Só onde há elevação real. */
+  .shadow-soft {
+    box-shadow:
+      0 1px 2px rgba(16, 19, 31, 0.04),
+      0 10px 28px -14px rgba(16, 19, 31, 0.14);
+  }
+  .shadow-lift {
+    box-shadow:
+      0 1px 2px rgba(16, 19, 31, 0.05),
+      0 16px 36px -16px rgba(16, 19, 31, 0.2);
+  }
+
+  /*
+   * Gradiente royal para roxo. Um endereço só: o botão de currículo, que é a
+   * ação mais importante e aparece no topo e no fechamento. Um gradiente em três
+   * lugares diferentes deixa de ser destaque e vira textura.
+   */
+  .grad-royal-violet {
+    background-image: linear-gradient(
+      112deg,
+      var(--color-royal) 0%,
+      var(--color-royal) 38%,
+      var(--color-violet) 100%
+    );
+  }
+
+  /*
+   * Convite ao scroll: um fio vertical que desaparece para baixo, com a seta
+   * descendo por ele.
+   *
+   * A versão de antes era rótulo pequeno e seta solta, e o autor apontou que
+   * ficava pouco atrativa. O fio resolve duas coisas de uma vez: é o convite e é
+   * a divisória entre o hero e a seção seguinte. Divisória por luz e por fio que
+   * termina em nada, nunca traço duro fechando a seção, que faria a página ler
+   * como caixas empilhadas.
+   */
+  /*
+   * A maior parte da barra é cor cheia, e só o último terço desvanece.
+   *
+   * A primeira versão era um fio de 1px com gradiente desde o topo, e o autor
+   * leu como glitch nas duas tentativas. O motivo é real: barra estreita cujo
+   * gradiente passa a maior parte do percurso em alfa baixo vira fileira de
+   * pixels semitransparentes, que o olho lê como falha de renderização, não como
+   * desenho. Com 3px e o desvanecer concentrado no fim, ela lê como barra.
+   */
+  .cue-rail {
+    background-image: linear-gradient(
+      to bottom,
+      var(--color-royal) 0%,
+      var(--color-royal) 62%,
+      transparent 100%
+    );
+    /* A transição vive na classe utilitária do elemento, porque `transition-*` do
+       Tailwind está numa layer posterior e sobrescreveria uma declarada aqui. */
+    opacity: 0.75;
+  }
+  .group:hover .cue-rail {
+    opacity: 1;
+  }
+
+  /*
+   * Clarão no pé do hero. Herdado do template original, que usava um radial no
+   * rodapé da primeira tela para marcar a passagem de seção sem fio. Aqui em
+   * royal e em alfa muito baixo: precisa ser sentido, não visto. Não é a malha de
+   * fundo que o autor mandou tirar, que era grade de pontos repetida na página
+   * inteira; este é um único clarão, num único lugar.
+   */
+  .hero-glow {
+    background-image: radial-gradient(
+      50% 50% at 50% 50%,
+      color-mix(in srgb, var(--color-royal) 13%, transparent) 0%,
+      transparent 70%
+    );
+  }
+
+  /*
+   * Sublinhado de link. Sempre desenhado, discreto, e no hover ele encorpa e
+   * fica royal cheio, crescendo da esquerda sem mover o texto.
+   *
+   * Antes ele partia de `background-size: 0%`, ou seja, **invisível até o
+   * hover**. Isso invertia a afordância da página: os trechos com ênfase colorida
+   * dentro do parágrafo pareciam link, e o link de verdade não parecia nada. Um
+   * link que só se anuncia quando o mouse já está nele não é afordância, é
+   * recompensa. O estado de repouso agora carrega o sinal.
+   */
+  .underline-draw {
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--color-royal) 38%, transparent),
+      color-mix(in srgb, var(--color-royal) 38%, transparent)
+    );
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
+    background-position: 0 100%;
+    transition:
+      background-size var(--duration-base) var(--ease-out-soft),
+      background-image var(--duration-base) var(--ease-out-soft);
+  }
+  .group:hover .underline-draw,
+  .underline-draw:hover {
+    background-image: linear-gradient(var(--color-royal), var(--color-royal));
+    background-size: 100% 2px;
+  }
+
+  /*
+   * Alvo de toque em ponteiro grosso, sem inflar o desenho em desktop.
+   * `tap-h` é só altura, para elemento que já é largo o bastante: forçar largura
+   * mínima nos chips de idioma alargou a placa e passou a cortar o hambúrguer em
+   * 360px. `tap` é para controle quadrado, como o próprio hambúrguer.
+   */
+  @media (pointer: coarse) {
+    .tap-h {
+      min-height: 44px;
+    }
+    .tap {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
   }
 }

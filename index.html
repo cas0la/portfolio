@@ -1,20 +1,64 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Your Name · Product Designer</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Lucas Casanova · Product Manager</title>
     <meta
       name="description"
-      content="A minimal, editorial portfolio template — clean, full-width, and easy to make your own."
+      content="Product Manager sênior. Respondo pelo Inteligência Comercial na Nexfar: catálogo, preço e estoque em tempo real, cotação por OCR e recomendação por IA para a operação comercial de distribuidoras farmacêuticas."
     />
+    <meta name="theme-color" content="#F7F8FB" />
 
-    <!-- Switzer (corpo, UI e labels) — Fontshare CDN -->
-    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <!-- Prévia de link.
+         O caminho de chegada é link em PDF de currículo ou no LinkedIn, então
+         estas tags são o que o avaliador vê antes de abrir a página.
+
+         Robô de preview não executa JS, então estas tags estáticas são as únicas
+         que ele lê, e por isso o cartão é neutro de idioma: nome, cargo e cidade,
+         sem frase longa. O `LocaleProvider` troca title e description em tempo de
+         execução para a aba do visitante, não para o robô.
+
+         `og:url` fica de fora de propósito: o domínio ainda não foi decidido, e
+         uma URL errada aqui é pior que nenhuma. -->
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content="Lucas Casanova" />
+    <meta property="og:title" content="Lucas Casanova · Product Manager" />
+    <meta
+      property="og:description"
+      content="Portfólio de Lucas Casanova, Product Manager sênior em Florianópolis. Raciocínio de produto, IA aplicada e a interface desenhada por mim."
+    />
+    <meta property="og:image" content="/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Cartão com o nome Lucas Casanova em tipografia grande e, abaixo, Product Manager, Florianópolis, Brasil."
+    />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Lucas Casanova · Product Manager" />
+    <meta
+      name="twitter:description"
+      content="Portfólio de Lucas Casanova, Product Manager sênior em Florianópolis. Raciocínio de produto, IA aplicada e a interface desenhada por mim."
+    />
+    <meta name="twitter:image" content="/og.png" />
+
+    <!-- Google Fonts, ambas OFL.
+         Bricolage Grotesque no display: caráter real sem custar legibilidade.
+         Public Sans no corpo: dos mais neutros e legíveis para texto longo.
+         A Advercase do template saiu: o .woff2 empacotado não era a Advercase e a
+         licença não era verificável. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
     />
   </head>
   <body>
