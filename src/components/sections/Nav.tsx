@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, type Variants } from 'motion/react'
 import { Download } from 'lucide-react'
 import { Container } from '@/components/primitives/Container'
@@ -47,6 +47,40 @@ export function Nav() {
   const { locale } = useLocale()
   const t = copyFor(locale)
   const close = () => setOpen(false)
+  const barRef = useRef<HTMLDivElement>(null)
+
+  /*
+   * Publica a altura real do cabeçalho em `--header-h`, que é de onde saem o
+   * `scroll-margin-top` das seções e a altura do hero.
+   *
+   * O cabeçalho é a única coisa que sabe quanto ele mede, e antes ninguém
+   * perguntava: as seções chumbavam 64px e o hero chumbava 72px, os dois
+   * discordando da barra de verdade. Era isso que fazia a seção grudar embaixo do
+   * cabeçalho ao chegar pela âncora do menu.
+   *
+   * `ResizeObserver` e não uma medida única: a barra muda de altura ao trocar de
+   * idioma (os rótulos do menu têm comprimentos diferentes), ao cruzar o
+   * breakpoint em que o botão de currículo sai, e quando o nome quebra em duas
+   * linhas numa tela estreita.
+   *
+   * **O alvo é a barra, não o `<header>`.** O painel do menu mobile vive dentro do
+   * mesmo `<header>`, então medir o elemento inteiro faria a altura saltar toda vez
+   * que o menu abrisse, e com ela o ponto de parada de todas as âncoras da página.
+   * O `ref` está num invólucro que contém só a barra.
+   */
+  useEffect(() => {
+    const node = barRef.current
+    if (!node) return
+
+    const sync = () => {
+      document.documentElement.style.setProperty('--header-h', `${node.offsetHeight}px`)
+    }
+
+    sync()
+    const observer = new ResizeObserver(sync)
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
 
   const links = [
     { label: t.nav.builds, href: '#cases' },
@@ -63,54 +97,58 @@ export function Nav() {
         {t.nav.skipToContent}
       </a>
 
-      <Container className="flex items-center justify-between gap-gap py-3.5">
-        <a
-          href="#top"
-          onClick={close}
-          className="whitespace-nowrap font-display text-body-sm font-extrabold tracking-tight text-ink sm:text-h3"
-        >
-          Lucas Casanova
-        </a>
-
-        <div className="flex items-center gap-2.5">
-          <nav className="hidden items-center gap-gap md:flex">
-            {links.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                className="text-body-sm font-medium text-ink-soft transition-colors hover:text-royal"
-              >
-                {l.label}
-              </a>
-            ))}
-          </nav>
-
-          <LangPlate />
-
+      {/* O invólucro existe para o `ResizeObserver` ter um alvo que é só a barra.
+          Medir o `<header>` incluiria o painel do menu mobile, que é filho dele. */}
+      <div ref={barRef}>
+        <Container className="flex items-center justify-between gap-gap py-3.5">
           <a
-            href={t.nav.resumeFile}
-            download
-            className="hidden h-9 items-center gap-2 rounded-pill border border-hairline-strong bg-surface px-3.5 text-body-sm font-semibold text-ink transition-colors hover:border-royal hover:text-royal sm:inline-flex"
+            href="#top"
+            onClick={close}
+            className="whitespace-nowrap font-display text-body-sm font-extrabold tracking-tight text-ink sm:text-h3"
           >
-            <Download className="size-4" aria-hidden />
-            {t.nav.resume}
+            Lucas Casanova
           </a>
 
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-label={open ? t.nav.closeMenu : t.nav.openMenu}
-            aria-expanded={open}
-            aria-controls="mobile-menu"
-            className="tap inline-flex size-9 items-center justify-center rounded-pill border border-hairline text-ink transition-colors hover:border-hairline-strong md:hidden"
-          >
-            <span aria-hidden className="relative block h-3.5 w-4">
-              <Bar open={open} base="3px" openY={3} openRot={45} />
-              <Bar open={open} base="9px" openY={-3} openRot={-45} />
-            </span>
-          </button>
-        </div>
-      </Container>
+          <div className="flex items-center gap-2.5">
+            <nav className="hidden items-center gap-gap md:flex">
+              {links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="text-body-sm font-medium text-ink-soft transition-colors hover:text-royal"
+                >
+                  {l.label}
+                </a>
+              ))}
+            </nav>
+
+            <LangPlate />
+
+            <a
+              href={t.nav.resumeFile}
+              download
+              className="hidden h-9 items-center gap-2 rounded-pill border border-hairline-strong bg-surface px-3.5 text-body-sm font-semibold text-ink transition-colors hover:border-royal hover:text-royal sm:inline-flex"
+            >
+              <Download className="size-4" aria-hidden />
+              {t.nav.resume}
+            </a>
+
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-label={open ? t.nav.closeMenu : t.nav.openMenu}
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              className="tap inline-flex size-9 items-center justify-center rounded-pill border border-hairline text-ink transition-colors hover:border-hairline-strong md:hidden"
+            >
+              <span aria-hidden className="relative block h-3.5 w-4">
+                <Bar open={open} base="3px" openY={3} openRot={45} />
+                <Bar open={open} base="9px" openY={-3} openRot={-45} />
+              </span>
+            </button>
+          </div>
+        </Container>
+      </div>
 
       <AnimatePresence>
         {open && (

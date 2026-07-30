@@ -32,7 +32,7 @@ export function Hero() {
   const t = copyFor(locale)
 
   return (
-    <section id="top" className="relative scroll-mt-16 pb-[112px] md:pb-beat">
+    <section id="top" className="relative scroll-anchor pb-[112px] md:pb-beat">
       {/*
        * Clarão que faz a passagem para a seção seguinte. Decorativo.
        *
@@ -67,15 +67,17 @@ export function Hero() {
        * assimétrico se anulam: o conteúdo centraliza dentro da caixa já
        * deslocada, então sobra vão morto de um lado.
        *
-       * A altura é a dobra menos o header (`py-3.5` mais o conteúdo dele, ~72px),
-       * porque o convite só cumpre a função se estiver visível sem rolar. Os 86svh
-       * de antes punham o pé do hero abaixo da linha d'água.
+       * A altura é a dobra menos o header, porque o convite só cumpre a função se
+       * estiver visível sem rolar. Os 86svh de antes punham o pé do hero abaixo da
+       * linha d'água.
        *
-       * NOTA: 4.5rem é a altura do header medida, não lida. Se o header mudar de
-       * altura, isto e o `scroll-mt-16` das seções saem de sincronia — os dois
-       * deveriam ler a mesma variável.
+       * `--header-h` é medido e publicado pelo próprio `Nav` a cada mudança de
+       * tamanho dele. Antes havia dois números chumbados que discordavam entre si e
+       * da barra real — 4.5rem aqui e `scroll-mt-16` nas seções —, e era isso que
+       * fazia a seção grudar embaixo do cabeçalho ao chegar pela âncora do menu.
+       * Nada aqui deve voltar a chumbar altura de header.
        */}
-      <Container className="relative flex min-h-[calc(100svh-4.5rem)] flex-col py-block text-center">
+      <Container className="relative flex min-h-[calc(100svh-var(--header-h))] flex-col py-block text-center">
         {/* `hero-measure` no wrapper, não em cada filho: é o que faz título,
             apresentação e parágrafo quebrarem no mesmo eixo. Ver a classe em
             index.css para o problema que ela resolve. */}

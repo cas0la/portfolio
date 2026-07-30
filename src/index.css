@@ -181,6 +181,29 @@
 }
 
 :root {
+  /*
+   * Altura real do cabeçalho, medida e escrita pelo `Nav` em tempo de execução.
+   *
+   * O valor aqui é só o palpite até o primeiro frame, e existe para o cálculo do
+   * hero e das âncoras não ficar quebrado enquanto o JS não roda. Era um número
+   * chumbado em dois lugares antes, e os dois discordavam da realidade: as seções
+   * usavam `scroll-mt-16` (64px) e o hero usava `4.5rem` (72px), enquanto o
+   * cabeçalho media outra coisa. O resultado era a seção grudando embaixo da barra
+   * ao chegar pela âncora do menu.
+   *
+   * Quem mede é o próprio cabeçalho, com `ResizeObserver`: ele muda de altura ao
+   * trocar de idioma, ao cruzar o breakpoint e quando o nome quebra em duas linhas
+   * numa tela estreita.
+   */
+  --header-h: 72px;
+  /*
+   * Respiro entre a barra e o começo da seção quando se chega por âncora. Sem ele
+   * a seção encosta na barra e o título fica espremido contra o fio de baixo dela.
+   * 24px no telefone e 40px acima de md: 40px de vazio numa tela de 640px de altura
+   * é 6% da viewport gasta em nada.
+   */
+  --scroll-air: 24px;
+
   --radius: 0.625rem;
 
   --background: #f7f8fb;
@@ -201,6 +224,12 @@
   --border: #e3e7f0;
   --input: #ccd3e2;
   --ring: #1e40c8;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --scroll-air: 40px;
+  }
 }
 
 @layer base {
@@ -238,6 +267,16 @@
 }
 
 @layer components {
+  /*
+   * Ponto de parada de âncora. Toda seção com `id` que o menu alcança usa esta
+   * classe, e nenhuma volta a chumbar `scroll-mt-*`: o valor tem que sair da
+   * altura medida do cabeçalho, senão ele e a barra saem de sincronia na primeira
+   * vez que a barra mudar.
+   */
+  .scroll-anchor {
+    scroll-margin-top: calc(var(--header-h) + var(--scroll-air));
+  }
+
   /* Rótulo pequeno. Usado com parcimônia, não acima de toda seção. */
   .label {
     font-size: var(--text-label);

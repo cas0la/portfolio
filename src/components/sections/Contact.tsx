@@ -236,7 +236,7 @@ export function Contact() {
     // aqui ele deixava a página terminar em 208px de vazio abaixo da assinatura.
     // O fechamento recebe respiro de bloco, que é o suficiente para o rodapé não
     // encostar na borda.
-    <footer id="contact" className="scroll-mt-16 pb-block">
+    <footer id="contact" className="scroll-anchor pb-block">
       <Container>
         <FadeIn>
           <h2 className="measure text-h1 font-extrabold text-ink">{t.close.title}</h2>

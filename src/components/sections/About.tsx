@@ -275,7 +275,7 @@ export function About() {
   const rest = t.inventory.testimonials.filter((item) => item !== featured)
 
   return (
-    <section id="about" className="scroll-mt-16 pb-[112px] md:pb-beat">
+    <section id="about" className="scroll-anchor pb-[112px] md:pb-beat">
       <Container>
         {/*
          * O ponto final colorido é a assinatura do sistema, herdada do hero. Aqui

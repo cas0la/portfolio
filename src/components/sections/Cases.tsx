@@ -127,7 +127,7 @@ export function Cases() {
   const rest = t.builds.items.filter((b) => b.tier !== 'highlight')
 
   return (
-    <section id="cases" className="scroll-mt-16 pb-[112px] md:pb-beat">
+    <section id="cases" className="scroll-anchor pb-[112px] md:pb-beat">
       <Container>
         <FadeIn>
           <h2 className="text-h1 font-extrabold text-ink">{t.builds.title}</h2>
