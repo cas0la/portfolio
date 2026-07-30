@@ -141,11 +141,18 @@ export function Hero() {
          * O que faz a seta funcionar agora é a posição: no meio da tela ela
          * precisava do fio para dizer "para baixo", no pé da dobra o próprio lugar
          * já diz, e o movimento confirma.
+         *
+         * O rótulo subiu de `text-body-sm`/`ink-soft` para `text-body`/`ink` quando
+         * ele deixou de nomear o destino e passou a dizer por onde começar. Em 14px
+         * cinza, uma frase desse tamanho lia como legenda de rodapé, e legenda não
+         * convida. Continua sendo link de texto com sublinhado, e não botão: o
+         * DESIGN.md reserva botão para o currículo, e o hero convida a descer, não a
+         * baixar.
          */}
         <FadeIn immediate delay={0.26}>
           <a
             href="#cases"
-            className="group inline-flex flex-col items-center gap-4 text-body-sm text-ink-soft transition-colors hover:text-royal"
+            className="group inline-flex flex-col items-center gap-4 text-body text-ink transition-colors hover:text-royal"
           >
             <span className="underline-draw">{t.hero.ctaBuilds}</span>
             {/* 16px de folga, não 8: a seta desce 6px no laço, e com 8px de

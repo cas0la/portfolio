@@ -19,6 +19,15 @@ import type { ReactNode } from 'react'
  *   royal → roxo. **Só no hero.** É o marcador mais caro da página: muda família,
  *   peso e cor de uma vez, então dois deles fora da abertura já fariam a página
  *   ler como texto promocional. Teto de três por parágrafo, como os outros.
+ * - `~~trecho~~` — destaque em itálico de serifa, em tinta, sem gradiente. É o
+ *   `@@` sem a pintura: serve onde a segunda voz tipográfica ajuda a destacar mas
+ *   a cor seria demais. Nasceu para o texto de trajetória do Sobre, onde os
+ *   destaques não são prova nem afirmação de papel — são os marcos do percurso.
+ *
+ * A diferença entre `**` e `~~` é o que o trecho é, não o quanto ele importa:
+ * `**` é prova que se verifica (número, período, resultado), `~~` é o momento que
+ * a frase quer que fique. Os dois ficam em tinta, e por isso podem conviver no
+ * mesmo parágrafo sem disputar.
  *
  * Por que cor aqui não lê como link, apesar do risco: link nesta página é texto
  * em `ink` com sublinhado (`underline-draw`) ou é controle com moldura. Trecho
@@ -35,9 +44,10 @@ const EMPHASIS: Emphasis[] = [
   { open: '++', close: '++', className: 'font-semibold text-royal' },
   { open: '==', close: '==', className: 'font-semibold text-violet' },
   { open: '@@', close: '@@', className: 'accent grad-text' },
+  { open: '~~', close: '~~', className: 'accent text-ink' },
 ]
 
-const PATTERN = /(\*\*[^*]+\*\*|\+\+[^+]+\+\+|==[^=]+==|@@[^@]+@@)/g
+const PATTERN = /(\*\*[^*]+\*\*|\+\+[^+]+\+\+|==[^=]+==|@@[^@]+@@|~~[^~]+~~)/g
 
 export function Rich({ text }: { text: string }): ReactNode {
   return text.split(PATTERN).map((part, i) => {

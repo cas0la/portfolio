@@ -460,6 +460,81 @@
   }
 
   /*
+   * Lista de experiência com rolagem própria, para equilibrar a altura da coluna
+   * com a da prosa ao lado. Ver `Timeline`, em `About.tsx`.
+   *
+   * **Só a partir de lg.** Abaixo disso as duas colunas viram uma pilha, e não há
+   * altura nenhuma para equilibrar: uma caixa rolável dentro de uma página rolável
+   * é armadilha de dedo no telefone, porque o toque de arrastar pode cair na
+   * caixa em vez de na página.
+   *
+   * O teto de 26rem foi escolhido para cortar no meio de uma linha, nunca entre
+   * duas. Cortar exatamente na divisória faz a lista parecer completa, e aí ninguém
+   * rola: a única afordância honesta de "tem mais" é ver metade de alguma coisa.
+   *
+   * O esmaecido é `mask-image`, e não um gradiente sobreposto, porque a coluna ao
+   * lado pode ter fundo diferente no futuro e um gradiente pintado de `page`
+   * passaria a aparecer como faixa. A máscara desbota o que existe, seja o que for.
+   *
+   * **Ele desliga no fim da lista.** A primeira versão deixava a máscara fixa, e o
+   * autor apontou que a última experiência ficava esmaecida mesmo depois de rolar
+   * até embaixo — a lista parecia ter mais coisa quando não tinha, que é
+   * exatamente o oposto do trabalho do esmaecido. O componente marca
+   * `data-at-end` quando a rolagem chega ao fim, e aí a máscara sai. Sem JS não
+   * dá: CSS não sabe onde um container rolável está.
+   */
+  @media (min-width: 1024px) {
+    .timeline-scroll {
+      max-height: 26rem;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent 100%);
+      transition: mask-image var(--duration-base) var(--ease-out-soft);
+    }
+    .timeline-scroll[data-at-end='true'] {
+      mask-image: none;
+      -webkit-mask-image: none;
+    }
+  }
+
+  /*
+   * Barra de rolagem no vocabulário do site: fio de cabelo forte no polegar,
+   * trilho transparente, nada de cinza de sistema.
+   *
+   * `scrollbar-width: thin` e `scrollbar-color` cobrem Firefox e os Chromium
+   * recentes; o bloco `::-webkit-scrollbar` cobre Safari e os Chromium antigos, que
+   * ignoram as duas propriedades padrão. Os dois precisam existir, e por isso a
+   * cor está declarada duas vezes.
+   *
+   * 8px de largura é o mínimo que ainda dá alvo de arrasto confortável no mouse.
+   * Em macOS a barra fica escondida até o gesto de rolagem começar, e isso é
+   * comportamento do sistema — é por isso que o esmaecido existe, e não a barra,
+   * como afordância principal de "tem mais".
+   */
+  .scroll-slim {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-hairline-strong) transparent;
+  }
+  .scroll-slim::-webkit-scrollbar {
+    width: 8px;
+  }
+  .scroll-slim::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scroll-slim::-webkit-scrollbar-thumb {
+    background-color: var(--color-hairline-strong);
+    border-radius: var(--radius-pill);
+    /* A borda transparente com `background-clip` afina o polegar sem afinar o
+       alvo de arrasto: o cursor pega os 8px, o olho vê 4px. */
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .scroll-slim:hover::-webkit-scrollbar-thumb {
+    background-color: var(--color-ink-soft);
+  }
+
+  /*
    * Placa da confirmação de cópia do e-mail. Ver `CopyEmail`, em `Contact.tsx`.
    *
    * Branco chapado na direita, desfazendo-se em transparente na direção do e-mail.

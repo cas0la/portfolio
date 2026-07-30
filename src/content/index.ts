@@ -16,6 +16,7 @@ import type { Locale } from '@/lib/i18n'
  *   ==trecho==   o que vem da origem em design. Roxo, sempre em minoria.
  *   @@trecho@@   palavra-chave do hero. Itálico de serifa, pintado de royal → roxo.
  *                SÓ NO HERO: ver o comentário em `Rich.tsx`.
+ *   ~~trecho~~   marco do percurso. Itálico de serifa em tinta, sem gradiente.
  *
  * Teto de três trechos coloridos por parágrafo. Acima disso a cor deixa de
  * destacar e vira textura.
@@ -57,11 +58,49 @@ export type Build = {
   cover?: { src: string; alt: string }
 }
 
+/**
+ * Uma linha da linha do tempo de experiência. Três níveis de informação, sempre
+ * na mesma ordem, mais o ano.
+ */
 export type InventoryRow = {
+  /** O ano ou o intervalo. */
   when: string
+  /** Marca a posição atual, que recebe a etiqueta "Agora" ao lado do ano. */
+  current?: boolean
+  /** Nível 1: posição e senioridade. */
   role: string
+  /**
+   * Nível 2: o squad, a frente ou o produto.
+   *
+   * **Estes valores foram derivados das descrições de cargo do
+   * `curriculo/curriculo-base.md`, não de nomes de squad informados.** Onde o
+   * currículo diz o produto ou a frente em que ele atuou, é isso que está aqui. Se
+   * algum squad tinha nome próprio diferente, corrigir aqui.
+   */
+  squad?: string
+  /** Nível 3: a empresa. */
   org: string
-  span: string
+}
+
+/**
+ * Relato de alguém que trabalhou com ele.
+ *
+ * REGRA: o texto é sempre a palavra da pessoa, nunca paráfrase, e a atribuição é
+ * sempre pela relação de trabalho, nunca por nome.
+ */
+export type Testimonial = {
+  quote: string
+  /** A relação de trabalho de quem falou. Ex.: "Par direto", "Ex-liderado". */
+  source: string
+  /**
+   * O relato que abre o bloco, em escala de display.
+   *
+   * **Um só.** O componente pega o primeiro marcado e trata o resto como o grupo
+   * de baixo; dois em destaque não é destaque, é duas colunas grandes. Para trocar
+   * qual é o pico, mover esta marca — e preferir um relato curto, porque em corpo
+   * de display um texto longo vira parágrafo grande em vez de citação.
+   */
+  featured?: boolean
 }
 
 type Copy = {
@@ -116,16 +155,12 @@ type Copy = {
     story: string[]
     experienceLabel: string
     rows: InventoryRow[]
+    /** Etiqueta da posição atual na linha do tempo. */
+    nowLabel: string
+    skillsLabel: string
+    skills: string[]
     toolsLabel: string
     tools: string[]
-    /**
-     * Fontes de dado que ele consulta, e a ressalva de como. Separadas das
-     * ferramentas de propósito: numa lista única, "GraphQL" ao lado de "Figma" lê
-     * como domínio direto, e o acesso é de leitura via MCP do Claude.
-     */
-    dataLabel: string
-    data: string[]
-    dataNote: string
     languagesLabel: string
     /** Um item por idioma, exibido com o mesmo tratamento das ferramentas. */
     languages: string[]
@@ -140,6 +175,17 @@ type Copy = {
     photosPending: string[]
     /** Fotos fora do trabalho. Exportar em 4:3. */
     hobbies?: { src: string; alt: string }[]
+    /**
+     * Subseção de relatos de terceiros.
+     *
+     * O `testimonialsNote` declara a origem, e isso não é formalidade: relato sem
+     * procedência declarada lê como depoimento de landing page, que é a coisa que
+     * o DESIGN.md recusa. Dizer que vem de avaliação interna é o que separa prova
+     * de propaganda.
+     */
+    testimonialsTitle: string
+    testimonialsNote: string
+    testimonials: Testimonial[]
   }
   close: {
     title: string
@@ -261,7 +307,35 @@ const pt: Copy = {
     lead: 'Estou no mercado há **10 anos**, **8 deles em produto**. Hoje uso @@IA e LLM@@ no produto que conduzo e no meu próprio trabalho. Venho de @@research e craft@@, e é de lá que vem a evidência para decidir, executar e acompanhar o desempenho.',
     location: 'Florianópolis, Brasil',
     ctaResume: 'Baixar meu currículo (PDF)',
-    ctaBuilds: 'Veja meus cases',
+    /*
+     * O convite a descer.
+     *
+     * "Veja meus cases" nomeava o destino e não dava razão nenhuma para ir até
+     * ele. O clarify trata isso como texto de apoio que repete o controle: a seta
+     * já diz que há mais abaixo, e a palavra "cases" já está no menu. Repetir o
+     * rótulo não é convite.
+     *
+     * "Comece pelo produto que eu conduzi do zero" foi a tentativa seguinte, e o
+     * autor apontou que ainda não convidava. Ele estava certo sobre a causa:
+     * **"Comece" é imperativo.** Manda em vez de chamar, e o modo verbal é o que
+     * separa instrução de convite, por mais útil que a instrução seja.
+     *
+     * "Vem ver" é oferta. E é o registro que o resto do hero já usa — o `greeting`
+     * diz "Oi, sou o Lucas. Quase todo mundo me chama de Casanova". O DESIGN.md
+     * define o site como carta em primeira pessoa; num convite, a pessoa fala.
+     *
+     * A promessa é verificável: o produto conduzido do zero existe na página, é o
+     * case de destaque, e "do marco zero" é o que o PRODUCT.md e o próprio case já
+     * afirmam. E ela é a instância concreta do que o `headline` promete no alto.
+     *
+     * O QUE EU NÃO ESCREVI, e por quê: a versão mais atraente seria prometer as
+     * decisões e os custos por trás dos cases, que é exatamente o que este leitor
+     * quer. Mas o campo `tradeoff` está **vazio nos três cases**, e o princípio 2 do
+     * PRODUCT.md é evidência real ou silêncio. Prometer no hero o que a seção não
+     * entrega é o pior lugar possível para uma promessa quebrada. Quando os
+     * trade-offs forem escritos, esta linha pode ficar bem mais forte.
+     */
+    ctaBuilds: 'Vem ver o que eu conduzi do zero',
   },
   /*
    * A DOBRA 2 NÃO EXISTE MAIS. `Intro.tsx` foi apagado e saiu do `App`, por decisão
@@ -361,35 +435,112 @@ const pt: Copy = {
     ],
   },
   inventory: {
-    statement: 'O caminho até produto teve ida e volta',
+    /*
+     * O título nomeia os dois extremos do percurso, e não só o destino. "O caminho
+     * até produto teve ida e volta" dizia de onde ele saiu por omissão; com "do
+     * design até Product Manager" a seção anuncia o assunto que o autor pediu — a
+     * migração — antes do primeiro parágrafo.
+     *
+     * A regra do `statement` continua valendo: a frase é promovida do texto da
+     * seção, nunca é afirmação nova.
+     */
+    statement: 'Do design até Product Manager',
+    /*
+     * Reescrito para ser trajetória, que é o que o autor pediu para esta coluna.
+     *
+     * A versão anterior tinha três parágrafos e só o primeiro contava o percurso.
+     * O segundo listava onde ele joga confortável e o terceiro descrevia jeito de
+     * trabalhar — os dois são afirmação sobre si mesmo, e **os dois passaram a ter
+     * dono melhor na página**: o hero já diz de onde vem a evidência com que ele
+     * decide, e a subseção de relatos diz, na voz de terceiros, que ele leva
+     * ferramenta testada para o time. Autoelogio ao lado do mesmo elogio dito por
+     * outra pessoa é o autoelogio perdendo.
+     *
+     * Ficou um arco de três tempos: origem, virada, hoje. É a virada que o autor
+     * queria explicar, e ela estava faltando — a versão anterior pulava de "voltei
+     * para product design" direto para "assumi Product Manager", sem dizer o que
+     * aconteceu no meio.
+     */
     story: [
-      'Comecei em design digital em 2016, replicando telas de caixa eletrônico. Entrei em produto ainda como designer, depois **liderei um time de nove designers**, voltei para pesquisa, voltei para product design e então assumi Product Manager. Não preciso de handoff externo para design, pesquisa ou produto.',
-      'Onde eu jogo mais confortável: **discovery com quem usa de verdade**, **instrumentação de métrica** e **IA aplicada ao trabalho de produto**. Codei protótipo funcional para validar ideia antes do handoff, e construí ferramenta interna que o time usa no dia a dia.',
-      'Trabalho bem com informação incompleta e com mudança de direção no meio do caminho. A decisão que eu defendo se sustenta pela leitura do problema, e a ferramenta nova que eu levo para o time chega testada antes de virar processo.',
+      'Comecei em 2016 desenhando telas de caixa eletrônico. Entrei em produto ainda como designer, ~~liderei um time de nove~~, voltei para pesquisa na Electrolux e cheguei à Nexfar como o ~~primeiro Product Designer~~ da empresa.',
+      'Foi ali que a virada aconteceu. Estruturar a frente de design sozinho me pôs para ~~decidir escopo e defender prioridade~~, não só desenhar a solução. Essa parte do trabalho foi ficando maior que a outra.',
+      'Em 2025 assumi como ~~Product Manager~~, e o Inteligência Comercial saiu do zero na minha mão. A base em design não virou passado: é ela que me deixa desenhar o fluxo, instrumentar a métrica e chegar ao dado sem depender de handoff.',
     ],
     experienceLabel: 'Experiência',
+    nowLabel: 'Agora',
     rows: [
       {
-        when: 'Agora',
-        role: 'Product Manager, Inteligência Comercial',
+        when: '2025',
+        current: true,
+        role: 'Product Manager, Sênior',
+        squad: 'Inteligência Comercial',
         org: 'Nexfar',
-        span: '2025',
       },
-      { when: 'Antes', role: 'Product Designer Sênior', org: 'Nexfar', span: '2023–2025' },
-      { when: 'Antes', role: 'UX Researcher Sênior', org: 'Electrolux', span: '2022–2023' },
-      { when: 'Antes', role: 'Lead Designer, time de 9', org: 'Garupa Design', span: '2021–2022' },
       {
-        when: 'Antes',
-        role: 'Product Designer',
-        org: 'Ahgora Sistemas, hoje TOTVS',
-        span: '2020–2021',
+        when: '2023–2025',
+        role: 'Product Designer, Sênior',
+        squad: 'Frente de design de produtos digitais',
+        org: 'Nexfar',
       },
-      { when: 'Antes', role: 'Product Designer', org: 'myTapp Tecnologia', span: '2018–2020' },
+      {
+        when: '2022–2023',
+        role: 'UX Researcher, Sênior',
+        squad: 'Produtos digitais',
+        org: 'Electrolux',
+      },
+      {
+        when: '2021–2022',
+        role: 'Lead Designer',
+        squad: 'Time de 9 designers',
+        org: 'Garupa Design',
+      },
+      {
+        when: '2020–2021',
+        role: 'Product Designer, Pleno',
+        squad: 'PontoWeb, back-office',
+        org: 'Ahgora Sistemas, hoje TOTVS',
+      },
+      {
+        when: '2018–2020',
+        role: 'Product Designer, Pleno',
+        squad: 'Equipe de Produto',
+        org: 'myTapp Tecnologia',
+      },
+      /* Os dois primeiros cargos numa linha só: UX Designer na Garupa (set/2016 a
+         nov/2017) e UI/UX Designer Júnior na Dzigual Golinelli (nov/2017 a nov/2018).
+         Juntos porque a lista tem sete linhas e essas duas são o mesmo capítulo, e
+         porque sem elas a linha do tempo abria em 2018 e fazia parecer que a carreira
+         começou ali. A ordem das empresas é a cronológica invertida, igual à da
+         lista. */
+      {
+        when: 'Até 2018',
+        role: 'UX/UI Designer',
+        squad: 'Generalista',
+        org: 'Dzigual Golinelli e Garupa Design',
+      },
+    ],
+    /* Da seção Habilidades do `curriculo-base.md`, recorte de Produto. As de design
+       e as de dado ficam de fora: o posicionamento do PRODUCT.md manda a base em
+       design entrar como o que sustenta o PM, e nunca como oferta alternativa de
+       serviço. Uma lista de skills de design ao lado de uma de produto é
+       exatamente a dúvida que o avaliador não pode ter. */
+    skillsLabel: 'Skills',
+    skills: [
+      'Product discovery',
+      'Roadmap e priorização',
+      'PRD e tech spec',
+      'Métricas e analytics de produto',
+      'KPI e instrumentação',
+      'Gestão de stakeholders e cliente',
+      'Product-led growth',
+      'Backlog management',
+      'Build vs. buy',
     ],
     toolsLabel: 'Ferramentas',
     tools: [
       'Figma',
       'Claude Code',
+      'MCP',
       'Power BI',
       'Mixpanel',
       'Microsoft Clarity',
@@ -397,19 +548,98 @@ const pt: Copy = {
       'Jira',
       'Miro',
     ],
-    dataLabel: 'Dados',
-    data: ['GraphQL', 'Postgres', 'BigQuery'],
-    dataNote: 'Consulto para leitura, via MCP do Claude.',
+    /* A lista "Dados" (GraphQL, Postgres, BigQuery, com a ressalva de acesso de
+       leitura via MCP) saiu por decisão do autor em 30/07/2026: irrelevante para o
+       que a seção precisa dizer. O MCP entrou em Ferramentas, que é onde ele
+       importa. **O que se perdeu junto:** a ressalva de escopo, que existia porque
+       "GraphQL" numa lista de credenciais lê como domínio direto, e o acesso é de
+       leitura. Se as três voltarem algum dia, a ressalva volta com elas. */
     languagesLabel: 'Idiomas',
     languages: [
       'Português nativo',
       'Inglês B2 (leitura e escrita fluentes, conversação intermediária)',
     ],
     portraitPending: 'Meu retrato entra aqui.',
-    photosLabel: 'Fora do trabalho',
+    photosLabel: 'Eu fora do trabalho',
     photosPending: [
       'Uma foto minha fora do trabalho entra aqui.',
       'Outra, de outro hobby, entra aqui.',
+    ],
+    testimonialsTitle: 'O que acham de trabalhar comigo?',
+    /*
+     * Diz do que a seção trata, e não de onde os relatos vêm — o autor pediu a
+     * troca. Duas correções na frase que ele escreveu:
+     *
+     * - **"abaixo" saiu.** O DESIGN.md proíbe copy que descreve posição de layout,
+     *   e aqui a regra morde de verdade: os relatos estão numa grade que é de uma
+     *   coluna no telefone e de três no desktop, e o que está "abaixo" numa largura
+     *   está ao lado na outra. No convite do hero "abaixo" era função; aqui é
+     *   coordenada.
+     * - **"pares" saiu.** Com o ex-líder e o ex-liderado na lista, "pares" deixou de
+     *   ser verdade. "Quem trabalhou comigo" cobre os três tipos de relação sem
+     *   prometer simetria que não existe.
+     *
+     * Também corrigi "dia-a-dia" para "dia a dia", que é a grafia depois do Acordo
+     * Ortográfico. Como substantivo hifenizado, ele só sobrevive em "o dia-a-dia" de
+     * antes de 2009.
+     */
+    testimonialsNote: 'O que quem trabalhou comigo pensa do meu papel no dia a dia.',
+    /*
+     * ORIGEM dos três primeiros: `relatorio_lucas-acosta-casanova_2026-mar-jun.pdf`,
+     * os blocos de resposta dos pares. Os marcados "[Autoavaliação]" no relatório são
+     * do próprio Lucas e **nunca** entram aqui — o valor deste bloco é ser palavra de
+     * terceiro. Os dois últimos foram ditados pelo autor.
+     *
+     * ENCURTADOS POR OMISSÃO, NUNCA POR REESCRITA. O autor pediu relatos mais
+     * sucintos, e há duas formas de encurtar palavra de outra pessoa: cortar trecho,
+     * ou reescrever. **A segunda transforma citação em paráfrase**, e aí as aspas
+     * passam a mentir sobre quem escolheu aquelas palavras. Todo corte aqui é
+     * supressão de oração inteira; nenhuma palavra foi trocada de lugar nem
+     * substituída. O que saiu de cada um:
+     *
+     *   1. "As pessoas ao redor embarcam com mais facilidade no que ele propõe, e o
+     *      trabalho de implementar anda de forma mais coletiva." Também já havia saído
+     *      antes o elogio por tempo de casa, que não transfere de empresa.
+     *   2. "que apoiam o desenvolvimento das atividades", oração adjetiva que não
+     *      acrescenta nada ao que já está dito em "ferramentas".
+     *   3. "Com colegas, com outras áreas, não importa de onde vem a dúvida ou o
+     *      pedido: ele não se nega." Enumeração que a primeira frase já resume.
+     *
+     * O segundo é o mais longo dos cinco e não desce mais sem virar reescrita: ele é
+     * uma frase única, sem oração descartável sobrando.
+     *
+     * PENDÊNCIA: **o relatório não identifica a relação de trabalho de quem
+     * escreveu.** Por isso os três primeiros estão em "Colega de trabalho", que é o
+     * mais específico que se sustenta, e não em "Par direto" ou "Colega de setor
+     * parceiro". Só o autor sabe quem escreveu o quê. Ao corrigir, trocar só o
+     * `source`.
+     */
+    testimonials: [
+      {
+        quote:
+          'Quando a solução parte dele, ela costuma ganhar tração entre os colegas. Não é influência pela imposição, é pela confiança que o time tem na leitura dele.',
+        source: 'Colega de trabalho',
+      },
+      {
+        quote:
+          'Te vejo como um profissional que, acima de tudo, é Sênior em aprender.',
+        source: 'Ex-líder',
+      },
+      {
+        quote: 'Sempre senti que podia chegar em ti e abrir sobre a realidade.',
+        source: 'Ex-liderado, em 1:1',
+        featured: true,
+      },
+      {
+        quote:
+          'Atua de forma proativa ao trazer e testar ferramentas, especialmente com o uso de IA e automação, contribuindo para ganhos de eficiência do time.',
+        source: 'Colega de trabalho',
+      },
+      {
+        quote:
+          'O Casanova não espera ser chamado pra ajudar. Quando não sabe a resposta, vai atrás ou indica quem sabe.',
+        source: 'Colega de trabalho',
+      },
     ],
   },
   close: {
@@ -456,7 +686,7 @@ const en: Copy = {
     lead: 'I’ve been working for **10 years**, **8 of them in product**. Today I use @@AI and LLMs@@ inside the product I run and in my own work. I come from @@research and craft@@, and that is where the evidence comes from to decide, to execute and to track how it performs.',
     location: 'Florianópolis, Brazil',
     ctaResume: 'Download my résumé (PDF)',
-    ctaBuilds: 'See my cases',
+    ctaBuilds: 'Come see what I ran from day one',
   },
   intro: {
     paragraphs: [
@@ -528,35 +758,76 @@ const en: Copy = {
     ],
   },
   inventory: {
-    statement: 'The path into product doubled back',
+    statement: 'From design to Product Manager',
     story: [
-      'I started in digital design in 2016, rebuilding ATM screens. I moved into product while still a designer, then **led a team of nine designers**, went back to research, back to product design, and took product management on from there. I do not need an external handoff for design, research, or product.',
-      'Where I play most comfortably: **discovery with the people who actually use the thing**, **metric instrumentation** and **AI applied to product work**. I have coded working prototypes to validate an idea before handoff, and built internal tooling the team uses daily.',
-      'I work well with incomplete information and with the direction shifting halfway through. The decisions I argue for stand on how well the problem was read, and the new tool I bring to the team arrives tested before it becomes process.',
+      'I started in 2016 drawing ATM screens. I moved into product while still a designer, ~~led a team of nine~~, went back to research at Electrolux, and joined Nexfar as the company’s ~~first Product Designer~~.',
+      'That is where it turned. Building the design practice on my own put me in the position of ~~deciding scope and defending priority~~, not only drawing the solution. That part of the work kept growing.',
+      'In 2025 I took over as ~~Product Manager~~, and Inteligência Comercial started from nothing in my hands. The design background did not become past tense: it is what lets me draw the flow, instrument the metric and get to the data without a handoff.',
     ],
     experienceLabel: 'Experience',
+    nowLabel: 'Now',
     rows: [
       {
-        when: 'Now',
-        role: 'Product Manager, Inteligência Comercial',
+        when: '2025',
+        current: true,
+        role: 'Senior Product Manager',
+        squad: 'Inteligência Comercial',
         org: 'Nexfar',
-        span: '2025',
       },
-      { when: 'Prev.', role: 'Senior Product Designer', org: 'Nexfar', span: '2023–2025' },
-      { when: 'Prev.', role: 'Senior UX Researcher', org: 'Electrolux', span: '2022–2023' },
-      { when: 'Prev.', role: 'Lead Designer, team of 9', org: 'Garupa Design', span: '2021–2022' },
       {
-        when: 'Prev.',
-        role: 'Product Designer',
-        org: 'Ahgora Sistemas, now TOTVS',
-        span: '2020–2021',
+        when: '2023–2025',
+        role: 'Senior Product Designer',
+        squad: 'Digital product design practice',
+        org: 'Nexfar',
       },
-      { when: 'Prev.', role: 'Product Designer', org: 'myTapp Tecnologia', span: '2018–2020' },
+      {
+        when: '2022–2023',
+        role: 'Senior UX Researcher',
+        squad: 'Digital products',
+        org: 'Electrolux',
+      },
+      {
+        when: '2021–2022',
+        role: 'Lead Designer',
+        squad: 'Team of 9 designers',
+        org: 'Garupa Design',
+      },
+      {
+        when: '2020–2021',
+        role: 'Product Designer',
+        squad: 'PontoWeb, back-office',
+        org: 'Ahgora Sistemas, now TOTVS',
+      },
+      {
+        when: '2018–2020',
+        role: 'Product Designer',
+        squad: 'Product team',
+        org: 'myTapp Tecnologia',
+      },
+      {
+        when: 'Until 2018',
+        role: 'UX/UI Designer',
+        squad: 'Generalist',
+        org: 'Dzigual Golinelli and Garupa Design',
+      },
+    ],
+    skillsLabel: 'Skills',
+    skills: [
+      'Product discovery',
+      'Roadmap and prioritisation',
+      'PRDs and tech specs',
+      'Product metrics and analytics',
+      'KPIs and instrumentation',
+      'Stakeholder and client management',
+      'Product-led growth',
+      'Backlog management',
+      'Build vs. buy',
     ],
     toolsLabel: 'Tools',
     tools: [
       'Figma',
       'Claude Code',
+      'MCP',
       'Power BI',
       'Mixpanel',
       'Microsoft Clarity',
@@ -564,19 +835,49 @@ const en: Copy = {
       'Jira',
       'Miro',
     ],
-    dataLabel: 'Data',
-    data: ['GraphQL', 'Postgres', 'BigQuery'],
-    dataNote: 'Read-only, queried through Claude MCP.',
     languagesLabel: 'Languages',
     languages: [
       'Portuguese, native',
       'English B2 (fluent reading and writing, intermediate conversation)',
     ],
     portraitPending: 'My portrait goes here.',
-    photosLabel: 'Off the clock',
+    photosLabel: 'Me away from work',
     photosPending: [
       'A photo of me away from work goes here.',
       'Another one, from a different hobby, goes here.',
+    ],
+    testimonialsTitle: 'What is it like to work with me?',
+    testimonialsNote: 'What the people I have worked with think of my day-to-day role.',
+    /* Ver a nota na versão em português para os cortes e para a pendência de
+       atribuição. **Estes cinco são tradução minha de originais em português**, e a
+       seção não diz mais isso: a declaração de procedência saiu a pedido do autor.
+       Citação traduzida sem aviso é prática comum em site bilíngue, mas é uma perda
+       real de transparência e vale saber que ela existe. */
+    testimonials: [
+      {
+        quote:
+          'When the solution comes from him, it tends to gain traction with his colleagues. It is not influence through pressure, it is through the trust the team has in his reading of things.',
+        source: 'Colleague',
+      },
+      {
+        quote: 'I see you as someone who is, above all, senior at learning.',
+        source: 'Former manager',
+      },
+      {
+        quote: 'I always felt I could come to you and be honest about where things really stood.',
+        source: 'Former report, in a 1:1',
+        featured: true,
+      },
+      {
+        quote:
+          'He proactively brings in and tests tools, especially using AI and automation, contributing to efficiency gains for the team.',
+        source: 'Colleague',
+      },
+      {
+        quote:
+          'Casanova does not wait to be asked for help. When he does not know the answer, he goes and finds out, or points you to who knows.',
+        source: 'Colleague',
+      },
     ],
   },
   close: {
