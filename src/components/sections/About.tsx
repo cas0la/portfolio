@@ -122,7 +122,8 @@ export function About() {
          * Duas correções nesta frase. Ela estava em `text-display`, o maior corpo
          * do site, maior que o título dos Cases e maior que o nome do produto que
          * ele conduziu, para uma afirmação de capacidade. E o texto repetia quase
-         * literal o primeiro parágrafo do Intro. Agora ela está em `text-h1` e diz
+         * literal o primeiro parágrafo da segunda dobra, que existia na época e foi
+         * removida depois. Agora ela está em `text-h1` e diz
          * o assunto real desta seção, promovido do parágrafo logo abaixo, que é a
          * regra: a frase sai do texto da seção, nunca é afirmação nova.
          */}

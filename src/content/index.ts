@@ -14,6 +14,8 @@ import type { Locale } from '@/lib/i18n'
  *   **trecho**   prova: número, período, resultado medido. Fica em tinta.
  *   ++trecho++   afirmação sobre o papel de Product Manager. Azul royal.
  *   ==trecho==   o que vem da origem em design. Roxo, sempre em minoria.
+ *   @@trecho@@   palavra-chave do hero. Itálico de serifa, pintado de royal → roxo.
+ *                SÓ NO HERO: ver o comentário em `Rich.tsx`.
  *
  * Teto de três trechos coloridos por parágrafo. Acima disso a cor deixa de
  * destacar e vira textura.
@@ -82,8 +84,14 @@ type Copy = {
     enAlt: string
   }
   hero: {
+    /**
+     * O `h1`. É a afirmação de papel, não a saudação: quem abre a página em
+     * processo seletivo precisa saber o cargo antes do nome. Aceita os marcadores
+     * de ênfase, e usa o `@@` no trecho do cargo.
+     */
+    headline: string
+    /** O `h2`. A apresentação em primeira pessoa, com o apelido. */
     greeting: string
-    role: string
     lead: string
     location: string
     ctaResume: string
@@ -173,23 +181,112 @@ const pt: Copy = {
     enAlt: 'Bandeira dos Estados Unidos, ver o site em inglês',
   },
   hero: {
-    greeting: 'Oi, eu sou o Lucas',
-    role: 'Product Manager Sênior',
-    lead: 'Priorizo o ++roadmap++ a partir de pesquisa com quem usa, de conversa direta com o cliente e do dado de uso. Uso ++IA++ no meu próprio trabalho e dentro do produto que eu conduzo. Quando ele pede, ==desenho a interface== eu mesmo: vim do design, e o craft ficou.',
+    /*
+     * "e2e" saiu daqui na quarta passada de clarify, por escolha do autor entre
+     * quatro opções. O achado: abreviação de nicho na linha mais importante da
+     * página, e leitor de tela a anuncia como "ê-dois-ê". Verbo no lugar de rótulo
+     * resolve as duas coisas, e "do início ao fim" é o termo que a seção de cases já
+     * usa ("Um produto que conduzi do começo ao fim"), então as duas superfícies
+     * passam a chamar a mesma coisa pelo mesmo nome.
+     *
+     * "de ponta a ponta" foi considerada e recusada: é a frase que o autor lista
+     * como tell de texto de IA.
+     */
+    headline: '@@Product Manager@@ que conduz do início ao fim',
+    greeting: 'Oi, sou o Lucas. Quase todo mundo me chama de “Casanova”.',
+    /*
+     * Terceira passada de clarify. Agora o parágrafo carrega as quatro coisas que o
+     * autor nomeou como o que ele quer passar, uma por frase:
+     *
+     *   1. posição sólida no mercado    → o par de números que abre
+     *   2. IA e LLM de verdade          → onde ele usa, não adjetivo
+     *   3. research e craft decidindo   → o que a base sustenta
+     *   4. condução e2e com dado        → o fecho de verbos, e o `e2e` do `headline`
+     *
+     * OS NÚMEROS SÃO VERIFICADOS, não arredondados para soar bem. `curriculo-base.md`
+     * dá Set/2016 como início de mercado, o que fecha 10 anos em jul/2026, e
+     * Nov/2018 como o primeiro cargo de Product Designer (myTapp), o que fecha 8.
+     * Ficam em `**tinta**` porque são prova, e prova nesta página nunca é colorida.
+     *
+     * Nota de coerência: o PRODUCT.md descreve os mesmos 8 anos como "os oito anos
+     * anteriores em Product Design e UX Research". É o mesmo intervalo contado do
+     * mesmo marco; muda só o enquadramento. "8 em produto" serve melhor ao
+     * posicionamento, que manda o avaliador não sair em dúvida sobre qual cadeira
+     * ele quer — e Product Designer é trabalho de produto.
+     *
+     * O que saiu nas passadas anteriores, para não voltar: "de forma holística
+     * desde a concepção até o pós-lançamento" e "desenho o fluxo, decido o escopo e
+     * instrumento a métrica sem passar a bola" diziam, junto com o fecho de verbos,
+     * a mesma ideia de alcance três vezes. Sobreviveu a formulação do autor.
+     *
+     * Quarta passada de clarify:
+     *
+     * - **"no meu processo" era substantivo vago**, e a ordem estava invertida. Virou
+     *   "no produto que conduzo e no meu próprio trabalho": o produto vem primeiro
+     *   porque é a parte demonstrável, e o princípio 3 do PRODUCT.md manda a IA
+     *   aparecer no artefato antes de aparecer na afirmação.
+     * - **"sustenta cada decisão que eu defendo" era circular e absoluto.** Dizia que
+     *   a base sustenta a decisão sem dizer como, e "cada" é uma promessa que ninguém
+     *   pode cumprir. Virou o mecanismo real: pesquisa produz evidência, e é a
+     *   evidência que fica atrás da decisão.
+     *
+     * Quinta passada, as duas mudanças de estrutura, as duas pedidas pelo autor:
+     *
+     * - **O fecho de seis verbos saiu.** Ele era a formulação do autor e sobreviveu a
+     *   três passadas por isso, mas depois de o `headline` passar a dizer "que conduz
+     *   do início ao fim", os verbos enumeravam a mesma ideia que o título já
+     *   afirmava. Foi a quarta tentativa dessa ideia de se duplicar no hero.
+     * - **O par de números deixou de abrir sem verbo.** "10 anos de mercado, 8 deles
+     *   em produto." era fragmento nominal logo depois de uma apresentação em
+     *   primeira pessoa, e o autor leu como início abrupto. Com verbo, ele continua a
+     *   fala do `greeting` em vez de recomeçar.
+     *
+     * A transição entre as frases agora é um arco de tempo, e é ele que faz o
+     * parágrafo ler como fala e não como três fatos empilhados: passado ("estou no
+     * mercado há"), presente ("hoje uso"), origem ("venho de"). Termina no raciocínio
+     * de produto, que é o princípio 1 do PRODUCT.md, e não na IA.
+     *
+     * Sexta passada. O autor pediu "executo" entre "decido" e "meço", e "acompanho o
+     * desempenho" no lugar de "meço depois". A construção literal não fecha: em "por
+     * trás do que eu decido, executo e acompanho o desempenho", os dois primeiros
+     * verbos tomam "do que" como objeto e o terceiro traz o seu próprio, então sobra
+     * "por trás do que eu ... acompanho o desempenho".
+     *
+     * A regência mudou de "por trás do que eu" para "para", e os três verbos viraram
+     * infinitivo. Assim cada um fica com o objeto que pede, e o trio ganha o ritmo de
+     * três tempos que a lista de seis verbos tinha e que era o que valia nela. A
+     * primeira pessoa se mantém, porque quem vem de research e craft é ele: a frase
+     * abre em "Venho de".
+     */
+    lead: 'Estou no mercado há **10 anos**, **8 deles em produto**. Hoje uso @@IA e LLM@@ no produto que conduzo e no meu próprio trabalho. Venho de @@research e craft@@, e é de lá que vem a evidência para decidir, executar e acompanhar o desempenho.',
     location: 'Florianópolis, Brasil',
     ctaResume: 'Baixar meu currículo (PDF)',
-    ctaBuilds: 'Veja os cases',
+    ctaBuilds: 'Veja meus cases',
   },
+  /*
+   * A DOBRA 2 NÃO EXISTE MAIS. `Intro.tsx` foi apagado e saiu do `App`, por decisão
+   * do autor em 30/07/2026. O que estava nela foi diluído:
+   *
+   * - "Cheguei a produto pelo design, e o caminho teve ida e volta" já era, quase
+   *   literal, a afirmação que abre o Sobre. Não foi para lugar nenhum porque já
+   *   estava lá.
+   * - "eu desenho o fluxo, decido o escopo e instrumento a métrica sem precisar
+   *   passar a bola" foi para o hero, onde virou o fecho de seis verbos que o autor
+   *   escreveu. É o que sustenta o "e2e" do título.
+   * - **Os números abaixo vão para dentro do case do Inteligência Comercial**, e é
+   *   por isso que este objeto continua aqui sem ninguém renderizar: é conteúdo em
+   *   trânsito, não conteúdo morto. Quando o case absorver os números e a fonte do
+   *   dado, apagar `intro` daqui e do tipo `Copy`.
+   */
   intro: {
     paragraphs: [
-      'Cheguei a produto pelo design, e o caminho teve ida e volta. Isso mudou o tipo de PM que eu sou: eu desenho o fluxo, decido o escopo e instrumento a métrica sem precisar passar a bola.',
       'O Inteligência Comercial saiu do zero na minha mão e hoje tem **mais de 400 usuários**, **NPS 80+** e **cinco operações migradas em seis meses**. Foram mais de 20 melhorias nos últimos três meses, priorizadas com dado de uso e conversa com quem vende em campo.',
     ],
     source: 'Números de julho de 2026, medidos em Power BI e Mixpanel.',
   },
   builds: {
     title: 'O que eu construí',
-    lead: 'Um produto que conduzi do começo ao fim, dois trabalhos de pesquisa e dois de interface. Cada case ganha uma página própria na próxima rodada.',
+    lead: 'Um produto que conduzi do começo ao fim e dois trabalhos de pesquisa. Cada case ganha uma página própria na próxima rodada.',
     piecesLabel: 'Módulos',
     openCase: 'Ver o case no Notion',
     newTab: 'abre em nova aba',
@@ -247,26 +344,20 @@ const pt: Copy = {
         pending:
           'Também não tenho material visual deste. O processo entra na página interna.',
       },
-      {
-        id: 'bb-consorcios',
-        tier: 'minor',
-        step: '04',
-        name: 'Consórcios',
-        org: 'Banco do Brasil',
-        tag: 'UI e regra de negócio',
-        body: 'Passo a passo da contratação de consórcio, com as regras de negócio e a simulação desenhadas junto ao cliente.',
-        href: 'https://app.notion.com/p/casola-design/BB-Cons-rcios-Produtos-8e451f7acfc94c1b8dda85ac5e915bd7',
-      },
-      {
-        id: 'sea-the-future',
-        tier: 'minor',
-        step: '05',
-        name: 'Sea the Future',
-        org: 'Oceanário de Lisboa',
-        tag: 'UI e craft',
-        body: 'Site do projeto. O material escrito do case está no Notion.',
-        href: 'https://app.notion.com/p/casola-design/Sea-the-Future-Site-819cdb9ced6f4127928ca5ab506adad5',
-      },
+      /*
+       * Banco do Brasil (Consórcios) e Sea the Future saíram por decisão do autor
+       * em 30/07/2026: eram os dois cases de UI pura, e ele não busca essa cadeira.
+       * "Quem faz de tudo, não faz nada" — um portfólio de PM com dois cases de
+       * interface no fim convida a dúvida sobre qual vaga ele quer, que é
+       * exatamente o que o posicionamento do PRODUCT.md manda evitar.
+       *
+       * Isto encerra de vez a pendência do "Oceanário de Lisboa", que era a
+       * organização atribuída ao Sea the Future e não aparecia em nenhum documento
+       * fonte. O case saiu antes de a atribuição ter que ser confirmada.
+       *
+       * Os dois continuam existindo no Notion e no histórico do git, se algum dia
+       * fizerem sentido de novo.
+       */
     ],
   },
   inventory: {
@@ -360,23 +451,22 @@ const en: Copy = {
     enAlt: 'Flag of the United States, view this site in English',
   },
   hero: {
-    greeting: "Hi, I’m Lucas",
-    role: 'Senior Product Manager',
-    lead: 'I prioritise the ++roadmap++ from research with the people who use it, from talking to customers directly, and from usage data. I use ++AI++ in my own work and inside the product I run. When it calls for it, I ==design the interface== myself: I came from design, and the craft stayed.',
+    headline: '@@Product Manager@@ who runs the product from start to finish',
+    greeting: 'Hi, I’m Lucas. Almost everyone calls me “Casanova”.',
+    lead: 'I’ve been working for **10 years**, **8 of them in product**. Today I use @@AI and LLMs@@ inside the product I run and in my own work. I come from @@research and craft@@, and that is where the evidence comes from to decide, to execute and to track how it performs.',
     location: 'Florianópolis, Brazil',
     ctaResume: 'Download my résumé (PDF)',
-    ctaBuilds: 'See the cases',
+    ctaBuilds: 'See my cases',
   },
   intro: {
     paragraphs: [
-      'I came to product through design, and the path doubled back more than once. That changed the kind of PM I am: I draw the flow, decide the scope, and instrument the metric without handing it off.',
       'Inteligência Comercial started from nothing in my hands and today has **more than 400 users**, a **product NPS above 80** and **five operations migrated in six months**. More than 20 improvements shipped in the last three months, prioritised from usage data and conversations with the people selling in the field.',
     ],
     source: 'Figures from July 2026, measured in Power BI and Mixpanel.',
   },
   builds: {
     title: 'What I have built',
-    lead: 'One product I ran from start to finish, two research projects, and two interface projects. Each case gets its own page in the next update.',
+    lead: 'One product I ran from start to finish and two research projects. Each case gets its own page in the next update.',
     piecesLabel: 'Modules',
     openCase: 'Read the case on Notion',
     newTab: 'opens in a new tab',
@@ -434,26 +524,7 @@ const en: Copy = {
         pending:
           'No visual material for this one either. The process goes on the case page.',
       },
-      {
-        id: 'bb-consorcios',
-        tier: 'minor',
-        step: '04',
-        name: 'Consortium journey',
-        org: 'Banco do Brasil',
-        tag: 'UI and business rules',
-        body: 'The step-by-step of buying into a consortium, with the business rules and the simulation designed alongside the client.',
-        href: 'https://app.notion.com/p/casola-design/BB-Cons-rcios-Produtos-8e451f7acfc94c1b8dda85ac5e915bd7',
-      },
-      {
-        id: 'sea-the-future',
-        tier: 'minor',
-        step: '05',
-        name: 'Sea the Future',
-        org: 'Oceanário de Lisboa',
-        tag: 'UI and craft',
-        body: 'Project website. The written case material lives in Notion.',
-        href: 'https://app.notion.com/p/casola-design/Sea-the-Future-Site-819cdb9ced6f4127928ca5ab506adad5',
-      },
+      /* Ver a nota na versão em português: os dois cases de UI pura saíram. */
     ],
   },
   inventory: {

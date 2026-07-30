@@ -15,6 +15,10 @@ import type { ReactNode } from 'react'
  *   o visitante precisa levar do parágrafo se ler só as palavras coloridas.
  * - `==trecho==` — o que vem da origem em design, em roxo. Segunda voz, sempre
  *   em minoria dentro do parágrafo.
+ * - `@@trecho@@` — palavra-chave do hero, em itálico de serifa pintado com o gradiente
+ *   royal → roxo. **Só no hero.** É o marcador mais caro da página: muda família,
+ *   peso e cor de uma vez, então dois deles fora da abertura já fariam a página
+ *   ler como texto promocional. Teto de três por parágrafo, como os outros.
  *
  * Por que cor aqui não lê como link, apesar do risco: link nesta página é texto
  * em `ink` com sublinhado (`underline-draw`) ou é controle com moldura. Trecho
@@ -30,9 +34,10 @@ const EMPHASIS: Emphasis[] = [
   { open: '**', close: '**', className: 'font-semibold text-ink' },
   { open: '++', close: '++', className: 'font-semibold text-royal' },
   { open: '==', close: '==', className: 'font-semibold text-violet' },
+  { open: '@@', close: '@@', className: 'accent grad-text' },
 ]
 
-const PATTERN = /(\*\*[^*]+\*\*|\+\+[^+]+\+\+|==[^=]+==)/g
+const PATTERN = /(\*\*[^*]+\*\*|\+\+[^+]+\+\+|==[^=]+==|@@[^@]+@@)/g
 
 export function Rich({ text }: { text: string }): ReactNode {
   return text.split(PATTERN).map((part, i) => {

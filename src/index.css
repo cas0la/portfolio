@@ -18,33 +18,77 @@
  */
 
 @theme inline {
-  /* ---------- Fontes ---------- */
-  /* Bricolage Grotesque no display: caráter real sem custar legibilidade.
-     Public Sans no corpo: dos mais neutros e legíveis para texto longo. */
+  /* ---------- Fontes ----------
+     Três papéis, e cada família tem um só. Trocar uma família é trocar uma linha
+     aqui: nenhum componente nomeia fonte, todos usam o papel.
+
+     `display`/`heading` — Bricolage Grotesque, título de seção e de case, em
+     400/500 com eixo óptico. Ver o comentário do `index.html` para as duas famílias
+     que passaram por este papel e voltaram, e por quê.
+     `accent` — Newsreader itálico, destaque dentro de título e de parágrafo, peso
+     600. Ver `.accent`, que corrige o tracking: itálico não pode herdar o tracking
+     negativo da grotesca.
+     `sans` — Public Sans, todo o parágrafo. */
   --font-sans: "Public Sans", system-ui, -apple-system, sans-serif;
   --font-display: "Bricolage Grotesque", "Public Sans", system-ui, sans-serif;
   --font-heading: "Bricolage Grotesque", "Public Sans", system-ui, sans-serif;
+  --font-accent: "Newsreader", Georgia, serif;
   --font-mono: "Public Sans", system-ui, sans-serif;
 
-  /* ---------- Rampa tipográfica ---------- */
-  --text-display: clamp(2.375rem, 5.2vw, 4.25rem);
-  --text-display--line-height: 1.02;
-  --text-display--letter-spacing: -0.032em;
+  /* ---------- Rampa tipográfica ----------
+     GRADE DE 4px, base 16px = 1rem. Todo corpo de fonte é múltiplo de 4px, e as
+     entrelinhas de corpo fixo resolvem em múltiplo de 4px também:
+
+       display  36 → 56    h1  28 → 40    h2  20 → 24
+       h3       20/28      body-lead  20/32
+       body     16/28      body-sm    14/24    label  12/16
+       num      28 → 36
+
+     O que a grade obrigou a mudar, e o efeito de cada um:
+
+     - **body de 17 para 16px.** 17 era o valor herdado do template e não é múltiplo
+       de nada. 16px é o piso que o DESIGN.md já declarava ("nunca abaixo de 16px"),
+       então a grade encostou o corpo no piso em vez de furá-lo.
+     - **entrelinha do body de 1.68 para 1.75**, que dá exatos 28px. 1.68 dava
+       26,88px e nenhuma linha caía na grade.
+     - **body-sm de 15 para 14px**, e **h3 de 17 para 20px**. O h3 era 17px, igual
+       ao body: um degrau que não existia. Agora existe.
+     - **display de 38→68 para 36→56px.** O teto caiu porque o hero passou a ter
+       coluna única de 40rem para título e parágrafo (ver `.hero-measure`), e 68px
+       ali quebrava em linha curta demais. 56px ainda é o maior corpo do site.
+     - **body-lead** entrou como token. Antes era `text-[1.1875rem]` escrito à mão
+       no Intro, 19px, fora da grade e fora do sistema.
+
+     O que fica fora da grade, e não é descuido: as entrelinhas dos corpos em
+     `clamp` (display, h1, h2, num). Corpo fluido e linha travada na grade são
+     mutuamente exclusivos — a entrelinha teria que ser um `clamp` paralelo que
+     resolvesse em múltiplo de 4 em toda largura, o que não existe. Nesses quatro a
+     entrelinha é óptica, e a grade vale para os corpos fixos, que são os que fazem
+     ritmo de leitura.
+
+     O tracking do display e do h1 relaxou de -0.032/-0.025 junto com a troca de
+     família: a Bricolage Grotesque tem contraforma mais fechada e aguentava mais
+     negativo em peso 800 do que em 400/500, que é o peso do hero agora. */
+  --text-display: clamp(2.25rem, 5.2vw, 3.5rem);
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.024em;
   --text-h1: clamp(1.75rem, 3.2vw, 2.5rem);
   --text-h1--line-height: 1.1;
-  --text-h1--letter-spacing: -0.025em;
+  --text-h1--letter-spacing: -0.018em;
   --text-h2: clamp(1.25rem, 2vw, 1.5rem);
   --text-h2--line-height: 1.2;
   --text-h2--letter-spacing: -0.018em;
-  --text-h3: 1.0625rem;
+  --text-h3: 1.25rem;
   --text-h3--line-height: 1.4;
   --text-h3--letter-spacing: -0.006em;
-  --text-body: 1.0625rem;
-  --text-body--line-height: 1.68;
-  --text-body-sm: 0.9375rem;
-  --text-body-sm--line-height: 1.62;
+  --text-body-lead: 1.25rem;
+  --text-body-lead--line-height: 1.6;
+  --text-body: 1rem;
+  --text-body--line-height: 1.75;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.7142857;
   --text-label: 0.75rem;
-  --text-label--line-height: 1.25;
+  --text-label--line-height: 1.3333333;
   --text-label--letter-spacing: 0.09em;
   --text-num: clamp(1.75rem, 2.6vw, 2.25rem);
   --text-num--line-height: 1;
@@ -96,13 +140,28 @@
   --radius-pill: 999px;
 
   /* ---------- Ritmo ----------
-     `beat` é o intervalo entre momentos da narrativa, e é deliberadamente
-     grande: cada seção conta uma parte da história e precisa de ar antes da
-     seguinte. Referência de respiro é o template original, que usava de 112 a
-     164px entre seções e um hero de quase uma tela inteira. No telefone o
-     intervalo cai para 88px, porque 160px lá viraria tela vazia. */
+     GRADE DE 8px. Todo espaçamento de layout é múltiplo de 8: os tokens abaixo e
+     também os utilitários do Tailwind usados nos componentes, o que na escala
+     padrão (passo de 4px) quer dizer **só os pares** — `gap-2`, `mt-4`, `py-6`.
+     Nada de `2.5`, `3`, `3.5`.
+
+     O que fica fora da grade de propósito, porque não é espaçamento de layout:
+     corpo de fonte e entrelinha (a rampa tipográfica tem sua própria lógica),
+     espessura de traço e raio de canto, e amplitude de animação.
+
+     `beat` é o intervalo entre momentos da narrativa, e é deliberadamente grande:
+     cada seção conta uma parte da história e precisa de ar antes da seguinte.
+     Referência de respiro é o template original, que usava de 112 a 164px entre
+     seções e um hero de quase uma tela inteira. No telefone o intervalo cai para
+     88px, porque 160px lá viraria tela vazia.
+
+     ESTADO: a grade valia para os tokens desde o começo, menos o `half-gap`, que
+     era 12px e virou `snug` de 16px. Dentro dos componentes ela só está aplicada
+     no Hero — as outras seções ainda têm `mt-3`, `gap-2.5`, `py-3.5` e afins, e
+     entram na grade quando cada uma for revisada. */
+  --spacing-tight: 8px;
+  --spacing-snug: 16px;
   --spacing-gap: 24px;
-  --spacing-half-gap: 12px;
   --spacing-block: 48px;
   --spacing-section: 96px;
   /*
@@ -160,6 +219,9 @@
   h2,
   h3 {
     font-family: var(--font-display);
+    /* A Bricolage tem eixo `opsz`. É ele que afina a haste e abre o espacejamento
+       no corpo grande; sem isso o desenho de 12px é esticado até 56px. */
+    font-optical-sizing: auto;
   }
 
   /* Foco de teclado sempre visível, e não só por cor. */
@@ -209,6 +271,24 @@
     max-width: 78ch;
   }
 
+  /*
+   * Coluna única do hero: o título, a apresentação e o parágrafo dividem a mesma
+   * largura.
+   *
+   * O autor apontou "largura do parágrafo muito menor que h1 e h2, causando
+   * estranheza", e a causa era estrutural. O `h1` usava a largura inteira do
+   * Container (até 1280px) e o parágrafo usava `.measure`, 66ch, que dava cerca de
+   * 620px. Não era diferença de refinamento, era 660px de desencontro no meio de um
+   * bloco centrado — três eixos de quebra diferentes na mesma pilha.
+   *
+   * 40rem = 640px, que a 16px de corpo dá cerca de 72 caracteres, dentro da medida
+   * de leitura. Foi esta coluna que obrigou o teto do display a cair de 68 para
+   * 56px: em 68px dentro de 640px, o título quebrava em linhas de três palavras.
+   */
+  .hero-measure {
+    max-width: 40rem;
+  }
+
   /* Numeral tabular: número precisa alinhar em coluna. */
   .tnum {
     font-variant-numeric: tabular-nums;
@@ -242,38 +322,127 @@
   }
 
   /*
-   * Convite ao scroll: um fio vertical que desaparece para baixo, com a seta
-   * descendo por ele.
+   * Destaque em itálico de serifa, dentro de título ou de parágrafo.
    *
-   * A versão de antes era rótulo pequeno e seta solta, e o autor apontou que
-   * ficava pouco atrativa. O fio resolve duas coisas de uma vez: é o convite e é
-   * a divisória entre o hero e a seção seguinte. Divisória por luz e por fio que
-   * termina em nada, nunca traço duro fechando a seção, que faria a página ler
-   * como caixas empilhadas.
+   * A versão anterior usava Caveat, cursiva de mão, e falhou por duas razões que o
+   * autor apontou de imediato: não fazia par com a grotesca, e a grotesca ao lado
+   * dela parecia bem maior. A segunda era mensurável — altura-x muito menor no
+   * mesmo corpo — e o `font-size: 1.12em` que eu tinha posto para compensar não
+   * chegava perto de fechar a diferença. Compensar altura-x com corpo é remendo:
+   * corrige a mancha e desalinha tudo o mais.
+   *
+   * Serifa contra sem-serifa resolve na origem, porque a altura-x da Newsreader é
+   * próxima da Public Sans. Daí `1.02em` ser o ajuste inteiro, e não 12%.
+   *
+   * O que continua sendo necessário:
+   *
+   * - **Tracking de volta a zero.** `text-display` e `text-h1` carregam tracking
+   *   negativo, calibrado para grotesca. Num itálico, letra negativa encosta o
+   *   traço de saída de uma letra na seguinte e fecha os contornos.
+   * - **`font-optical-sizing: auto`.** A Newsreader tem eixo `opsz`, e é ele que
+   *   afina a haste e abre o espacejamento no corpo de display. Sem isso, o mesmo
+   *   desenho de 17px é usado a 68px e a serifa fica pesada.
+   *
+   * `line-height` de propósito não está aqui: num trecho inline, mexer na
+   * entrelinha do span estica a caixa daquela linha só, e o parágrafo passa a ter
+   * uma linha mais alta que as outras.
    */
+  .accent {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.02em;
+    font-optical-sizing: auto;
+    letter-spacing: 0;
+  }
+
   /*
-   * A maior parte da barra é cor cheia, e só o último terço desvanece.
+   * Texto pintado com o gradiente royal → roxo.
    *
-   * A primeira versão era um fio de 1px com gradiente desde o topo, e o autor
-   * leu como glitch nas duas tentativas. O motivo é real: barra estreita cujo
-   * gradiente passa a maior parte do percurso em alfa baixo vira fileira de
-   * pixels semitransparentes, que o olho lê como falha de renderização, não como
-   * desenho. Com 3px e o desvanecer concentrado no fim, ela lê como barra.
+   * O DESIGN.md dava ao gradiente um endereço só, o botão de currículo, com o
+   * argumento de que gradiente repetido deixa de ser destaque e vira textura. O
+   * autor pediu o gradiente também no título do hero e nas palavras-chave do
+   * parágrafo de abertura. O guardrail que mantém o argumento vivo é o mesmo da
+   * ênfase colorida: **só no hero**, e teto de três trechos por parágrafo. Fora do
+   * hero, o destaque continua sendo `++royal++` e `==roxo==` em cor cheia.
+   *
+   * O contraste sobrevive à pintura porque as duas pontas passam sozinhas: royal
+   * #1e40c8 dá 7,4:1 sobre a página e roxo #6d28d9 dá 6,5:1, então todo ponto
+   * intermediário fica acima de 4,5:1.
+   *
+   * A parada de royal fica em 18%, não nos 38% do botão: num trecho curto como uma
+   * palavra, 38% de cor chapada some com a transição e o gradiente vira um azul
+   * arroxeado sem direção.
    */
-  .cue-rail {
+  .grad-text {
     background-image: linear-gradient(
-      to bottom,
+      112deg,
       var(--color-royal) 0%,
-      var(--color-royal) 62%,
-      transparent 100%
+      var(--color-royal) 18%,
+      var(--color-violet) 100%
     );
-    /* A transição vive na classe utilitária do elemento, porque `transition-*` do
-       Tailwind está numa layer posterior e sobrescreveria uma declarada aqui. */
-    opacity: 0.75;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
   }
-  .group:hover .cue-rail {
-    opacity: 1;
+
+  /*
+   * Texto pintado é texto sem cor de fonte. Onde a pintura não chega, ele
+   * desapareceria por inteiro: alto contraste do sistema descarta imagem de fundo,
+   * e vários motores de impressão também. Nos dois casos volta a ser tinta.
+   */
+  @media (forced-colors: active), print {
+    .grad-text {
+      background-image: none;
+      color: var(--color-ink);
+      -webkit-text-fill-color: var(--color-ink);
+    }
   }
+
+  /*
+   * Seta do convite a descer. Sobe e desce 5px num ciclo longo.
+   *
+   * É o único movimento em laço do site, e ele existe porque o convite agora mora
+   * no pé da dobra: parado ali embaixo, ele lê como legenda do rodapé, não como
+   * "tem mais". O laço é lento e de amplitude curta de propósito — a versão de
+   * 10px em 1,2s puxava o olho para longe do texto que ainda estava sendo lido.
+   *
+   * O hover não mexe em `transform`, mexe em cor: `transform` já pertence à
+   * animação, e disputar a mesma propriedade faria a seta pular ao entrar o mouse.
+   *
+   * O bloco global de `prefers-reduced-motion` zera a duração, então quem pediu
+   * menos movimento vê a seta parada no lugar certo.
+   *
+   * Os 6px de percurso ficam fora da grade de 8px de propósito: a grade governa
+   * espaçamento de layout, e amplitude de animação não é espaçamento. Em 8px o
+   * laço passava a ler como salto.
+   */
+  @keyframes cue-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.7;
+    }
+    50% {
+      transform: translateY(6px);
+      opacity: 1;
+    }
+  }
+  .cue-arrow {
+    animation: cue-bob 2.8s var(--ease-out-soft) infinite;
+  }
+
+  /*
+   * O `.cue-rail` saiu daqui: era a barra royal de 3px que fazia o convite a
+   * descer, e o autor pediu seta animada no lugar. A razão de ela ter existido
+   * ainda vale como aviso, se algum dia voltar um fio: barra estreita cujo
+   * gradiente passa a maior parte do percurso em alfa baixo vira fileira de pixels
+   * semitransparentes, e o olho lê como falha de renderização. E seta encostada em
+   * fio dá dois traços de espessura diferente desalinhados em subpixel, que foi o
+   * motivo de a barra ter substituído a seta na primeira vez. A seta de agora está
+   * sozinha, sem fio para encostar.
+   */
 
   /*
    * Clarão no pé do hero. Herdado do template original, que usava um radial no
@@ -287,6 +456,32 @@
       50% 50% at 50% 50%,
       color-mix(in srgb, var(--color-royal) 13%, transparent) 0%,
       transparent 70%
+    );
+  }
+
+  /*
+   * Placa da confirmação de cópia do e-mail. Ver `CopyEmail`, em `Contact.tsx`.
+   *
+   * Branco chapado na direita, desfazendo-se em transparente na direção do e-mail.
+   * A placa fica encostada na borda direita do campo e sua largura é o conteúdo
+   * mais o `padding-left` daqui, então ela nunca atravessa o campo inteiro: o
+   * endereço continua visível à esquerda enquanto a confirmação aparece.
+   *
+   * Os 64px de `padding-left` são a zona do fade e existem para o gradiente ter
+   * curso. Com o fade curto (16 ou 24px) a transição vira uma borda cinza-clara
+   * visível, que é pior que um corte seco — corte seco lê como decisão, borda de
+   * gradiente curto lê como defeito de renderização.
+   *
+   * A parada de branco cheio fica em 56px, e não em 100%, para o rótulo ter fundo
+   * opaco de verdade embaixo dele. Se o gradiente ainda estivesse subindo sob o
+   * texto, o e-mail apareceria por trás das letras.
+   */
+  .copy-plate {
+    padding-left: 64px;
+    background-image: linear-gradient(
+      to right,
+      transparent 0%,
+      var(--color-surface) 56px
     );
   }
 

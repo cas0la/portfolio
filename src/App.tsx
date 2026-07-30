@@ -12,7 +12,7 @@
  * roxo #6D28D9 em elemento pequeno (etiqueta, número de módulo, marcador de
  * período); gradiente royal para roxo em um endereço só, o botão de currículo.
  * Separação é fio de cabelo de 1px, nunca borda grossa. Canto de 8 a 14px.
- * Bricolage Grotesque no display, Public Sans no corpo.
+ * Schibsted Grotesk no display, Newsreader itálico nos destaques, Public Sans no corpo.
  *
  * STORY: Liderança de produto entende em segundos que é um PM sênior que
  * desenha, vê número real com fonte declarada, encontra o case conduzido do
@@ -32,7 +32,6 @@
 
 import { Nav } from '@/components/sections/Nav'
 import { Hero } from '@/components/sections/Hero'
-import { Intro } from '@/components/sections/Intro'
 import { Cases } from '@/components/sections/Cases'
 import { About } from '@/components/sections/About'
 import { Contact } from '@/components/sections/Contact'
@@ -44,7 +43,6 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
-        <Intro />
         <Cases />
         <About />
         <Contact />

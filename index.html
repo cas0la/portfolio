@@ -49,16 +49,43 @@
     />
     <meta name="twitter:image" content="/og.png" />
 
-    <!-- Google Fonts, ambas OFL.
-         Bricolage Grotesque no display: caráter real sem custar legibilidade.
-         Public Sans no corpo: dos mais neutros e legíveis para texto longo.
-         A Advercase do template saiu: o .woff2 empacotado não era a Advercase e a
-         licença não era verificável. -->
+    <!-- Google Fonts, as três OFL. Três papéis, cada um com um só endereço:
+         Bricolage Grotesque em título de seção, pesos 400 a 800, com eixo de
+         tamanho óptico. É a família que o autor já havia escolhido comparando
+         especímen ao vivo contra Familjen Grotesk e Schibsted Grotesk, e escolhido
+         justamente por ter mais personalidade — o 'g' de perna aberta, o 'M', as
+         proporções levemente estreitas. O que muda é o peso: o hero passou a usar
+         500, que é o pedido para título de seção. O eixo continua carregado até 800
+         porque as outras seções ainda estão em `font-extrabold`, e cortar o topo do
+         eixo antes de revisá-la faria o browser sintetizar o negrito ali.
+         Newsreader itálico nos destaques de título e de parágrafo, peso 600, com
+         eixo de tamanho óptico. Cursiva no sentido tipográfico do termo — itálico
+         verdadeiro, com desenho próprio de 'a', 'e' e 'g', não a inclinação
+         sintetizada de uma romana.
+         Public Sans no parágrafo. Continua sendo a mais neutra e legível para
+         texto longo, e já estava carregada.
+
+         A Caveat caiu deste papel na mesma sessão em que entrou. O autor apontou
+         duas coisas, as duas verdadeiras: cursiva de mão não faz par com grotesca,
+         e a grotesca ao lado dela parecia bem maior. A segunda tem causa medível —
+         a altura-x da Caveat é muito menor no mesmo corpo, e o 1.12em de correção
+         que eu tinha posto não fecha uma diferença desse tamanho. Serifa contra
+         sem-serifa é eixo de par de verdade, e a altura-x da Newsreader é
+         próxima da Public Sans, então o desencontro deixa de existir na origem.
+
+         Duas famílias passaram pelo papel de display e voltaram para a Bricolage.
+         A Instrument Sans saiu porque o detector do impeccable a classifica como
+         fonte da safra padrão de UI gerada por IA, e num portfólio que precisa não
+         parecer com os outros essa é a crítica certa. A Schibsted Grotesk entrou no
+         lugar dela e o autor apontou que era sóbria demais — o que fecha o círculo,
+         porque ela é uma das duas que ele já havia descartado no comparativo
+         original, pelo mesmo motivo. A Advercase do template saiu antes de todas: o
+         .woff2 empacotado não era a Advercase e a licença não era verificável. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Newsreader:ital,opsz,wght@1,6..72,500..600&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
     />
   </head>
   <body>
