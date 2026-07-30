@@ -10,7 +10,7 @@
     <title>Lucas Casanova · Product Manager</title>
     <meta
       name="description"
-      content="Product Manager sênior. Respondo pelo Inteligência Comercial na Nexfar: catálogo, preço e estoque em tempo real, cotação por OCR e recomendação por IA para a operação comercial de distribuidoras farmacêuticas."
+      content="Portfólio de Lucas Casanova, Product Manager sênior em Florianópolis. 10 anos de mercado, 8 deles em produto. Conduzo o Inteligência Comercial na Nexfar: cotação por OCR, catálogo com preço e estoque em tempo real e recomendação por IA para a operação comercial de distribuidoras farmacêuticas."
     />
     <meta name="theme-color" content="#F7F8FB" />
 
@@ -23,21 +23,33 @@
          sem frase longa. O `LocaleProvider` troca title e description em tempo de
          execução para a aba do visitante, não para o robô.
 
-         `og:url` fica de fora de propósito: o domínio ainda não foi decidido, e
-         uma URL errada aqui é pior que nenhuma. -->
+         AS URLS SÃO ABSOLUTAS E ESTÃO CHUMBADAS. LinkedIn, Twitter e Slack não
+         resolvem caminho relativo em `og:image` e simplesmente não mostram imagem
+         nenhuma; o Telegram resolve, e é por isso que o cartão parecia funcionar.
+         Não há como derivar o domínio aqui: o robô de preview não executa JS, então
+         qualquer coisa calculada em tempo de execução chega tarde demais para ele.
+
+         **Se o domínio mudar, estas três linhas mudam junto** — `og:url`,
+         `og:image`, `twitter:image` e nada mais.
+
+         O `?v=` no fim da imagem é quebra de cache, e não enfeite: LinkedIn,
+         Telegram e Slack guardam a prévia pela URL e podem servir o cartão antigo
+         por dias depois de o arquivo mudar. Trocar o parâmetro cria uma URL nova e
+         força a releitura. **Ao regerar o `og.png`, subir o número.** -->
     <meta property="og:type" content="profile" />
     <meta property="og:site_name" content="Lucas Casanova" />
     <meta property="og:title" content="Lucas Casanova · Product Manager" />
     <meta
       property="og:description"
-      content="Portfólio de Lucas Casanova, Product Manager sênior em Florianópolis. Raciocínio de produto, IA aplicada e a interface desenhada por mim."
+      content="Product Manager que conduz do início ao fim. 10 anos de mercado, 8 deles em produto, com IA e LLM dentro do produto e dentro do processo."
     />
-    <meta property="og:image" content="/og.png" />
+    <meta property="og:url" content="https://casanovaprd.vercel.app/" />
+    <meta property="og:image" content="https://casanovaprd.vercel.app/og.png?v=2" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="Cartão com o nome Lucas Casanova em tipografia grande e, abaixo, Product Manager, Florianópolis, Brasil."
+      content="Cartão com o nome Lucas Casanova no topo e, em tipografia grande, a frase Product Manager que conduz do início ao fim. No pé, dez anos de mercado, oito deles em produto, e Florianópolis, Brasil."
     />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:locale:alternate" content="en_US" />
@@ -45,9 +57,9 @@
     <meta name="twitter:title" content="Lucas Casanova · Product Manager" />
     <meta
       name="twitter:description"
-      content="Portfólio de Lucas Casanova, Product Manager sênior em Florianópolis. Raciocínio de produto, IA aplicada e a interface desenhada por mim."
+      content="Product Manager que conduz do início ao fim. 10 anos de mercado, 8 deles em produto, com IA e LLM dentro do produto e dentro do processo."
     />
-    <meta name="twitter:image" content="/og.png" />
+    <meta name="twitter:image" content="https://casanovaprd.vercel.app/og.png?v=2" />
 
     <!-- Google Fonts, as três OFL. Três papéis, cada um com um só endereço:
          Bricolage Grotesque em título de seção, pesos 400 a 800, com eixo de

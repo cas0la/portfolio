@@ -207,7 +207,7 @@ const pt: Copy = {
   meta: {
     title: 'Lucas Casanova · Product Manager',
     description:
-      'Product Manager sênior. Respondo pelo Inteligência Comercial na Nexfar: catálogo, preço e estoque em tempo real, cotação por OCR e recomendação por IA.',
+      'Product Manager que conduz do início ao fim. 10 anos de mercado, 8 deles em produto. Conduzo o Inteligência Comercial na Nexfar: cotação por OCR, catálogo em tempo real e recomendação por IA.',
   },
   nav: {
     builds: 'Cases',
@@ -661,7 +661,7 @@ const en: Copy = {
   meta: {
     title: 'Lucas Casanova · Product Manager',
     description:
-      'Senior product manager. I own Inteligência Comercial at Nexfar: real-time catalog, price and stock, OCR quoting and AI order recommendation.',
+      'Product manager who runs the product from start to finish. 10 years in the market, 8 of them in product. I own Inteligência Comercial at Nexfar: OCR quoting, real-time catalog and AI order recommendation.',
   },
   nav: {
     builds: 'Cases',
