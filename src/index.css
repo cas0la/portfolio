@@ -1527,6 +1527,119 @@
       min-width: 44px;
     }
   }
+
+  /*
+   * A faixa de marcas: um laço contínuo, de borda a borda.
+   *
+   * **O corte nas laterais é resolvido por máscara, não por gradiente pintado.**
+   * Um gradiente na cor do papel viraria faixa visível no dia em que o fundo
+   * mudar; a máscara desbota o que existe, seja o que for. É a mesma decisão que
+   * já governa o esmaecido da linha do tempo no Sobre.
+   *
+   * O desbote é curto no telefone e longo no desktop: 6rem de cada lado numa tela
+   * de 390px comeriam metade da faixa, e a peça deixaria de mostrar marca para
+   * mostrar transparência.
+   */
+  .brand-rail {
+    --brand-fade: 2.5rem;
+    overflow: clip;
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--brand-fade),
+      #000 calc(100% - var(--brand-fade)),
+      transparent 100%
+    );
+  }
+
+  @media (min-width: 768px) {
+    .brand-rail {
+      --brand-fade: 6rem;
+    }
+  }
+
+  /*
+   * **O laço não tem emenda porque o intervalo mora no item, não entre as listas.**
+   * A pista contém a lista duas vezes e anda exatos 50%, que é o começo da segunda
+   * cópia. Com um `gap` separando as duas listas, esses 50% cairiam no meio do
+   * intervalo e a faixa daria um salto a cada volta. Com meio intervalo de cada
+   * lado de cada item, o espaçamento é o mesmo dentro da lista e na costura.
+   */
+  .brand-run {
+    display: flex;
+    width: max-content;
+    animation: brand-run 52s linear infinite;
+  }
+
+  .brand-set {
+    display: flex;
+    align-items: center;
+  }
+
+  .brand-item {
+    padding-inline: calc(var(--spacing-block) / 2);
+  }
+
+  @keyframes brand-run {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Para no hover, no toque e quando o foco entra na faixa. `:active` é o que
+     responde ao dedo, que nunca passa por hover. */
+  .brand-rail:hover .brand-run,
+  .brand-rail:active .brand-run,
+  .brand-rail:focus-within .brand-run {
+    animation-play-state: paused;
+  }
+
+  /*
+   * **A marca sai em preto e desbotada, e é assim que ela fica monocromática de
+   * verdade.** `brightness(0)` achata qualquer arte numa silhueta sólida, seja o
+   * SVG de uma cor ou de seis, e a opacidade a traz para perto do `ink-soft` do
+   * sistema. Filtro, e não máscara: máscara exigiria largura declarada por marca,
+   * e oito logos têm oito proporções diferentes.
+   *
+   * Se algum logo não sobreviver ao achatamento (marca com contraforma branca, que
+   * viraria um bloco preto), a saída dele é vir em SVG já monocromático e trocar o
+   * filtro por `grayscale(1)` só nesse arquivo.
+   */
+  .brand-logo {
+    height: 2rem;
+    width: auto;
+    filter: brightness(0);
+    opacity: 0.5;
+    transition: opacity 300ms ease-out;
+  }
+
+  .brand-rail:hover .brand-logo {
+    opacity: 0.72;
+  }
+
+  .brand-word {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    color: var(--color-ink-soft);
+    white-space: nowrap;
+  }
+
+  /*
+   * Sem movimento, a faixa precisa de outra forma de mostrar o que sobra. O reset
+   * global de `prefers-reduced-motion` já congela a animação, então aqui só se
+   * devolve a rolagem e se retira a cópia, que sem o laço vira lista repetida.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .brand-rail {
+      overflow-x: auto;
+    }
+
+    .brand-set[aria-hidden='true'] {
+      display: none;
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

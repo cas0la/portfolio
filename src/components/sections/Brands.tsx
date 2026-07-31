@@ -1,0 +1,87 @@
+import { Container } from '@/components/primitives/Container'
+import { FadeIn } from '@/components/primitives/FadeIn'
+import { useLocale } from '@/lib/i18n'
+import { copyFor, type Brand } from '@/content'
+
+/**
+ * A faixa de marcas, entre os cases e o Sobre.
+ *
+ * **Ela existe como credencial, e o lugar dela é depois da prova.** Antes dos
+ * cases, uma fileira de logos pediria confiança antes de ter mostrado trabalho,
+ * que é como uma landing page se apresenta. Depois deles, ela responde a uma
+ * pergunta que a leitura já fez: em que contextos isso aconteceu.
+ *
+ * **A ressalva de qualidade é obrigatória.** Oito marcas em fila afirmam, por
+ * associação, que ele trabalhou em todas elas como empregado. A linha abaixo do
+ * título diz que não, e é o que separa esta faixa de uma afirmação inflada.
+ *
+ * **Este é o segundo movimento em laço do site, e o registro importa.** O
+ * DESIGN.md dizia que a seta do hero era o único, com o argumento de que um
+ * segundo laço tira dela o que a faz convidar. O autor derrubou a regra ao
+ * escolher o laço contínuo, e o argumento continua valendo como limite: um
+ * terceiro não entra. Os dois convivem porque nunca estão na mesma tela e porque
+ * fazem coisas diferentes — a seta convida a descer, a faixa mostra que a lista
+ * não acabou na borda.
+ */
+function BrandItem({ brand }: { brand: Brand }) {
+  return (
+    <li className="brand-item">
+      {brand.logo ? (
+        <img
+          src={brand.logo}
+          alt={brand.name}
+          loading="lazy"
+          decoding="async"
+          className="brand-logo"
+        />
+      ) : (
+        /* Sem arquivo, o nome é a marca. Ele não finge ser logo: sai na família de
+           display, no mesmo cinza dos logos, e some no instante em que o SVG
+           entrar no conteúdo. */
+        <span className="brand-word">{brand.name}</span>
+      )}
+    </li>
+  )
+}
+
+export function Brands() {
+  const { locale } = useLocale()
+  const t = copyFor(locale)
+  const { title, lead, items } = t.brands
+
+  if (items.length === 0) return null
+
+  return (
+    <section className="pb-[112px] md:pb-beat">
+      <Container>
+        <FadeIn>
+          <h2 className="measure text-h1 font-extrabold text-ink">{title}</h2>
+          <p className="measure mt-3 text-body text-ink-soft">{lead}</p>
+        </FadeIn>
+      </Container>
+
+      {/* A faixa vive **fora do Container** para correr de borda a borda. Dentro
+          dele ela pararia no respiro lateral, e a máscara desbotaria contra uma
+          margem em vez de contra a borda da tela, que é onde o corte incomoda. */}
+      <FadeIn delay={0.06}>
+        <div className="brand-rail mt-block">
+          <div className="brand-run">
+            <ul className="brand-set">
+              {items.map((brand) => (
+                <BrandItem key={brand.name} brand={brand} />
+              ))}
+            </ul>
+            {/* A segunda cópia é o que fecha o laço sem emenda, e ela não existe
+                para quem ouve a página: repetir oito marcas seguidas num leitor de
+                tela transformaria a credencial em ruído. */}
+            <ul className="brand-set" aria-hidden="true">
+              {items.map((brand) => (
+                <BrandItem key={brand.name} brand={brand} />
+              ))}
+            </ul>
+          </div>
+        </div>
+      </FadeIn>
+    </section>
+  )
+}

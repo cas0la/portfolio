@@ -389,6 +389,24 @@ export type Language = {
   note?: string
 }
 
+/**
+ * Uma marca da faixa de credenciais.
+ *
+ * **O logo é opcional de propósito.** Marca registrada de terceiro é arquivo que
+ * só o autor pode fornecer, e enquanto ele não chega o nome composto em tipografia
+ * ocupa o lugar — mesma regra da capa de case, que sem arquivo mostra um
+ * placeholder que se assume placeholder em vez de arte de preenchimento.
+ *
+ * Os SVGs vão em `public/assets/marcas/`. Eles são pintados em preto e desbotados
+ * por CSS, então a cor do arquivo original não importa; o que importa é vir em SVG,
+ * com fundo transparente e a marca ocupando a caixa inteira, sem margem embutida.
+ */
+export type Brand = {
+  name: string
+  /** Caminho do SVG. Ausente, o nome vira a marca. */
+  logo?: string
+}
+
 type Copy = {
   meta: { title: string; description: string }
   nav: {
@@ -484,6 +502,17 @@ type Copy = {
     notFoundTitle: string
     notFoundBody: string
     notFoundCta: string
+  }
+  brands: {
+    /** Oração em primeira pessoa, como todo título de seção. */
+    title: string
+    /**
+     * A linha que diz em que qualidade cada marca entra. Ela não é enfeite: uma
+     * faixa de logos sem essa ressalva afirma, por associação, que ele trabalhou
+     * *em* todas elas. Princípio 2 do PRODUCT.md, evidência real ou silêncio.
+     */
+    lead: string
+    items: Brand[]
   }
   inventory: {
     /** A afirmação que abre a seção, em escala de display. Promovida do texto. */
@@ -1480,7 +1509,9 @@ const pt: Copy = {
         tier: 'major',
         step: '03',
         name: 'Mundo Azul',
-        org: 'Unicesumar',
+        /* Duas marcas, porque foram duas: a Unicesumar como cliente e a Brivia
+           como parceira do projeto. Confirmado pelo autor em 31/07/2026. */
+        org: 'Unicesumar e Brivia',
         tag: 'UX Research e Product Design',
         body: 'Pesquisa de usuário conduzida como designer principal da conta.',
         wip: true,
@@ -1520,6 +1551,36 @@ const pt: Copy = {
     notFoundTitle: 'Essa página não existe.',
     notFoundBody: 'O endereço pode ter mudado de lugar. Os cases estão todos na home.',
     notFoundCta: 'Voltar para o começo',
+  },
+  /*
+   * A ordem é a que o autor ditou, e não é alfabética nem cronológica. Mantida
+   * como veio: mexer nela sem motivo é decidir por ele uma hierarquia que ele já
+   * decidiu.
+   *
+   * **Os endereços que ele passou ficam aqui como referência de onde achar a
+   * marca**, e não viram link na página: link de saída numa faixa de credenciais
+   * tira do site quem está justamente avaliando o site.
+   * Electrolux `loja.electrolux.com.br` · Banco do Brasil `bb.com.br` · Bradesco
+   * `banco.bradesco` · Nexfar `nexfar.com.br` · Unicesumar `unicesumar.edu.br` ·
+   * myTapp `mytapp.com.br` · Brivia `brivia.com.br` · Garupa `garupa.com.vc`.
+   *
+   * **A Brivia é a única que não aparece em `curriculo/`.** As outras sete estão
+   * nos três arquivos. Princípio 5 do PRODUCT.md: o que o site afirma tem que
+   * bater com o currículo, então ou ela entra lá ou sai daqui.
+   */
+  brands: {
+    title: 'Marcas com as quais eu já trabalhei',
+    lead: 'Entre empregos, clientes de agência e parcerias de projeto.',
+    items: [
+      { name: 'Electrolux' },
+      { name: 'Banco do Brasil' },
+      { name: 'Bradesco' },
+      { name: 'Nexfar' },
+      { name: 'Unicesumar' },
+      { name: 'myTapp' },
+      { name: 'Brivia' },
+      { name: 'Garupa Design' },
+    ],
   },
   inventory: {
     /*
@@ -2270,7 +2331,9 @@ const en: Copy = {
         tier: 'major',
         step: '03',
         name: 'Mundo Azul',
-        org: 'Unicesumar',
+        /* Duas marcas, porque foram duas: a Unicesumar como cliente e a Brivia
+           como parceira do projeto. Confirmado pelo autor em 31/07/2026. */
+        org: 'Unicesumar and Brivia',
         tag: 'UX research and product design',
         body: 'User research run as lead designer on the account.',
         wip: true,
@@ -2294,6 +2357,21 @@ const en: Copy = {
     notFoundTitle: 'This page does not exist.',
     notFoundBody: 'The address may have moved. Every case lives on the home page.',
     notFoundCta: 'Back to the start',
+  },
+  /* Ver a nota de ordem, endereços e a pendência da Brivia na versão em português. */
+  brands: {
+    title: 'Brands I have worked with',
+    lead: 'Across employers, agency clients and project partners.',
+    items: [
+      { name: 'Electrolux' },
+      { name: 'Banco do Brasil' },
+      { name: 'Bradesco' },
+      { name: 'Nexfar' },
+      { name: 'Unicesumar' },
+      { name: 'myTapp' },
+      { name: 'Brivia' },
+      { name: 'Garupa Design' },
+    ],
   },
   inventory: {
     statement: 'From design to Product Manager',
