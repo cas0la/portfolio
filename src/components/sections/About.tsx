@@ -23,8 +23,9 @@ import type { InventoryRow, Language, Testimonial } from '@/content'
  *    conta a migração de design para produto; a linha do tempo dá o mesmo percurso
  *    em dados, para quem prefere varrer a olho. São a mesma informação em dois
  *    formatos, lado a lado de propósito — o avaliador escolhe por qual entra.
- * 2. **Credenciais à esquerda, retrato ao centro, fotos à direita.** As três
- *    listas são credencial, não narrativa, e por isso ficam juntas numa coluna só.
+ * 2. **Retrato à esquerda, credenciais à direita.** Eram três colunas, com as
+ *    fotos de fora do trabalho na terceira; elas saíram em 30/07/2026 e o que
+ *    contavam passou para a ficha que sobe do retrato no hover.
  * 3. **Relatos de terceiros**, a subseção nova.
  *
  * O que eu **não** copiei do template original: lá cada bloco era um cartão com
@@ -90,9 +91,10 @@ function PhotoSlot({
  * gastavam de uma vez todo o vocabulário gráfico do site numa imagem só.**
  * Distribuídos entre repouso e hover, cada estado fica com um gesto.
  *
- * - **Repouso:** foto em preto e branco, gradiente royal→roxo deslocado 16px.
+ * - **Repouso:** foto em preto e branco, gradiente royal→roxo deslocado 8px.
  *   Acromática, ela não disputa com o gradiente, e o conjunto lê como retrato de
- *   credencial, que é o que a coluna de credenciais pede.
+ *   credencial, que é o que a coluna ao lado pede. Eram 16px, e a 16px o gradiente
+ *   lia como segundo bloco ao lado da foto em vez de sombra colorida dela.
  * - **Hover:** a cor volta, o gradiente cresce para 28px e a faixa sobe do pé com
  *   o nome e o que ele faz fora do trabalho.
  *
@@ -141,8 +143,8 @@ function PortraitSlot({
             lido, e ele já está visível para quem chega pelo teclado. */}
         <figcaption className="portrait-card">
           <p className="text-h3 font-extrabold text-white">{name}</p>
-          <p className="label mt-1 text-white/55">{interestsLabel}</p>
-          <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+          <p className="label mt-2 text-white/55">{interestsLabel}</p>
+          <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
             {interests.map((item) => (
               <li
                 key={item.label}
@@ -150,8 +152,14 @@ function PortraitSlot({
               >
                 {/* O emoji sai da árvore de acessibilidade: o rótulo ao lado já diz
                     a mesma coisa em palavra, e sem isto o leitor de tela anunciaria
-                    "cara de cachorro" antes de "meus cachorros". */}
-                <span aria-hidden className="text-[18px] leading-none">
+                    "cara de cachorro" antes de "meus cachorros".
+
+                    Corpo em `body`, 16px, ao lado de um rótulo em `body-sm`, 14px.
+                    Ele é maior que o texto de propósito: emoji ocupa menos da caixa
+                    em do que letra latina, e no mesmo corpo pareceria menor. Era
+                    `text-[18px]`, valor fora da rampa escolhido a olho — 16px casa
+                    igualmente bem e é um degrau documentado. */}
+                <span aria-hidden className="text-body leading-none">
                   {item.emoji}
                 </span>
                 {item.label}
