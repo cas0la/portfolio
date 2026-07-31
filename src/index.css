@@ -1600,8 +1600,24 @@
     align-items: center;
   }
 
+  /*
+   * Meio intervalo de cada lado, para o espaçamento ser o mesmo dentro da lista e
+   * na costura entre as cópias.
+   *
+   * **Subiu de 24 para 32px, e para 48px acima de md.** Com os logos em 48px de
+   * altura, 48px de intervalo total deixava marcas vizinhas quase encostadas, e
+   * duas marcas próximas demais leem como uma composição só. O intervalo cresce
+   * com a largura porque no telefone ele custa marca visível: em 390px, 96px entre
+   * itens deixariam pouco mais de uma marca por vez na janela.
+   */
   .brand-item {
-    padding-inline: calc(var(--spacing-block) / 2);
+    padding-inline: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .brand-item {
+      padding-inline: 3rem;
+    }
   }
 
   @keyframes brand-run {

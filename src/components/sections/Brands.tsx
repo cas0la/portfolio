@@ -89,7 +89,20 @@ export function Brands() {
   if (items.length === 0) return null
 
   return (
-    <section className="pb-[112px] md:pb-beat">
+    /*
+     * **Esta é a única seção que abre com padding, e é exceção declarada.**
+     *
+     * A regra do DESIGN.md é que seção fecha com `pb` e nunca abre, para o
+     * intervalo entre duas seções ser contado uma vez só em vez de somar duas
+     * margens. Aqui somar é o objetivo. As outras seções têm altura de sobra para
+     * ocupar a própria dobra; esta tem título, uma linha e uma faixa, e com o
+     * intervalo padrão ela aparecia junto com o pé dos cases ou com o topo do
+     * Sobre, o que a fazia ler como rodapé da seção vizinha em vez de assunto
+     * próprio.
+     *
+     * Mais acima do que abaixo, seguindo a mesma regra que vale para título.
+     */
+    <section className="pt-block pb-[112px] md:pt-section md:pb-beat">
       <Container>
         <FadeIn>
           <h2 className="measure text-h1 font-extrabold text-ink">{title}</h2>
