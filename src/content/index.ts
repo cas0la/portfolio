@@ -418,6 +418,17 @@ export type Brand = {
    * diferença de luminância entre os dois e a marca continua legível.
    */
   tone?: 'flat' | 'gray'
+  /**
+   * Ajuste fino sobre o tamanho calculado por área, para quando o olho discordar
+   * da conta. Ver `fitByArea` em `sections/Brands.tsx`.
+   *
+   * **Ele existe para o que a área não sabe: quanto do arquivo é marca.** Um SVG
+   * com folga generosa em volta desenha menos tinta na mesma caixa que um recortado
+   * rente, e a conta trata os dois igual. Use com parcimônia — nudge de 0,9 ou 1,1
+   * é acerto de arquivo; qualquer coisa longe de 1 quer dizer que o arquivo é que
+   * está errado, e o conserto é recortar o `viewBox`.
+   */
+  scale?: number
 }
 
 type Copy = {

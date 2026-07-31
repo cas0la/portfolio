@@ -24,6 +24,42 @@ import { copyFor, type Brand } from '@/content'
  * fazem coisas diferentes — a seta convida a descer, a faixa mostra que a lista
  * não acabou na borda.
  */
+/*
+ * **Marcas se igualam por área, não por altura nem por largura.**
+ *
+ * As oito vão de 2,6:1 (Garupa) a 7,1:1 (Banco do Brasil). Igualar a altura faz a
+ * mais larga ocupar quase três vezes o papel da mais compacta; igualar a largura
+ * faz o contrário, e foi o que aconteceu com o teto de 12rem — ele derrubou o
+ * Banco do Brasil para 27px de altura enquanto Brivia e Nexfar ficavam com os 48
+ * cheios. Os dois critérios erram porque nenhum descreve o que o olho compara,
+ * que é quanta tinta a marca põe na página.
+ *
+ * Área constante é a régua que os designers usam à mão para mural de logo, e ela
+ * tem forma fechada: com área A e proporção r, a altura é `√(A/r)`. Marca compacta
+ * fica alta e estreita, marca comprida fica baixa e larga, e as duas ocupam o
+ * mesmo tanto de papel.
+ *
+ * **A proporção é medida do arquivo, não tabelada.** `naturalWidth/naturalHeight`
+ * vem do próprio SVG, então trocar um logo reajusta o tamanho dele sozinho — que é
+ * o que evita uma tabela de números mágicos envelhecendo em silêncio a cada troca
+ * de arquivo.
+ *
+ * Os limites existem para o caso extremo: uma marca quadrada pediria altura demais
+ * e uma faixa muito comprida sumiria. Dentro deles, `scale` no conteúdo é o ajuste
+ * fino para quando o olho discordar da conta.
+ */
+const BRAND_AREA = 7744
+const BRAND_MIN_H = 32
+const BRAND_MAX_H = 56
+
+function fitByArea(event: React.SyntheticEvent<HTMLImageElement>, scale = 1) {
+  const img = event.currentTarget
+  const ratio = img.naturalWidth / img.naturalHeight
+  if (!Number.isFinite(ratio) || ratio <= 0) return
+  const raw = Math.sqrt(BRAND_AREA / ratio) * scale
+  img.style.height = `${Math.min(BRAND_MAX_H, Math.max(BRAND_MIN_H, raw))}px`
+}
+
 function BrandItem({ brand }: { brand: Brand }) {
   return (
     <li className="brand-item">
@@ -31,8 +67,13 @@ function BrandItem({ brand }: { brand: Brand }) {
         <img
           src={brand.logo}
           alt={brand.name}
-          loading="lazy"
+          /* **Sem `lazy` aqui, e é por causa do cálculo.** O tamanho de cada marca
+             sai do `onLoad`, e imagem adiada não dispara evento até entrar em
+             cena — as cópias da direita ficariam nos 3rem do palpite inicial,
+             com altura diferente das mesmas marcas à esquerda. São oito SVGs
+             pequenos, reusados em todas as cópias e servidos do cache. */
           decoding="async"
+          onLoad={(event) => fitByArea(event, brand.scale)}
           className="brand-logo"
           data-tone={brand.tone}
         />
@@ -100,9 +141,14 @@ export function Brands() {
      * Sobre, o que a fazia ler como rodapé da seção vizinha em vez de assunto
      * próprio.
      *
-     * Mais acima do que abaixo, seguindo a mesma regra que vale para título.
+     * **Os dois lados têm que somar igual, e é isso que a conta abaixo faz.** O vão
+     * de cima é o fecho dos cases mais a abertura desta seção; o de baixo é só o
+     * fecho dela, porque o Sobre não abre com padding. Repetindo o mesmo `pb` das
+     * outras seções, a marca ficava com 160px em cima e 112px embaixo, e o autor
+     * leu a diferença de imediato. O `pb` daqui é a soma que o topo já produz:
+     * 112 + 48 no telefone, 208 + 96 acima de md.
      */
-    <section className="pt-block pb-[112px] md:pt-section md:pb-beat">
+    <section className="pt-block pb-[160px] md:pt-section md:pb-[304px]">
       <Container>
         <FadeIn>
           <h2 className="measure text-h1 font-extrabold text-ink">{title}</h2>

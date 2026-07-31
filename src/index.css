@@ -1650,22 +1650,19 @@
      declarada é maior que a marca desenhada: 32px de caixa entregavam algo perto
      de 22px de logo, que numa faixa de credencial lê como rodapé. */
   /*
-   * **Altura fixa sozinha não iguala marca nenhuma.** As oito vão de 2,6:1
-   * (Garupa) a 7,1:1 (Banco do Brasil), e altura igual faz a mais larga ocupar o
-   * dobro de papel da mais compacta. Numa faixa de credenciais isso lê como
-   * hierarquia entre as empresas, que não existe.
+   * **A altura de cada marca é calculada por área, em JS** — ver `fitByArea` em
+   * `sections/Brands.tsx`, que é onde está o raciocínio. Os 3rem daqui são só o
+   * valor até a imagem carregar e informar a própria proporção.
    *
-   * O teto de largura é o que corrige, e sem tabela por marca: com `object-fit:
-   * contain` numa caixa de 12rem por 3rem, a marca compacta usa a altura inteira e
-   * a larga encolhe até caber, o que é exatamente o que um olho treinado faria à
-   * mão. A caixa continua com 3rem em todas, então a linha de base da fileira não
-   * se mexe.
+   * O teto de largura saiu. Ele foi a tentativa anterior de igualar as oito e
+   * errou pelo lado oposto ao da altura fixa: cortando pela largura, o Banco do
+   * Brasil caía para 27px de altura enquanto Brivia e Nexfar ficavam com os 48
+   * cheios. Com área constante o teto deixa de ter função, e mantê-lo voltaria a
+   * espremer justamente as marcas compridas.
    */
   .brand-logo {
     height: 3rem;
-    max-width: 12rem;
     width: auto;
-    object-fit: contain;
     filter: brightness(0);
     opacity: 0.5;
   }
