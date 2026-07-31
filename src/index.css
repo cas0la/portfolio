@@ -1312,6 +1312,16 @@
    * O `text-wrap: balance` divide as duas linhas em partes parecidas em vez de
    * deixar uma palavra órfã embaixo de uma linha cheia.
    */
+  /* O marcador da decisão. Mesmo ponto de 6px do stepper e da assinatura, na cor
+     que o sistema reserva para elemento pequeno. Ver a nota no `PieceCard`. */
+  .decision-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--color-violet);
+  }
+
   .mj-caption {
     min-height: 3rem;
     text-wrap: balance;
@@ -1619,8 +1629,12 @@
    * viraria um bloco preto), a saída dele é vir em SVG já monocromático e trocar o
    * filtro por `grayscale(1)` só nesse arquivo.
    */
+  /* **48px de altura, e não 32.** A pedido do autor, depois de ver a faixa no ar.
+     A caixa do SVG quase sempre traz folga em volta da marca, então a altura
+     declarada é maior que a marca desenhada: 32px de caixa entregavam algo perto
+     de 22px de logo, que numa faixa de credencial lê como rodapé. */
   .brand-logo {
-    height: 2rem;
+    height: 3rem;
     width: auto;
     filter: brightness(0);
     opacity: 0.5;
@@ -1635,16 +1649,15 @@
   }
 
   /*
-   * O nome como marca. **28px e não 20px**: a pedido do autor, entre 25% e 50%
-   * acima do corpo anterior. Em 20px ele lia como legenda ao lado de logos de
-   * 32px de altura, e uma faixa de credenciais em que metade dos itens sussurra
-   * não tem por que existir. 28px é degrau da rampa e alinha a altura óptica do
-   * nome com a caixa dos logos.
+   * O nome como marca, para quem ainda não tem arquivo. Ele acompanha a altura da
+   * caixa do logo: subiu de 20 para 28px quando os logos estavam em 32px, e para
+   * 36px quando eles foram para 48px. A entrelinha é a altura da caixa, e é ela
+   * que mantém a fileira com a mesma altura tenha ou não arquivo.
    */
   .brand-word {
     font-family: var(--font-display);
-    font-size: 1.75rem;
-    line-height: 2rem;
+    font-size: 2.25rem;
+    line-height: 3rem;
     font-weight: 600;
     letter-spacing: -0.018em;
     color: var(--color-ink-soft);

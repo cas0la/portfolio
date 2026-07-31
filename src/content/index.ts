@@ -1415,10 +1415,21 @@ const pt: Copy = {
          * silêncio") derruba a fatia.
          */
         discovery: {
-          title: 'Eu nunca decidi sozinho o que entrava',
+          /*
+           * **O título dizia "Eu nunca decidi sozinho o que entrava", e o autor leu
+           * nele falta de autonomia.** Ele está certo, e a causa é gramatical: a
+           * frase era negativa e o único verbo em primeira pessoa era o que ele
+           * *não* fazia. Quem avalia um PM lê isso como alguém que não decide.
+           *
+           * A seção sempre falou de método, nunca de permissão. O conserto é pôr o
+           * verbo de decidir em primeira pessoa e deixar a evidência no papel que
+           * ela de fato tem, que é o de apontar a direção e não o de assinar a
+           * escolha. Nenhum fato mudou.
+           */
+          title: 'Eu decido o que entra, e a evidência diz por onde',
           body: [
             'Depois que o produto subiu, a fila de melhorias parou de sair de reunião de roadmap. Passei a manter grupo aberto com os vendedores que usam a plataforma todo dia, a entrevistar quem tinha acabado de usar, e a olhar o dado de uso ao lado dos dois.',
-            'Cada frente pega o que as outras não pegam. O grupo traz o incômodo que ninguém abre chamado para relatar. A entrevista mostra onde a pessoa hesita, que é diferente de onde ela reclama. O dado diz quantos passam pelo mesmo ponto, e é ele que separa o caso isolado do problema que vale corrigir. ++Foi assim que a fila do que entrar deixou de ser minha opinião.++',
+            'Cada frente pega o que as outras não pegam. O grupo traz o incômodo que ninguém abre chamado para relatar. A entrevista mostra onde a pessoa hesita, que é diferente de onde ela reclama. O dado diz quantos passam pelo mesmo ponto, e é ele que separa o caso isolado do problema que vale corrigir. ++Trazer as três para a mesa é o que me deixa decidir a fila por evidência em vez de por palpite.++',
           ],
           results: [{ value: '20+', unit: 'melhorias lançadas em 3 meses' }],
         },
@@ -2288,10 +2299,12 @@ const en: Copy = {
         /* Ver a nota na versão em português: por que as três frentes vão nomeadas
            uma a uma e por que o texto não afirma proporção. */
         discovery: {
-          title: 'I never decided alone what went in',
+          /* Ver a nota na versão em português: o título negativo lia como falta
+             de autonomia, e o verbo de decidir voltou para a primeira pessoa. */
+          title: 'I decide what goes in, and the evidence tells me where',
           body: [
             'Once the product was live, the improvement queue stopped coming out of roadmap meetings. I kept a standing group with the reps who use the platform every day, interviewed people right after they used it, and read the usage data alongside both.',
-            'Each front catches what the others miss. The group surfaces the friction nobody files a ticket about. The interview shows where someone hesitates, which is not where they complain. The data says how many people hit the same spot, and that is what separates one bad day from a problem worth fixing. ++That is how the queue stopped being my opinion.++',
+            'Each front catches what the others miss. The group surfaces the friction nobody files a ticket about. The interview shows where someone hesitates, which is not where they complain. The data says how many people hit the same spot, and that is what separates one bad day from a problem worth fixing. ++Bringing all three to the table is what lets me set the queue on evidence instead of on hunch.++',
           ],
           results: [{ value: '20+', unit: 'improvements shipped in 3 months' }],
         },

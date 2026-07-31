@@ -379,20 +379,36 @@ function PieceCard({
             </div>
           )}
 
+          {/* A lista virou `ul`. Enquanto as decisões tinham numeral, `ol` dizia a
+              verdade para quem ouve a página; sem ele, ordenar continuaria
+              anunciando "item 1 de 3" para três decisões que não são etapas. */}
           {piece.decisions && (
-            <ol className="mt-block flex flex-col gap-block">
-              {piece.decisions.map((decision, i) => (
+            <ul className="mt-block flex flex-col gap-block">
+              {piece.decisions.map((decision) => (
                 <li key={decision.title} className="border-l border-hairline pl-gap">
-                  <h4 className="measure text-body font-bold text-ink">
-                    <span className="tnum mr-3 text-violet">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    {decision.title}
+                  {/* **O numeral da decisão virou ponto, a pedido do autor.** Ele
+                      era `01`, `02`, `03` em roxo e `tnum`, exatamente o mesmo
+                      tratamento do numeral do módulo logo acima — dois numerais
+                      idênticos, um dentro do outro, dizem que estão no mesmo
+                      nível, e a leitura tropeça procurando a relação entre eles.
+
+                      Ponto e não letra: A/B/C ainda afirma sequência, e as três
+                      decisões de um módulo são paralelas, não etapas. O que
+                      carrega o "isto está dentro do módulo" continua sendo o fio
+                      à esquerda, que não mudou.
+
+                      Alinhado por `items-baseline`, sem número mágico: a caixa
+                      vazia do ponto tem a base na linha do texto, então ele cai
+                      dentro da altura-x sem depender de `vertical-align`
+                      calibrado a olho. */}
+                  <h4 className="measure flex items-baseline gap-2 text-body font-bold text-ink">
+                    <span aria-hidden className="decision-dot shrink-0" />
+                    <span>{decision.title}</span>
                   </h4>
                   <p className="measure mt-2 text-body text-ink-soft">{decision.body}</p>
                 </li>
               ))}
-            </ol>
+            </ul>
           )}
 
           {/* Os números ficam **depois** da explicação, e não em cima dela: o módulo
