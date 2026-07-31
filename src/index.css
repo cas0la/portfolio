@@ -1168,6 +1168,11 @@
      * que o telefone não tem.
      */
     max-width: min(17rem, 26svh);
+    /* Centrado na coluna, a pedido do autor. Abaixo de `lg` o palco é uma linha
+       inteira da grade e o aparelho ocupa uma fração dela; encostado à esquerda,
+       ele e o stepper apontavam para eixos diferentes. Acima de `lg` a coluna
+       mede exatamente o aparelho e o centro não move nada. */
+    margin-inline: auto;
     /*
      * O arrasto horizontal é nosso, o vertical continua sendo do navegador. Sem
      * isto o gesto de trocar de tela roubaria o dedo de quem só queria rolar a
@@ -1310,6 +1315,10 @@
   .mj-caption {
     min-height: 3rem;
     text-wrap: balance;
+    /* Centrada junto com o aparelho e o stepper. A largura não muda, então a
+       reserva de duas linhas acima continua valendo: o ponto de quebra é o mesmo,
+       só o eixo do texto mudou. */
+    text-align: center;
   }
 
   /*
@@ -1560,15 +1569,20 @@
 
   /*
    * **O laço não tem emenda porque o intervalo mora no item, não entre as listas.**
-   * A pista contém a lista duas vezes e anda exatos 50%, que é o começo da segunda
-   * cópia. Com um `gap` separando as duas listas, esses 50% cairiam no meio do
-   * intervalo e a faixa daria um salto a cada volta. Com meio intervalo de cada
-   * lado de cada item, o espaçamento é o mesmo dentro da lista e na costura.
+   * Com um `gap` separando as cópias, o deslocamento cairia no meio do intervalo e
+   * a faixa daria um salto a cada volta. Com meio intervalo de cada lado de cada
+   * item, o espaçamento é o mesmo dentro da lista e na costura.
+   *
+   * **O passo é uma cópia, e não metade da pista.** O número de cópias é medido em
+   * tempo de execução, então `-50%` só estaria certo quando fossem exatamente duas.
+   * `100% / --brand-copies` é a largura de uma cópia em qualquer contagem, e a
+   * duração fica fixa: como o passo é sempre uma cópia, a velocidade não muda
+   * quando a medição decide acrescentar mais uma.
    */
   .brand-run {
     display: flex;
     width: max-content;
-    animation: brand-run 52s linear infinite;
+    animation: brand-run 30s linear infinite;
   }
 
   .brand-set {
@@ -1582,17 +1596,17 @@
 
   @keyframes brand-run {
     to {
-      transform: translateX(-50%);
+      transform: translateX(calc(-100% / var(--brand-copies, 2)));
     }
   }
 
-  /* Para no hover, no toque e quando o foco entra na faixa. `:active` é o que
-     responde ao dedo, que nunca passa por hover. */
-  .brand-rail:hover .brand-run,
-  .brand-rail:active .brand-run,
-  .brand-rail:focus-within .brand-run {
-    animation-play-state: paused;
-  }
+  /*
+   * **Não para no hover, por decisão do autor.** A pausa é o reflexo em faixa de
+   * logos, e ela pressupõe que haja o que ler parado: aqui não há link, nem
+   * legenda, nem alvo. Parar seria responder a um gesto com uma mudança que não
+   * leva a lugar nenhum, e ainda entregaria a única coisa que a faixa não pode
+   * mostrar, que é onde a lista começa e acaba.
+   */
 
   /*
    * **A marca sai em preto e desbotada, e é assim que ela fica monocromática de
@@ -1610,16 +1624,27 @@
     width: auto;
     filter: brightness(0);
     opacity: 0.5;
-    transition: opacity 300ms ease-out;
   }
 
-  .brand-rail:hover .brand-logo {
-    opacity: 0.72;
+  /* A exceção em que a cor é a marca. Escala de cinza guarda a diferença de
+     luminância que o achatamento apagaria, e a opacidade sobe porque cinza claro
+     a 50% sobre papel frio some. Ver o campo `tone` em `content/index.ts`. */
+  .brand-logo[data-tone='gray'] {
+    filter: grayscale(1);
+    opacity: 0.65;
   }
 
+  /*
+   * O nome como marca. **28px e não 20px**: a pedido do autor, entre 25% e 50%
+   * acima do corpo anterior. Em 20px ele lia como legenda ao lado de logos de
+   * 32px de altura, e uma faixa de credenciais em que metade dos itens sussurra
+   * não tem por que existir. 28px é degrau da rampa e alinha a altura óptica do
+   * nome com a caixa dos logos.
+   */
   .brand-word {
     font-family: var(--font-display);
-    font-size: var(--text-h3);
+    font-size: 1.75rem;
+    line-height: 2rem;
     font-weight: 600;
     letter-spacing: -0.018em;
     color: var(--color-ink-soft);

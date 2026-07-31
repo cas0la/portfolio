@@ -403,8 +403,21 @@ export type Language = {
  */
 export type Brand = {
   name: string
-  /** Caminho do SVG. Ausente, o nome vira a marca. */
+  /** Caminho do arquivo. Ausente, o nome vira a marca. */
   logo?: string
+  /**
+   * Como a marca vira monocromática.
+   *
+   * `flat` é o padrão e achata tudo em preto, que é o que dá uma faixa de uma cor
+   * só. Ele funciona quando a marca é uma silhueta: qualquer arte com fundo
+   * transparente sai como recorte preto, seja o original de uma cor ou de seis.
+   *
+   * `gray` existe para a exceção em que **a cor é a marca**. O Banco do Brasil é
+   * um quadrado azul com a marca em amarelo por dentro; achatado, o amarelo
+   * encosta no azul e sobra um quadrado preto. Escala de cinza preserva a
+   * diferença de luminância entre os dois e a marca continua legível.
+   */
+  tone?: 'flat' | 'gray'
 }
 
 type Copy = {
@@ -695,7 +708,7 @@ const pt: Copy = {
      */
     lead: 'Estou no mercado há **10 anos**, **8 deles em produto**. Hoje uso @@IA e LLM@@ no produto que conduzo e no meu próprio trabalho. Venho de @@research e craft@@, e é de lá que vem a evidência para decidir, executar e acompanhar o desempenho.',
     location: 'Florianópolis, Brasil',
-    ctaResume: 'Baixar meu currículo (PDF)',
+    ctaResume: 'Currículo (PDF)',
     /*
      * O convite a descer.
      *
@@ -1579,16 +1592,18 @@ const pt: Copy = {
    */
   brands: {
     title: 'Marcas com as quais eu já trabalhei',
-    lead: 'Entre empregos, clientes de agência e projetos em que eu entrei como contratado.',
+    lead: 'Funcionário em umas, agência ou contratado em outras. Oito contextos de negócio, e em nenhum deles o problema já chegava formulado.',
     items: [
-      { name: 'Electrolux' },
-      { name: 'Banco do Brasil' },
-      { name: 'Bradesco' },
-      { name: 'Nexfar' },
-      { name: 'Unicesumar' },
-      { name: 'myTapp' },
-      { name: 'Brivia' },
-      { name: 'Garupa Design' },
+      { name: 'Electrolux', logo: '/assets/marcas/electrolux.svg' },
+      // Duas cores que carregam a marca inteira: o achatamento em preto devolvia
+      // um quadrado sólido. Esta é a única que anda em escala de cinza.
+      { name: 'Banco do Brasil', logo: '/assets/marcas/bb.svg', tone: 'gray' },
+      { name: 'Bradesco', logo: '/assets/marcas/bradesco.png' },
+      { name: 'Nexfar', logo: '/assets/marcas/nexfar.png' },
+      { name: 'Unicesumar', logo: '/assets/marcas/unicesumar.svg' },
+      { name: 'myTapp', logo: '/assets/marcas/mytapp.svg' },
+      { name: 'Brivia', logo: '/assets/marcas/brivia.svg' },
+      { name: 'Garupa Design', logo: '/assets/marcas/garupa.svg' },
     ],
   },
   inventory: {
@@ -1823,44 +1838,52 @@ const pt: Copy = {
      * O segundo é o mais longo dos cinco e não desce mais sem virar reescrita: ele é
      * uma frase única, sem oração descartável sobrando.
      *
-     * PENDÊNCIA: **o relatório não identifica a relação de trabalho de quem
-     * escreveu.** Por isso os três primeiros estão em "Colega de trabalho", que é o
-     * mais específico que se sustenta, e não em "Par direto" ou "Colega de setor
-     * parceiro". Só o autor sabe quem escreveu o quê. Ao corrigir, trocar só o
-     * `source`.
+     * **A pendência da relação de trabalho foi resolvida pelo autor em 31/07/2026.**
+     * O relatório da avaliação não identifica quem escreveu o quê; ele identifica.
+     * Os genéricos "Colega de trabalho" e "Ex-líder" viraram par direto, par
+     * indireto, ex-líder e ex-liderado, cada um com a empresa ao lado.
+     *
+     * **Nome de colega continua proibido, e não é isso que mudou.** O que entrou é a
+     * relação e o lugar, que é o que dá peso ao relato: "par direto" e "ex-liderado"
+     * dizem de que ângulo a pessoa viu o trabalho, e "colega de trabalho" não dizia.
+     * Quem escreveu segue anônimo.
      */
     testimonials: [
       {
         quote:
           'Quando a solução parte dele, ela costuma ganhar tração entre os colegas. Não é influência pela imposição, é pela confiança que o time tem na leitura dele.',
-        source: 'Colega de trabalho',
+        source: 'Par direto, Nexfar',
       },
       {
         quote: 'Te vejo como um profissional que, acima de tudo, é Sênior em aprender.',
-        source: 'Ex-líder',
+        source: 'Ex-líder, Garupa Design',
       },
       {
         quote: 'Sempre senti que podia chegar em ti e abrir sobre a realidade.',
-        source: 'Ex-liderado, em 1:1',
+        source: 'Ex-liderado, Garupa Design',
         featured: true,
       },
       {
         quote:
           'Atua de forma proativa ao trazer e testar ferramentas, especialmente com o uso de IA e automação, contribuindo para ganhos de eficiência do time.',
-        source: 'Colega de trabalho',
+        source: 'Par indireto, Nexfar',
       },
       {
         quote:
           'O Casanova não espera ser chamado pra ajudar. Quando não sabe a resposta, vai atrás ou indica quem sabe.',
-        source: 'Colega de trabalho',
+        source: 'Par indireto, Nexfar',
+      },
+      {
+        quote: 'Adotamos os padrões que você definiu como processo de pesquisa.',
+        source: 'Design Manager, Electrolux',
       },
     ],
   },
   close: {
     title: 'Vamos conversar.',
     lead: 'Se você está montando um time de produto, ou quer entender melhor alguma decisão que eu tomei, me escreve. Também deixei o currículo completo em PDF. Respondo em português ou inglês.',
-    signoff: 'Obrigado por ler até aqui.',
-    ctaResume: 'Baixar meu currículo (PDF)',
+    signoff: '',
+    ctaResume: 'Currículo (PDF)',
     copy: 'Copiar e-mail',
     copied: 'Copiado!',
     copyFailed: 'Não consegui copiar. Selecionei o endereço para você copiar.',
@@ -1902,7 +1925,7 @@ const en: Copy = {
     greeting: 'Hi, I’m Lucas, but you can call me “Casanova”.',
     lead: 'I’ve been working for **10 years**, **8 of them in product**. Today I use @@AI and LLMs@@ inside the product I run and in my own work. I come from @@research and craft@@, and that is where the evidence comes from to decide, to execute and to track how it performs.',
     location: 'Florianópolis, Brazil',
-    ctaResume: 'Download my résumé (PDF)',
+    ctaResume: 'Résumé (PDF)',
     ctaBuilds: 'Come see what I ran from day one',
   },
   intro: {
@@ -2370,16 +2393,18 @@ const en: Copy = {
   /* Ver a nota de ordem, endereços e a pendência da Brivia na versão em português. */
   brands: {
     title: 'Brands I have worked with',
-    lead: 'Across employers, agency clients and projects I came into as a contractor.',
+    lead: 'On staff at some, agency or contractor at others. Eight business contexts, and in none of them did the problem arrive already framed.',
     items: [
-      { name: 'Electrolux' },
-      { name: 'Banco do Brasil' },
-      { name: 'Bradesco' },
-      { name: 'Nexfar' },
-      { name: 'Unicesumar' },
-      { name: 'myTapp' },
-      { name: 'Brivia' },
-      { name: 'Garupa Design' },
+      { name: 'Electrolux', logo: '/assets/marcas/electrolux.svg' },
+      // Duas cores que carregam a marca inteira: o achatamento em preto devolvia
+      // um quadrado sólido. Esta é a única que anda em escala de cinza.
+      { name: 'Banco do Brasil', logo: '/assets/marcas/bb.svg', tone: 'gray' },
+      { name: 'Bradesco', logo: '/assets/marcas/bradesco.png' },
+      { name: 'Nexfar', logo: '/assets/marcas/nexfar.png' },
+      { name: 'Unicesumar', logo: '/assets/marcas/unicesumar.svg' },
+      { name: 'myTapp', logo: '/assets/marcas/mytapp.svg' },
+      { name: 'Brivia', logo: '/assets/marcas/brivia.svg' },
+      { name: 'Garupa Design', logo: '/assets/marcas/garupa.svg' },
     ],
   },
   inventory: {
@@ -2508,35 +2533,39 @@ const en: Copy = {
       {
         quote:
           'When the solution comes from him, it tends to gain traction with his colleagues. It is not influence through pressure, it is through the trust the team has in his reading of things.',
-        source: 'Colleague',
+        source: 'Direct peer, Nexfar',
       },
       {
         quote: 'I see you as someone who is, above all, senior at learning.',
-        source: 'Former manager',
+        source: 'Former manager, Garupa Design',
       },
       {
         quote:
           'I always felt I could come to you and be honest about where things really stood.',
-        source: 'Former report, in a 1:1',
+        source: 'Former report, Garupa Design',
         featured: true,
       },
       {
         quote:
           'He proactively brings in and tests tools, especially using AI and automation, contributing to efficiency gains for the team.',
-        source: 'Colleague',
+        source: 'Indirect peer, Nexfar',
       },
       {
         quote:
           'Casanova does not wait to be asked for help. When he does not know the answer, he goes and finds out, or points you to who knows.',
-        source: 'Colleague',
+        source: 'Indirect peer, Nexfar',
+      },
+      {
+        quote: 'We adopted the standards you defined as our research process.',
+        source: 'Design Manager, Electrolux',
       },
     ],
   },
   close: {
     title: 'Let’s talk.',
     lead: 'If you are building a product team, or you want to dig into a decision I made, write to me. I have also left the full résumé as a PDF. I answer in English or Portuguese.',
-    signoff: 'Thanks for reading this far.',
-    ctaResume: 'Download my résumé (PDF)',
+    signoff: '',
+    ctaResume: 'Résumé (PDF)',
     copy: 'Copy email',
     copied: 'Copied!',
     copyFailed: 'I could not copy it. I selected the address for you to copy.',

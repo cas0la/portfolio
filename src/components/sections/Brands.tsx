@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { Container } from '@/components/primitives/Container'
 import { FadeIn } from '@/components/primitives/FadeIn'
 import { useLocale } from '@/lib/i18n'
@@ -33,6 +34,7 @@ function BrandItem({ brand }: { brand: Brand }) {
           loading="lazy"
           decoding="async"
           className="brand-logo"
+          data-tone={brand.tone}
         />
       ) : (
         /* Sem arquivo, o nome é a marca. Ele não finge ser logo: sai na família de
@@ -48,6 +50,41 @@ export function Brands() {
   const { locale } = useLocale()
   const t = copyFor(locale)
   const { title, lead, items } = t.brands
+  const railRef = useRef<HTMLDivElement | null>(null)
+  const setRef = useRef<HTMLUListElement | null>(null)
+  const [copies, setCopies] = useState(2)
+
+  /*
+   * **Duas cópias não bastam, e é isso que fazia a faixa "acabar na Garupa".**
+   *
+   * A pista anda exatamente a largura de uma cópia e volta ao início. No instante
+   * antes de voltar, o que está à vista começa no fim da primeira cópia, então
+   * ainda precisa existir uma tela inteira de conteúdo **depois** desse ponto. Com
+   * duas cópias, o que sobra ali é exatamente uma cópia — e quando a lista é mais
+   * estreita que a janela, ela não preenche a tela e aparece o vão.
+   *
+   * A conta é quantas cópias cabem na janela, mais uma para cobrir o trecho já
+   * percorrido. Ela é medida e não chutada porque a largura da lista vai mudar:
+   * cada nome que virar logo muda a largura da fileira inteira.
+   */
+  useEffect(() => {
+    const rail = railRef.current
+    const set = setRef.current
+    if (!rail || !set || typeof ResizeObserver === 'undefined') return
+
+    const measure = () => {
+      const setWidth = set.getBoundingClientRect().width
+      const railWidth = rail.getBoundingClientRect().width
+      if (setWidth < 1) return
+      setCopies(Math.max(2, Math.ceil(railWidth / setWidth) + 1))
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(rail)
+    observer.observe(set)
+    return () => observer.disconnect()
+  }, [items.length, locale])
 
   if (items.length === 0) return null
 
@@ -64,21 +101,23 @@ export function Brands() {
           dele ela pararia no respiro lateral, e a máscara desbotaria contra uma
           margem em vez de contra a borda da tela, que é onde o corte incomoda. */}
       <FadeIn delay={0.06}>
-        <div className="brand-rail mt-block">
-          <div className="brand-run">
-            <ul className="brand-set">
+        <div className="brand-rail mt-block" ref={railRef}>
+          <div className="brand-run" style={{ ['--brand-copies' as string]: copies }}>
+            <ul className="brand-set" ref={setRef}>
               {items.map((brand) => (
                 <BrandItem key={brand.name} brand={brand} />
               ))}
             </ul>
-            {/* A segunda cópia é o que fecha o laço sem emenda, e ela não existe
-                para quem ouve a página: repetir oito marcas seguidas num leitor de
-                tela transformaria a credencial em ruído. */}
-            <ul className="brand-set" aria-hidden="true">
-              {items.map((brand) => (
-                <BrandItem key={brand.name} brand={brand} />
-              ))}
-            </ul>
+            {/* As cópias existem só para fechar o laço, e não existem para quem
+                ouve a página: repetir oito marcas várias vezes num leitor de tela
+                transformaria a credencial em ruído. */}
+            {Array.from({ length: copies - 1 }, (_, i) => (
+              <ul className="brand-set" aria-hidden="true" key={i}>
+                {items.map((brand) => (
+                  <BrandItem key={brand.name} brand={brand} />
+                ))}
+              </ul>
+            ))}
           </div>
         </div>
       </FadeIn>

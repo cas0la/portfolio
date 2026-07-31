@@ -322,11 +322,18 @@ export function Contact() {
           sintetizada pelo browser, que é o defeito que um leitor com olho de
           design nota primeiro numa assinatura.
         */}
-        <FadeIn delay={0.1}>
-          <p className="mt-block text-h2 font-semibold italic text-ink">
-            {t.close.signoff}
-          </p>
-        </FadeIn>
+        {/* **A assinatura saiu a pedido do autor em 31/07/2026**, e o campo ficou
+            no conteúdo em branco em vez de ser apagado do tipo: ela é decisão de
+            voz, não código morto, e voltar é preencher a string. O bloco só desenha
+            quando há texto, para não deixar um `mt-block` vazio empurrando o
+            rodapé. */}
+        {t.close.signoff && (
+          <FadeIn delay={0.1}>
+            <p className="mt-block text-h2 font-semibold italic text-ink">
+              {t.close.signoff}
+            </p>
+          </FadeIn>
+        )}
 
         <FadeIn delay={0.14}>
           <div className="mt-block flex flex-col gap-2 border-t border-hairline pt-gap text-body-sm text-ink-soft sm:flex-row sm:items-center sm:justify-between">

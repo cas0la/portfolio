@@ -250,7 +250,7 @@ function ModuleJourney({
           centro do bloco desce e as setas desceriam junto, saindo da altura da
           fileira que elas comandam. A janela carrega a altura da seta, então
           alinhados pelo topo os três ficam no mesmo eixo. */}
-      <div className="mt-gap flex items-start gap-3">
+      <div className="mt-gap flex items-start justify-center gap-3">
         <button
           type="button"
           onClick={() => goTo(active - 1)}
