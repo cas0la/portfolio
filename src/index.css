@@ -782,7 +782,7 @@
     .evo-item::before {
       left: calc(var(--spacing-gap) / -2);
       right: calc(var(--spacing-gap) / -2);
-      top: 248px;
+      top: 200px;
       bottom: auto;
       width: auto;
       height: 1px;
@@ -799,7 +799,7 @@
 
     .evo-item::after {
       left: 0;
-      top: 245px;
+      top: 197px;
     }
 
     .evo-art {
@@ -807,7 +807,7 @@
       /* Altura fixa, e não `flex-1`: com `flex-1` a altura da arte dependeria da
          altura da legenda abaixo, as legendas têm alturas diferentes, e os cinco
          nós deixariam de cair na mesma horizontal. */
-      height: 248px;
+      height: 200px;
       justify-content: flex-start;
       padding-bottom: var(--spacing-gap);
     }

@@ -96,7 +96,12 @@ function MainCase({ build }: { build: Build }) {
         <MainOpening build={build} />
       </div>
 
-      <div className="mt-block grid gap-block lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:gap-x-[72px]">
+      {/* O intervalo entre o painel e as cápsulas encolhe no desktop. Ele separa
+          duas partes do **mesmo** case, não dois assuntos, e 48px ali eram o
+          intervalo que o sistema reserva para separar blocos independentes. No
+          telefone ele fica, porque lá as duas partes se empilham e nada mais as
+          separa. */}
+      <div className="mt-block grid gap-block lg:mt-gap lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:gap-x-[72px]">
         <div className="flex flex-col gap-gap">
           {build.roles && (
             <PillRow label={t.builds.rolesLabel}>

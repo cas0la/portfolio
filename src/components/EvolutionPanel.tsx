@@ -252,7 +252,12 @@ export function EvolutionPanel({ milestones }: { milestones: Milestone[] }) {
   const t = copyFor(locale)
 
   return (
-    <div className="rounded-lg bg-ink px-gap py-block md:px-block">
+    /* O respiro interno cai para metade a partir de `lg`, e é lá que ele custa: a
+       faixa horizontal é o elemento mais alto do case de destaque, e 48px em cima
+       e embaixo eram 96px gastos em nada num bloco que precisa caber numa dobra.
+       Abaixo de `lg` o painel é lista vertical, cada estação com a própria arte, e
+       ali o respiro é o que separa o painel do papel. */
+    <div className="rounded-lg bg-ink px-gap py-block md:px-block lg:py-gap">
       <ol
         aria-label={t.builds.timelineLabel}
         className="flex flex-col gap-block lg:flex-row lg:gap-gap"

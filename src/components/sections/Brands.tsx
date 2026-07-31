@@ -117,7 +117,11 @@ export function Brands() {
       const setWidth = set.getBoundingClientRect().width
       const railWidth = rail.getBoundingClientRect().width
       if (setWidth < 1) return
-      setCopies(Math.max(2, Math.ceil(railWidth / setWidth) + 1))
+      /* O teto de 6 é contra o transitório, não contra o cálculo. Antes das
+         imagens carregarem a lista mede quase só o padding, e a divisão pedia dez
+         ou mais cópias — dez listas montadas e desmontadas no frame seguinte,
+         quando o observador remede com a largura real. */
+      setCopies(Math.min(6, Math.max(2, Math.ceil(railWidth / setWidth) + 1)))
     }
 
     measure()
@@ -151,8 +155,19 @@ export function Brands() {
     <section className="pt-block pb-[160px] md:pt-section md:pb-[304px]">
       <Container>
         <FadeIn>
-          <h2 className="measure text-h1 font-extrabold text-ink">{title}</h2>
-          <p className="measure mt-3 text-body text-ink-soft">{lead}</p>
+          {/* `mt-4` e não `mt-3`. A grade de espaçamento do DESIGN.md é de 8px, o
+              que na escala do Tailwind quer dizer só os pares; `mt-3` são 12px e
+              fura. Doze contra dezesseis não se vê sozinho, e é justamente por
+              isso que a grade existe: o que se vê é a página inteira meio fora de
+              esquadro depois de vinte decisões dessas. */}
+          <h2 className="measure text-balance text-h1 font-extrabold text-ink">
+            {title}
+          </h2>
+          {/* `text-pretty` no lead porque ele quebra em duas linhas na maioria das
+              larguras, e sem isso a primeira terminava no "e" solto de "negócio,
+              e". Conjunção órfã no fim da linha faz o olho voltar para conferir se
+              perdeu alguma coisa. */}
+          <p className="measure mt-4 text-pretty text-body text-ink-soft">{lead}</p>
         </FadeIn>
       </Container>
 
