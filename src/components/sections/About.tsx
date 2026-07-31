@@ -3,9 +3,10 @@ import { ImagePlus } from 'lucide-react'
 import { Container } from '@/components/primitives/Container'
 import { FadeIn } from '@/components/primitives/FadeIn'
 import { Rich } from '@/components/primitives/Rich'
+import { Pill } from '@/components/primitives/Ui'
 import { useLocale } from '@/lib/i18n'
 import { copyFor } from '@/content'
-import type { InventoryRow, Testimonial } from '@/content'
+import type { InventoryRow, Language, Testimonial } from '@/content'
 
 /**
  * Sobre.
@@ -81,26 +82,163 @@ function PhotoSlot({
 }
 
 /**
- * Lista curta separada por ponto. Ferramentas e idiomas usam a mesma, porque são
- * a mesma coisa: item curto que quebra linha sozinho. O ponto é decorativo e sai
- * da árvore de acessibilidade, então o leitor de tela ouve a lista, não os pontos.
+ * O retrato: preto e branco em repouso, cor e ficha pessoal no hover.
+ *
+ * A versão anterior era estática — foto saturada, bloco royal deslocado e a faixa
+ * marcadora atravessando. O autor pediu que ela virasse componente com dois
+ * estados, e a troca melhora um problema que a estática tinha: **os três gestos
+ * gastavam de uma vez todo o vocabulário gráfico do site numa imagem só.**
+ * Distribuídos entre repouso e hover, cada estado fica com um gesto.
+ *
+ * - **Repouso:** foto em preto e branco, gradiente royal→roxo deslocado 16px.
+ *   Acromática, ela não disputa com o gradiente, e o conjunto lê como retrato de
+ *   credencial, que é o que a coluna de credenciais pede.
+ * - **Hover:** a cor volta, o gradiente cresce para 28px e a faixa sobe do pé com
+ *   o nome e o que ele faz fora do trabalho.
+ *
+ * **A faixa é revelação, não conteúdo escondido.** Tudo que ela mostra existe
+ * também em texto na página; ela não é a única via para nenhuma informação. Se um
+ * dia ela virar o único lugar onde algo é dito, isso deixa de valer e ela precisa
+ * de um gatilho de verdade em vez de hover.
+ *
+ * **O `<figure>` recebe `tabIndex`** para o mesmo estado existir no teclado. Sem
+ * ele, quem navega sem mouse simplesmente nunca veria a faixa — e `:focus-visible`
+ * num elemento sem foco possível não faz nada. Não virou botão porque não há ação:
+ * anunciar como botão prometeria um clique que não leva a lugar nenhum.
+ *
+ * Em `prefers-reduced-motion` os estados continuam existindo, só que trocam sem
+ * transição. Suprimir o efeito inteiro tiraria informação de quem pediu menos
+ * movimento, e não é isso que a preferência pede.
  */
-function DotList({ label, items }: { label: string; items: string[] }) {
+function PortraitSlot({
+  photo,
+  pending,
+  name,
+  interestsLabel,
+  interests,
+}: {
+  photo?: { src: string; alt: string }
+  pending: string
+  name: string
+  interestsLabel: string
+  interests: { emoji: string; label: string }[]
+}) {
+  if (!photo) return <PhotoSlot pending={pending} ratio="aspect-[4/5]" />
+
+  return (
+    <figure className="portrait-figure group" tabIndex={0}>
+      <span aria-hidden className="portrait-gradient" />
+      <div className="portrait-frame">
+        <img
+          src={photo.src}
+          alt={photo.alt}
+          loading="lazy"
+          decoding="async"
+          className="portrait-shot size-full object-cover"
+        />
+
+        {/* A ficha. `aria-hidden` não entra aqui: o conteúdo é real e deve ser
+            lido, e ele já está visível para quem chega pelo teclado. */}
+        <figcaption className="portrait-card">
+          <p className="text-h3 font-extrabold text-white">{name}</p>
+          <p className="label mt-1 text-white/55">{interestsLabel}</p>
+          <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+            {interests.map((item) => (
+              <li
+                key={item.label}
+                className="flex items-center gap-2 text-body-sm text-white"
+              >
+                {/* O emoji sai da árvore de acessibilidade: o rótulo ao lado já diz
+                    a mesma coisa em palavra, e sem isto o leitor de tela anunciaria
+                    "cara de cachorro" antes de "meus cachorros". */}
+                <span aria-hidden className="text-[18px] leading-none">
+                  {item.emoji}
+                </span>
+                {item.label}
+              </li>
+            ))}
+          </ul>
+        </figcaption>
+      </div>
+    </figure>
+  )
+}
+
+/**
+ * A altura desta coluna é governada pelo comprimento dos rótulos, não pelo layout.
+ *
+ * Uma passada tentou resolver por estrutura: as credenciais viraram faixa de
+ * largura inteira, com o rótulo à esquerda, e as skills caíram de oito fileiras
+ * para duas. O autor recusou — ele quer as três listas na coluna ao lado do
+ * retrato, que é onde elas contam como credencial e não como seção própria. **A
+ * causa verdadeira era outra**, e é a que ele apontou: rótulos como "Gestão de
+ * stakeholders e cliente" tomam a coluna inteira sozinhos, então cada cápsula
+ * custava uma fileira. Encurtar o termo resolve sem mover nada.
+ *
+ * Regra para quem for editar a lista: **numa coluna de cerca de 380px, o teto
+ * prático é 20 caracteres**. Acima disso a cápsula não divide fileira com nenhuma
+ * outra, e a lista volta a crescer uma linha por item.
+ */
+
+/**
+ * Lista de credenciais curtas em cápsulas.
+ *
+ * Antes era uma linha corrida separada por pontos do meio. A troca por cápsula tem
+ * um custo real e vale nomear: **a linha corrida cabia em menos altura**, e vinte
+ * cápsulas ocupam bem mais espaço vertical do que vinte palavras separadas por
+ * ponto. O que se ganha é varredura — cada item vira um alvo com contorno próprio,
+ * e quem lê uma lista de skills lê pulando, não lendo em sequência.
+ *
+ * A `ul` continua sendo lista de verdade, então o leitor de tela anuncia a
+ * contagem e navega item a item. Isto melhorou junto: os pontos do meio eram
+ * decorativos e obrigavam `aria-hidden`; agora não há nada de decorativo a esconder.
+ */
+function PillList({ label, items }: { label: string; items: string[] }) {
   return (
     <div>
       <h3 className="label text-ink-soft">{label}</h3>
-      <ul className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm text-ink">
-        {items.map((item, i) => (
-          <li key={item} className="flex items-center gap-2">
-            <span>{item}</span>
-            {i < items.length - 1 && (
-              <span aria-hidden className="text-hairline-strong">
-                ·
-              </span>
-            )}
-          </li>
+      <ul className="mt-4 flex flex-wrap gap-2 text-body-sm text-ink">
+        {items.map((item) => (
+          <Pill key={item}>{item}</Pill>
         ))}
       </ul>
+    </div>
+  )
+}
+
+/**
+ * Idiomas. A mesma cápsula, com duas informações dentro: o idioma em tinta e o
+ * nível apagado ao lado, separados por um ponto do meio.
+ *
+ * O nível **dentro** da cápsula e não numa segunda linha: "Inglês" sozinho não é
+ * credencial, é substantivo. O par é que informa, e o par cabe.
+ *
+ * A ressalva de escopo do inglês vira nota abaixo do grupo. Ela é a única prosa
+ * desta coluna e por isso fica em `ink-soft`, no mesmo corpo das cápsulas — se
+ * subisse de tamanho, a ressalva pesaria mais que a credencial que ela qualifica.
+ */
+function LanguageList({ label, items }: { label: string; items: Language[] }) {
+  const notes = items.filter((item) => item.note)
+
+  return (
+    <div>
+      <h3 className="label text-ink-soft">{label}</h3>
+      <ul className="mt-4 flex flex-wrap gap-2 text-body-sm">
+        {items.map((item) => (
+          <Pill key={item.name} className="text-ink">
+            {item.name}
+            <span aria-hidden className="px-2 text-hairline-strong">
+              ·
+            </span>
+            <span className="text-ink-soft">{item.level}</span>
+          </Pill>
+        ))}
+      </ul>
+      {notes.map((item) => (
+        <p key={item.name} className="mt-4 text-body-sm text-ink-soft">
+          {item.note}
+        </p>
+      ))}
     </div>
   )
 }
@@ -199,7 +337,9 @@ function Timeline({
                   de mais corpo. Antes era grotesca 600, e numa lista de sete o peso
                   repetido sete vezes vira mancha em vez de hierarquia. */}
               <span className="accent block text-h3 text-ink">{row.role}</span>
-              {row.squad && <span className="block text-body-sm text-ink">{row.squad}</span>}
+              {row.squad && (
+                <span className="block text-body-sm text-ink">{row.squad}</span>
+              )}
               <span className="block text-body-sm text-ink-soft">{row.org}</span>
             </div>
           </li>
@@ -268,7 +408,6 @@ function FeaturedQuote({ testimonial }: { testimonial: Testimonial }) {
 export function About() {
   const { locale } = useLocale()
   const t = copyFor(locale)
-  const hobbies = t.inventory.hobbies ?? []
   /* O primeiro marcado abre o bloco; todo o resto forma o grupo de baixo, inclusive
      um segundo marcado por engano. Ver o comentário de `Testimonial.featured`. */
   const featured = t.inventory.testimonials.find((item) => item.featured)
@@ -330,49 +469,47 @@ export function About() {
         </div>
 
         {/*
-         * Bloco 2: credenciais à esquerda, retrato ao centro, fotos à direita.
+         * Bloco 2: o retrato à esquerda, as credenciais à direita.
          *
-         * As três listas ficam empilhadas numa coluna só, e não espalhadas numa
-         * faixa horizontal como antes, porque agora dividem a linha com o retrato.
-         * São o mesmo tipo de conteúdo — credencial curta, não narrativa — e
-         * separá-las em três colunas só faria sentido se não houvesse mais nada
-         * disputando a linha.
+         * **Eram três colunas e as fotos de fora do trabalho ficavam na terceira.**
+         * Elas saíram por decisão do autor em 30/07/2026, e a razão dele foi de
+         * conteúdo, não de layout: os arquivos nunca chegaram, e três espaços
+         * reservados numa seção já ocupada custavam mais do que rendiam. O que
+         * elas contavam — que existe vida fora do trabalho — passou para a ficha
+         * que sobe do retrato no hover, que diz o mesmo com o nome junto e sem
+         * esperar arquivo nenhum.
          *
-         * O retrato é o do meio e a coluna dele é a mais larga: é uma foto 4:5, e
-         * numa coluna estreita ela vira selo. Com o `PhotoSlot` em modo de espera,
-         * porém, a diferença some — a proporção final não é reservada de propósito.
+         * A saída delas melhorou as credenciais de graça: com duas colunas em vez
+         * de três, a lista de cápsulas ganhou perto de 60% mais largura, e as
+         * skills que antes tomavam uma fileira cada passaram a dividir linha.
+         *
+         * **O retrato é a coluna estreita.** Ele é 4:5, e numa coluna larga uma
+         * foto 4:5 passa de 600px de altura, o que faria a seção ganhar em altura
+         * tudo que a saída das fotos economizou.
+         *
+         * O conteúdo de `photosLabel`, `photosPending` e `hobbies` continua no
+         * arquivo de textos, sem ninguém renderizar. É conteúdo em espera: se as
+         * fotos chegarem, o bloco volta.
          */}
-        <div className="mt-block grid items-start gap-block lg:mt-[72px] lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)_minmax(0,0.8fr)] lg:gap-x-[72px]">
+        <div className="mt-block grid items-start gap-block lg:mt-[72px] lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1fr)] lg:gap-x-[72px]">
           <FadeIn delay={0.16}>
-            <div className="flex flex-col gap-block">
-              <DotList label={t.inventory.skillsLabel} items={t.inventory.skills} />
-              <DotList label={t.inventory.toolsLabel} items={t.inventory.tools} />
-              <DotList label={t.inventory.languagesLabel} items={t.inventory.languages} />
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={0.22}>
-            <PhotoSlot
+            <PortraitSlot
               photo={t.inventory.portrait}
               pending={t.inventory.portraitPending}
-              ratio="aspect-[4/5]"
+              name={t.inventory.portraitName}
+              interestsLabel={t.inventory.interestsLabel}
+              interests={t.inventory.interests}
             />
           </FadeIn>
 
-          <FadeIn delay={0.28}>
-            <h3 className="label text-ink-soft">{t.inventory.photosLabel}</h3>
-            <div className="mt-4 flex flex-col gap-gap">
-              {/* Dois espaços porque duas fotos já contam que há vida fora do
-                  trabalho sem virar galeria. O retrato é o principal; estas são
-                  as adicionais. */}
-              {t.inventory.photosPending.map((pending, i) => (
-                <PhotoSlot
-                  key={pending}
-                  photo={hobbies[i]}
-                  pending={pending}
-                  ratio="aspect-[4/3]"
-                />
-              ))}
+          <FadeIn delay={0.22}>
+            <div className="flex flex-col gap-block">
+              <PillList label={t.inventory.skillsLabel} items={t.inventory.skills} />
+              <PillList label={t.inventory.toolsLabel} items={t.inventory.tools} />
+              <LanguageList
+                label={t.inventory.languagesLabel}
+                items={t.inventory.languages}
+              />
             </div>
           </FadeIn>
         </div>

@@ -24,6 +24,53 @@ import type { Locale } from '@/lib/i18n'
 
 export type BuildTier = 'highlight' | 'major' | 'minor'
 
+/**
+ * Uma estação do painel de evolução: um marco datado da vida do produto.
+ *
+ * O painel substituiu uma capa em imagem. A primeira versão era um JPEG de
+ * 2100x640 composto fora do site, e ela morria no telefone: a faixa encolhia para
+ * cerca de 104px de altura e as cinco estações viravam borrão. Como componente, a
+ * mesma cronologia é horizontal no desktop e vertical no telefone, e cada marco
+ * continua legível.
+ *
+ * **O que se ganhou junto foi semântica.** Em imagem, tudo isto cabia num `alt`
+ * longo, que um leitor de tela despeja num parágrafo só. Agora cada estação é item
+ * de lista ordenada com `<time>` real, e a navegação é marco a marco.
+ */
+export type Milestone = {
+  /** Ano e mês em ISO, para o `datetime` do `<time>`. Ex.: `'2024-11'`. */
+  iso: string
+  /** O mesmo instante como se lê. Ex.: `'Nov 2024'`. */
+  when: string
+  title: string
+  /** Uma linha do que aconteceu ali. */
+  note?: string
+  /**
+   * As capturas deste marco. Vazio no primeiro, que é tipográfico, e no último,
+   * que é o medidor de NPS desenhado em SVG.
+   *
+   * Mais de uma imagem só no marco de produção: são três módulos de um produto
+   * só, e por isso aparecem agrupados em vez de em estações separadas.
+   */
+  shots?: { src: string; alt: string }[]
+  /**
+   * As dores que o produto ataca, no marco de ideação.
+   *
+   * **Texto e não captura de slide, por decisão do autor.** A captura era o slide
+   * verde da primeira apresentação interna, e ela punha uma quarta família de cor
+   * na peça — o painel é royal, o produto de hoje é roxo, o lo-fi é cinza. Em
+   * tipografia do site, a ideação deixa de ser "foto de um slide" e vira conteúdo
+   * do portfólio.
+   *
+   * **O custo é conhecido:** deixa de ser artefato original e passa a ser
+   * interpretação. O slide continua existindo e o lugar dele é a página interna,
+   * onde cabe mostrar o documento como documento.
+   */
+  pains?: string[]
+  /** O número que fecha a linha, com a fonte declarada. */
+  score?: { value: string; label: string; source: string; min: string; max: string }
+}
+
 export type Piece = {
   name: string
   detail: string
@@ -44,6 +91,43 @@ export type Build = {
   /** A tag do que foi feito ali. */
   tag: string
   body: string
+  /**
+   * Os papéis que ele exerceu no trabalho, um por cápsula.
+   *
+   * **Papel, não habilidade.** "Discovery" entra porque ele conduziu discovery
+   * neste produto; "Product discovery" como competência já vive nas credenciais do
+   * Sobre, e repetir a lista de lá aqui faria o case provar menos, não mais. Cada
+   * item precisa ser verdade sobre *este* trabalho.
+   *
+   * Teto de 20 caracteres, igual às credenciais: a cápsula é a mesma e a razão é
+   * a mesma.
+   */
+  roles?: string[]
+  /**
+   * Os destaques de escopo e de resultado, também em cápsula.
+   *
+   * Dois tipos convivem aqui de propósito, e o componente distingue sozinho: onde
+   * há algarismo o valor sai em royal (é medição), onde não há ele sai em tinta (é
+   * escopo). "NPS 80+" e "E2E" moram na mesma fileira porque respondem à mesma
+   * pergunta do avaliador, que é "o quanto disso é sério".
+   *
+   * **Todo número aqui é verificado**, não arredondado para cima: eles saem de
+   * `curriculo-base.md` e da memória de métricas do produto, ambos apurados em
+   * Power BI e Mixpanel em julho de 2026.
+   */
+  highlights?: { value: string; label?: string }[]
+  /**
+   * Rota interna da página do case, para o botão do case principal.
+   *
+   * Diferente de `href`, que é link externo e abre em nova aba. Este fica dentro
+   * do site e navega na mesma aba.
+   */
+  page?: string
+  /**
+   * O painel de evolução, exclusivo do case de destaque. Onde ele existe, ele
+   * substitui a capa: um case não tem os dois.
+   */
+  milestones?: Milestone[]
   pieces?: Piece[]
   /** O custo da decisão. Nativo da caixa de peças, não pendurado no fim. */
   tradeoff?: string
@@ -52,8 +136,15 @@ export type Build = {
   href?: string
   /**
    * Capa do case. Enquanto não existir, o componente mostra placeholder.
-   * Exporte em 16:10, solte em `public/assets/cases/` e preencha aqui.
-   * `alt` descreve o que a imagem mostra, e vai vazio se ela for decorativa.
+   *
+   * **Duas proporções, conforme o `tier`.** O case `highlight` abre a seção em
+   * largura inteira e exporta em **21:9** (2100x900); em 16:10 ele passaria de
+   * 700px de altura e comeria um viewport de notebook sozinho. Os secundários
+   * seguem em **16:10** (1600x1000), que é a caixa do `CaseCover`.
+   *
+   * Solte em `public/assets/cases/` e preencha aqui. O `alt` descreve o que a
+   * imagem mostra, e vai vazio se ela for decorativa — mas capa que carrega
+   * argumento, como a do case de destaque, **nunca é decorativa**.
    */
   cover?: { src: string; alt: string }
 }
@@ -103,6 +194,34 @@ export type Testimonial = {
   featured?: boolean
 }
 
+/**
+ * Um idioma, na forma que a pílula exige.
+ *
+ * Ele era uma string só — `'Inglês B2 (leitura e escrita fluentes, conversação
+ * intermediária)'` — e essa frase não cabe numa pílula: ela quebraria em três
+ * linhas dentro de uma cápsula de canto redondo, que é a forma errada para
+ * texto corrido. A informação não se perdeu, ela se separou pelo que é: o nome e
+ * o nível vão para dentro da pílula, que é credencial curta, e a ressalva vai
+ * para uma linha de texto abaixo do grupo, que é onde prosa lê bem.
+ *
+ * A ressalva **fica**. "Inglês B2" sozinho deixa quem lê imaginar o que quiser
+ * sobre a conversação, e o que está escrito aqui é mais honesto que a média das
+ * declarações de idioma em currículo.
+ */
+export type Language = {
+  name: string
+  /** O nível, em corpo apagado dentro da mesma pílula. */
+  level: string
+  /**
+   * Ressalva de escopo, exibida como nota abaixo do grupo. **Frase inteira e
+   * autossuficiente, com o idioma dentro dela**: a nota fica separada da cápsula
+   * que a originou, e uma nota que dependesse do contexto ("leitura e escrita
+   * fluentes") deixaria de dizer de qual idioma se trata quando um segundo idioma
+   * ganhasse ressalva.
+   */
+  note?: string
+}
+
 type Copy = {
   meta: { title: string; description: string }
   nav: {
@@ -143,6 +262,14 @@ type Copy = {
   builds: {
     title: string
     lead: string
+    /** Rótulo das cápsulas de papel no case principal. */
+    rolesLabel: string
+    /** Rótulo das cápsulas de escopo e resultado no case principal. */
+    highlightsLabel: string
+    /** Nome acessível da lista de marcos, lido antes do primeiro item. */
+    timelineLabel: string
+    /** Botão do case principal, que leva para a página interna. */
+    openFull: string
     piecesLabel: string
     openCase: string
     /** Avisa que o link sai do site. Entra só no rótulo acessível. */
@@ -163,13 +290,31 @@ type Copy = {
     tools: string[]
     languagesLabel: string
     /** Um item por idioma, exibido com o mesmo tratamento das ferramentas. */
-    languages: string[]
+    languages: Language[]
     /**
      * Retrato principal do Sobre. Enquanto `src` não existir, o componente mostra
      * espaço reservado e declara que está esperando arquivo. Exportar em 4:5.
      */
     portrait?: { src: string; alt: string }
     portraitPending: string
+    /**
+     * O que aparece na faixa que sobe do retrato no hover: o nome e os hobbies.
+     *
+     * **Os hobbies estão aqui e não nas credenciais** porque não são credencial.
+     * Eles existem para o avaliador sair com uma pessoa na cabeça, não uma lista —
+     * e é por isso que o emoji, que o DESIGN.md não usa em nenhum outro lugar,
+     * cabe exatamente neste.
+     *
+     * O emoji vai no conteúdo e não no componente porque ele **é** conteúdo: ele
+     * carrega significado próprio e muda com o item, ao contrário de um ícone
+     * decorativo. Cada um recebe `aria-hidden` na renderização — o rótulo ao lado
+     * já diz a mesma coisa em palavra, e sem isso o leitor de tela anunciaria
+     * "cara de cachorro" antes de "meus cachorros".
+     */
+    portraitName: string
+    /** Rótulo curto acima da lista, na faixa. */
+    interestsLabel: string
+    interests: { emoji: string; label: string }[]
     photosLabel: string
     /** Uma frase por slot. Texto idêntico em caixas vizinhas lê como bug, não como candura. */
     photosPending: string[]
@@ -197,6 +342,7 @@ type Copy = {
     /** Clipboard negado ou contexto não seguro. O endereço fica selecionado. */
     copyFailed: string
     linkedin: string
+    github: string
     location: string
     builtWith: string
     rights: string
@@ -239,7 +385,12 @@ const pt: Copy = {
      * como tell de texto de IA.
      */
     headline: '@@Product Manager@@ que conduz do início ao fim',
-    greeting: 'Oi, sou o Lucas. Quase todo mundo me chama de “Casanova”.',
+    /* Reescrito pelo autor em 30/07/2026. Era "Oi, sou o Lucas. Quase todo mundo
+       me chama de 'Casanova'." — duas frases, e a segunda relatava um fato sobre
+       terceiros ("quase todo mundo") em vez de falar com quem está lendo. "Pode me
+       chamar" é convite e é dirigido, que é o registro do resto do hero. As aspas
+       são as tipográficas do sistema, não as retas. */
+    greeting: 'Oi, eu sou o Lucas, mas pode me chamar de “Casanova”.',
     /*
      * Terceira passada de clarify. Agora o parágrafo carrega as quatro coisas que o
      * autor nomeou como o que ele quer passar, uma por frase:
@@ -359,8 +510,58 @@ const pt: Copy = {
     source: 'Números de julho de 2026, medidos em Power BI e Mixpanel.',
   },
   builds: {
-    title: 'O que eu construí',
-    lead: 'Um produto que conduzi do começo ao fim e dois trabalhos de pesquisa. Cada case ganha uma página própria na próxima rodada.',
+    /*
+     * O título passou por três versões, e a razão de cada troca importa.
+     *
+     * "O que eu construí" divergia do menu, do convite do hero e do endereço da
+     * âncora, que já diziam "Cases" nos três lugares. Virou "Cases", e aí o autor
+     * apontou o problema seguinte: **substantivo solto ao lado de frases.** Todos os
+     * outros títulos da página são orações em primeira pessoa — "Product Manager que
+     * conduz do início ao fim", a afirmação que abre o Sobre, "Vamos conversar." —,
+     * e uma palavra sozinha lê como aba de menu no meio de uma carta.
+     *
+     * A frase de agora é oração, é primeira pessoa e **é promovida do parágrafo
+     * abaixo**, que é a regra que o Sobre já segue: o título sai do texto da seção,
+     * nunca é afirmação nova. O menu continua dizendo "Cases", e deve continuar —
+     * item de navegação é rótulo, não voz.
+     */
+    title: 'Trabalhos que eu gosto de contar',
+    /*
+     * A abertura da seção, reescrita a pedido do autor.
+     *
+     * A versão anterior — "Um produto que conduzi do começo ao fim e dois trabalhos
+     * de pesquisa" — fazia o que ele recusou: **inventariava o que vinha logo em
+     * seguida**, em vez de dizer alguma coisa sobre como ele trabalha. Uma frase
+     * que descreve a própria lista é redundante com a lista, e o leitor chega nos
+     * cases já tendo lido o resumo deles.
+     *
+     * A frase de agora diz para que serve um case e o que ele põe dentro de cada
+     * um, e termina convidando. **Ela não repete o hero de propósito:** o hero fala
+     * do percurso dele (dez anos, IA, origem em research), esta fala do critério —
+     * decisão, custo e número. Duplicação entre dobras foi o achado que mais
+     * apareceu nas passadas de clarify.
+     */
+    /*
+     * Reescrito a pedido do autor, que leu a versão anterior como passivo-agressiva.
+     * Ele tem razão, e vale nomear o mecanismo: ela abria com "Um case serve para
+     * verificar o que um currículo só afirma", ou seja, **começava dizendo que o
+     * documento que o leitor tem na mão não basta.** Quem chega aqui chegou pelo
+     * currículo. Abrir contestando a ferramenta de quem lê põe a pessoa na defensiva
+     * antes da primeira prova.
+     *
+     * A frase de agora faz o mesmo trabalho pelo lado de dentro: em vez de atacar o
+     * currículo, ela diz o que estes textos têm de diferente, e o "inclusive o que
+     * não saiu como eu esperava" entrega a mesma credibilidade que a versão anterior
+     * tentava arrancar do contraste.
+     *
+     * "Fica à vontade" fecha convidando, no lugar de "Abre o que te interessar", que
+     * era imperativo seco. Sem travessão, pela regra de voz do autor.
+     */
+    lead: 'Em cada um eu conto o começo, a decisão que mudou o rumo e o que veio depois, inclusive o que não saiu como eu esperava. Fica à vontade para entrar pelo que te interessar.',
+    rolesLabel: 'O que eu fiz',
+    timelineLabel: 'Como o produto evoluiu',
+    highlightsLabel: 'Escopo e resultado',
+    openFull: 'Ver o case completo',
     piecesLabel: 'Módulos',
     openCase: 'Ver o case no Notion',
     newTab: 'abre em nova aba',
@@ -372,7 +573,139 @@ const pt: Copy = {
         name: 'Inteligência Comercial',
         org: 'Nexfar',
         tag: 'Product Manager, do marco zero',
-        body: 'O único produto que conduzi desde o começo: visão, estratégia, roadmap, especificação, instrumentação da métrica e o design da interface. Três módulos em produção, cada um resolvendo uma etapa da visita do vendedor à farmácia. Em produção com clientes reais.',
+        page: '/cases/inteligencia-comercial',
+        /*
+         * Três linhas, teto pedido pelo autor. A versão anterior tinha seis e fazia
+         * o trabalho da página interna: listava os papéis (agora em `roles`), os
+         * módulos (que já têm bloco próprio) e o estágio do produto (agora em
+         * `highlights`). Sobrando só a narrativa, o parágrafo pode fazer a única
+         * coisa que cápsula nenhuma faz, que é **contar de onde o produto veio**.
+         *
+         * Abre pelo problema e não pela solução, porque é o problema que prende
+         * quem avalia: um vendedor parado dentro da farmácia sem as três
+         * informações de que precisa é uma cena, e cena instiga. "Três módulos em
+         * produção" é conclusão, e conclusão fecha o assunto em vez de abrir.
+         */
+        body: 'Começou com um problema de campo: o vendedor dentro da farmácia sem preço, sem estoque e sem o histórico do cliente na mão. Hoje são três módulos em produção, e a operação comercial roda em cima deles.',
+        /* Papéis exercidos neste produto, apurados da descrição de cargo no
+           `curriculo-base.md`. Nenhum deles é aspiracional. */
+        roles: [
+          'Discovery contínuo',
+          'Visão e estratégia',
+          'Roadmap',
+          'Spec e handoff',
+          'Instrumentação',
+          'Design da interface',
+        ],
+        /*
+         * Escopo e resultado. Os números saem de `curriculo-base.md` e da memória de
+         * métricas do produto, apurados em Power BI e Mixpanel em julho de 2026.
+         *
+         * **"MVP" e "soft launch" não entraram.** O autor citou os dois como exemplo
+         * de formato, e nenhuma fonte que eu tenho registra que o IC passou por um
+         * MVP declarado ou por um soft launch. Se passou, ele confirma e eu ponho —
+         * a regra dura deste arquivo é que nada aqui pode ser afirmado sem fonte, e
+         * ela vale principalmente para o que soa bem.
+         *
+         * "NPS +85" tem fonte, e ela chegou depois: o medidor que o autor mandou
+         * para a capa marca **86**. A pílula fica em "+85" por escolha dele, que é
+         * arredondar para baixo — a afirmação continua verdadeira e não precisa ser
+         * revista quando o número oscilar. Antes daqui a pílula dizia "NPS 80+", que
+         * era o que o `curriculo-base.md` sustentava.
+         *
+         * **O currículo ainda diz "NPS 80+"** nos três arquivos (base e os dois
+         * publicados). Se for para alinhar, é uma edição e dois PDFs regerados.
+         */
+        highlights: [
+          { value: 'E2E' },
+          { value: 'SaaS B2B' },
+          { value: '400+', label: 'usuários' },
+          { value: 'NPS +85' },
+          { value: '80%+', label: 'de conversão' },
+        ],
+        /*
+         * O painel de evolução. Ver o tipo `Milestone` para por que ele deixou de
+         * ser uma imagem e por que a ideação é texto e não a captura do slide.
+         *
+         * As datas são do autor (30/07/2026) e não constam em nenhum outro
+         * documento deste repositório: se um dia precisarem ser conferidas, a
+         * fonte é ele.
+         */
+        milestones: [
+          {
+            iso: '2024-11',
+            when: 'Nov 2024',
+            title: 'Ideação',
+            note: 'A primeira apresentação interna nomeia o que o produto vai atacar.',
+            /* Do slide "Dores que buscamos resolver", da apresentação interna.
+               Encurtadas para caber em três linhas; o sentido é o do slide. */
+            pains: [
+              'Estagnação no mix comercializado',
+              'Falta de visibilidade das campanhas',
+              'Perda de eficiência no planejamento',
+            ],
+          },
+          {
+            iso: '2024-12',
+            when: 'Dez 2024',
+            title: 'Lo-fi',
+            note: 'O primeiro fluxo, ainda sem marca.',
+            shots: [
+              {
+                src: '/assets/cases/ic/lofi.jpg',
+                alt: 'Wireframe em tons de cinza da tela de sugestões, com a lista de clientes e o carrinho sugerido.',
+              },
+            ],
+          },
+          {
+            iso: '2025-01',
+            when: 'Jan 2025',
+            title: 'First draft',
+            note: 'A interface ganha marca e os pedidos ideais.',
+            shots: [
+              {
+                src: '/assets/cases/ic/draft.jpg',
+                alt: 'Primeiro rascunho de interface, em verde, com a lista de pedidos ideais por cliente.',
+              },
+            ],
+          },
+          {
+            iso: '2025-09',
+            when: 'Set 2025',
+            title: 'Em produção',
+            note: 'Três módulos no ar, com clientes reais.',
+            shots: [
+              {
+                src: '/assets/cases/ic/objetivos.jpg',
+                alt: 'Objetivos e Sugestões: rosca de desempenho de venda total e o gráfico de projeção contra a meta.',
+              },
+              {
+                src: '/assets/cases/ic/cotacao.jpg',
+                alt: 'Cotação Ágil: o resumo de uma cotação com os produtos, as quantidades e o preço por unidade.',
+              },
+              {
+                src: '/assets/cases/ic/catalogo.jpg',
+                alt: 'Catálogo Digital: as estatísticas de um catálogo publicado, com interesses, acessos e tempo ativo.',
+              },
+            ],
+          },
+          {
+            iso: '2026-07',
+            when: 'Jul 2026',
+            title: 'NPS do produto',
+            /* A procedência é o Formbricks, informada pelo autor. Ela **fica**: o
+               site declara origem em todo número que publica, e NPS sem fonte pesa
+               menos justamente para quem sabe ler NPS. Eu já errei esta linha uma
+               vez, atribuindo ao Mixpanel — o Mixpanel mede uso da plataforma. */
+            score: {
+              value: '86',
+              label: 'NPS do produto',
+              source: 'Formbricks',
+              min: '-100',
+              max: '100',
+            },
+          },
+        ],
         pieces: [
           {
             name: 'Cotação Ágil',
@@ -510,13 +843,19 @@ const pt: Copy = {
          nov/2017) e UI/UX Designer Júnior na Dzigual Golinelli (nov/2017 a nov/2018).
          Juntos porque a lista tem sete linhas e essas duas são o mesmo capítulo, e
          porque sem elas a linha do tempo abria em 2018 e fazia parecer que a carreira
-         começou ali. A ordem das empresas é a cronológica invertida, igual à da
-         lista. */
+         começou ali.
+
+         **Dentro desta linha a ordem é cronológica, ao contrário da lista inteira**,
+         por correção do autor em 30/07/2026. Ela era invertida, para acompanhar a
+         lista, e isso punha a Dzigual na frente. Duas razões para a exceção: o
+         intervalo é rotulado "Até 2018", que já pede leitura para frente; e a Garupa
+         é a empresa para onde ele volta em 2021, três linhas acima — abrindo por ela,
+         a linha do tempo mostra um retorno em vez de repetir um nome do nada. */
       {
         when: 'Até 2018',
         role: 'UX/UI Designer',
         squad: 'Generalista',
-        org: 'Dzigual Golinelli e Garupa Design',
+        org: 'Garupa Design e Dzigual Golinelli',
       },
     ],
     /* Da seção Habilidades do `curriculo-base.md`, recorte de Produto. As de design
@@ -525,16 +864,47 @@ const pt: Copy = {
        serviço. Uma lista de skills de design ao lado de uma de produto é
        exatamente a dúvida que o avaliador não pode ter. */
     skillsLabel: 'Skills',
+    /* TETO DE 20 CARACTERES POR ITEM. A lista vive numa coluna de cerca de 380px, e
+       ali um rótulo mais longo que isso não divide fileira com nenhum outro: cada
+       item passa a custar uma linha inteira. Foi o que aconteceu na primeira versão
+       em cápsulas — "Gestão de stakeholders e cliente" e "Métricas e analytics de
+       produto" sozinhas geravam oito fileiras para nove itens.
+
+       Os termos abaixo são os do `curriculo-base.md` encurtados, e onde encurtar
+       perderia informação eu separei em dois itens em vez de truncar:
+
+       - "Roadmap e priorização"    → "Roadmap" + "Priorização"
+       - "KPI e instrumentação"     → "KPIs" + "Instrumentação"
+       - "Métricas e analytics de produto" → "Métricas e analytics" ("de produto"
+         é redundante numa seção que só fala de produto)
+       - "Gestão de stakeholders e cliente" → "Stakeholders". Aqui houve perda
+         real, e ela é consciente: o cliente saiu do rótulo. Ele continua dito na
+         prosa da trajetória, em "Product discovery" (o discovery dele é com
+         cliente e com vendedor em campo) e por inteiro no currículo. Uma cápsula
+         "Discovery com cliente" ao lado de "Product discovery" seria a mesma
+         palavra duas vezes, que é o defeito que mais aparece nesta página.
+
+       **O currículo não segue este teto** e não deve seguir: lá o campo é uma
+       linha de texto, não uma cápsula, e a forma longa é a que os filtros de ATS
+       leem. As duas listas divergem de propósito. */
     skills: [
       'Product discovery',
-      'Roadmap e priorização',
+      'Roadmap',
+      'Priorização',
       'PRD e tech spec',
-      'Métricas e analytics de produto',
-      'KPI e instrumentação',
-      'Gestão de stakeholders e cliente',
+      'Métricas e analytics',
+      'KPIs',
+      'Instrumentação',
+      'Stakeholders',
       'Product-led growth',
       'Backlog management',
       'Build vs. buy',
+      /* Entrou por pedido do autor em 30/07/2026, e fica na última posição de
+         propósito: numa lista lida em varredura, o fim é a segunda posição mais
+         forte depois do começo, e este é o item que separa o currículo dele do de
+         outro PM sênior. Sem tradução na versão em inglês — o termo já é inglês, e
+         traduzir "vibe coding" produziria uma frase que ninguém procura. */
+      'Vibe coding',
     ],
     toolsLabel: 'Ferramentas',
     tools: [
@@ -556,10 +926,31 @@ const pt: Copy = {
        leitura. Se as três voltarem algum dia, a ressalva volta com elas. */
     languagesLabel: 'Idiomas',
     languages: [
-      'Português nativo',
-      'Inglês B2 (leitura e escrita fluentes, conversação intermediária)',
+      { name: 'Português', level: 'Nativo' },
+      {
+        name: 'Inglês',
+        level: 'B2',
+        note: 'Leio e escrevo em inglês com fluência; na conversação estou em nível intermediário.',
+      },
     ],
+    /* Recortada em 4:5 a partir de um quadrado de 1280px e **espelhada de volta**:
+       o arquivo veio da câmera frontal, e no original "1985" no boné, "KING" no
+       bolso e os katakana da manga liam de trás para frente. */
+    portrait: {
+      src: '/assets/retrato.jpg',
+      alt: 'Lucas Casanova de boné e óculos, com o rosto virado de lado sob uma faixa de luz de sol.',
+    },
     portraitPending: 'Meu retrato entra aqui.',
+    portraitName: 'Lucas Casanova',
+    interestsLabel: 'Fora do trabalho',
+    /* Os três que o autor listou, nesta ordem. O emoji é conteúdo aqui, não
+       decoração: ele carrega o significado junto com a palavra e muda com o item. */
+    interests: [
+      { emoji: '🥊', label: 'Boxe' },
+      { emoji: '🎮', label: 'Videogames' },
+      { emoji: '🐶', label: 'Tempo com meus cachorros' },
+      { emoji: '🎧', label: 'Rap nacional e pop rock' },
+    ],
     photosLabel: 'Eu fora do trabalho',
     photosPending: [
       'Uma foto minha fora do trabalho entra aqui.',
@@ -621,8 +1012,7 @@ const pt: Copy = {
         source: 'Colega de trabalho',
       },
       {
-        quote:
-          'Te vejo como um profissional que, acima de tudo, é Sênior em aprender.',
+        quote: 'Te vejo como um profissional que, acima de tudo, é Sênior em aprender.',
         source: 'Ex-líder',
       },
       {
@@ -651,6 +1041,7 @@ const pt: Copy = {
     copied: 'Copiado!',
     copyFailed: 'Não consegui copiar. Selecionei o endereço para você copiar.',
     linkedin: 'LinkedIn',
+    github: 'GitHub',
     location: 'Florianópolis, SC, Brasil',
     builtWith: 'Feito por mim com React, Vite e Tailwind.',
     rights: '© 2026 Lucas Casanova',
@@ -682,7 +1073,9 @@ const en: Copy = {
   },
   hero: {
     headline: '@@Product Manager@@ who runs the product from start to finish',
-    greeting: 'Hi, I’m Lucas. Almost everyone calls me “Casanova”.',
+    /* Acompanha a reescrita em português: convite dirigido a quem lê, não relato
+       sobre o que os outros fazem. Ver o comentário na versão em português. */
+    greeting: 'Hi, I’m Lucas, but you can call me “Casanova”.',
     lead: 'I’ve been working for **10 years**, **8 of them in product**. Today I use @@AI and LLMs@@ inside the product I run and in my own work. I come from @@research and craft@@, and that is where the evidence comes from to decide, to execute and to track how it performs.',
     location: 'Florianópolis, Brazil',
     ctaResume: 'Download my résumé (PDF)',
@@ -695,8 +1088,13 @@ const en: Copy = {
     source: 'Figures from July 2026, measured in Power BI and Mixpanel.',
   },
   builds: {
-    title: 'What I have built',
-    lead: 'One product I ran from start to finish and two research projects. Each case gets its own page in the next update.',
+    /* Ver os comentários na versão em português para as duas reescritas. */
+    title: 'Work I like talking about',
+    lead: 'In each one I walk through the start, the decision that changed course and what came after, including what did not go the way I hoped. Feel free to begin wherever you like.',
+    rolesLabel: 'What I did',
+    timelineLabel: 'How the product evolved',
+    highlightsLabel: 'Scope and outcome',
+    openFull: 'Read the full case',
     piecesLabel: 'Modules',
     openCase: 'Read the case on Notion',
     newTab: 'opens in a new tab',
@@ -708,12 +1106,98 @@ const en: Copy = {
         name: 'Inteligência Comercial',
         org: 'Nexfar',
         tag: 'Product manager, from zero',
-        body: 'The one product I have run from the start: vision, strategy, roadmap, specs, metric instrumentation, and the interface design. Three modules in production, each solving one stage of a rep visiting a pharmacy. Live with real customers.',
+        page: '/cases/inteligencia-comercial',
+        body: 'It started with a problem in the field: the rep standing inside the pharmacy with no price, no stock and no client history at hand. Today it is three modules in production, and the commercial operation runs on them.',
+        roles: [
+          'Continuous discovery',
+          'Vision and strategy',
+          'Roadmap',
+          'Specs and handoff',
+          'Instrumentation',
+          'Interface design',
+        ],
+        highlights: [
+          { value: 'E2E' },
+          { value: 'B2B SaaS' },
+          { value: '400+', label: 'users' },
+          { value: 'NPS +85' },
+          { value: '80%+', label: 'conversion' },
+        ],
+        /* Ver os comentários na versão em português. */
+        milestones: [
+          {
+            iso: '2024-11',
+            when: 'Nov 2024',
+            title: 'Ideation',
+            note: 'The first internal deck names what the product will attack.',
+            pains: [
+              'Stagnant product mix',
+              'No visibility into campaigns',
+              'Planning losing efficiency',
+            ],
+          },
+          {
+            iso: '2024-12',
+            when: 'Dec 2024',
+            title: 'Lo-fi',
+            note: 'The first flow, still unbranded.',
+            shots: [
+              {
+                src: '/assets/cases/ic/lofi.jpg',
+                alt: 'Greyscale wireframe of the suggestions screen, with the client list and the suggested cart.',
+              },
+            ],
+          },
+          {
+            iso: '2025-01',
+            when: 'Jan 2025',
+            title: 'First draft',
+            note: 'The interface gets a brand, and ideal orders.',
+            shots: [
+              {
+                src: '/assets/cases/ic/draft.jpg',
+                alt: 'First interface draft, in green, with the list of ideal orders per client.',
+              },
+            ],
+          },
+          {
+            iso: '2025-09',
+            when: 'Sep 2025',
+            title: 'Live',
+            note: 'Three modules shipped, with real customers.',
+            shots: [
+              {
+                src: '/assets/cases/ic/objetivos.jpg',
+                alt: 'Objetivos e Sugestões: total-sales performance dial and the projection chart against target.',
+              },
+              {
+                src: '/assets/cases/ic/cotacao.jpg',
+                alt: 'Cotação Ágil: a quote summary with products, quantities and unit price.',
+              },
+              {
+                src: '/assets/cases/ic/catalogo.jpg',
+                alt: 'Catálogo Digital: stats for a published catalogue, with interest, views and time live.',
+              },
+            ],
+          },
+          {
+            iso: '2026-07',
+            when: 'Jul 2026',
+            title: 'Product NPS',
+            score: {
+              value: '86',
+              label: 'Product NPS',
+              source: 'Formbricks',
+              min: '-100',
+              max: '100',
+            },
+          },
+        ],
         pieces: [
           {
             name: 'Cotação Ágil',
             detail:
-              "The customer’s list goes in as a photo and comes out as a quote via OCR. It saves **more than an hour** of typing per quote, at 50 to 100 items on average, plus the manual comparison of terms. Conversion runs **above 80%**.",
+              'The customer’s list goes in as a photo and comes out as a quote via OCR. It saves **more than an hour** of typing per quote, at 50 to 100 items on average, plus the manual comparison of terms. Conversion runs **above 80%**.',
             count: { value: '400+', unit: 'quotes/month' },
           },
           {
@@ -725,7 +1209,7 @@ const en: Copy = {
           {
             name: 'Objetivos e Sugestões',
             detail:
-              "The point of sale’s history becomes product mix suggestions and sales targets. This is the product’s AI module.",
+              'The point of sale’s history becomes product mix suggestions and sales targets. This is the product’s AI module.',
             count: { value: '~200', unit: 'orders/day' },
           },
         ],
@@ -739,7 +1223,7 @@ const en: Copy = {
         name: 'Electrolux Cuida',
         org: 'Electrolux',
         tag: 'UX research',
-        body: "User research as part of standing up digital-product research at Electrolux, an area that until then only looked at industrial products.",
+        body: 'User research as part of standing up digital-product research at Electrolux, an area that until then only looked at industrial products.',
         pending:
           'I have no publishable visual material from this work. What I do have is the process and the research framework, and they go on the case page.',
       },
@@ -808,20 +1292,27 @@ const en: Copy = {
         when: 'Until 2018',
         role: 'UX/UI Designer',
         squad: 'Generalist',
-        org: 'Dzigual Golinelli and Garupa Design',
+        /* Ordem cronológica dentro da linha, igual à versão em português. Ver o
+           comentário lá. */
+        org: 'Garupa Design and Dzigual Golinelli',
       },
     ],
     skillsLabel: 'Skills',
+    /* Mesmo teto de 20 caracteres da versão em português, e os mesmos cortes. Ver
+       o comentário lá para o raciocínio e para o que se perdeu. */
     skills: [
       'Product discovery',
-      'Roadmap and prioritisation',
-      'PRDs and tech specs',
-      'Product metrics and analytics',
-      'KPIs and instrumentation',
-      'Stakeholder and client management',
+      'Roadmap',
+      'Prioritisation',
+      'PRD and tech spec',
+      'Metrics and analytics',
+      'KPIs',
+      'Instrumentation',
+      'Stakeholders',
       'Product-led growth',
       'Backlog management',
       'Build vs. buy',
+      'Vibe coding',
     ],
     toolsLabel: 'Tools',
     tools: [
@@ -837,10 +1328,29 @@ const en: Copy = {
     ],
     languagesLabel: 'Languages',
     languages: [
-      'Portuguese, native',
-      'English B2 (fluent reading and writing, intermediate conversation)',
+      { name: 'Portuguese', level: 'Native' },
+      {
+        name: 'English',
+        level: 'B2',
+        note: 'I read and write English fluently; my conversation is at an intermediate level.',
+      },
     ],
+    portrait: {
+      src: '/assets/retrato.jpg',
+      alt: 'Lucas Casanova in a cap and glasses, face turned to the side under a band of sunlight.',
+    },
     portraitPending: 'My portrait goes here.',
+    portraitName: 'Lucas Casanova',
+    interestsLabel: 'Away from work',
+    interests: [
+      { emoji: '🥊', label: 'Boxing' },
+      { emoji: '🎮', label: 'Video games' },
+      { emoji: '🐶', label: 'Time with my dogs' },
+      /* "Rap nacional" fica em português na versão em inglês: é o nome do gênero,
+         não uma descrição. Traduzir para "Brazilian rap" perderia o termo pelo
+         qual ele é conhecido. */
+      { emoji: '🎧', label: 'Rap nacional and pop rock' },
+    ],
     photosLabel: 'Me away from work',
     photosPending: [
       'A photo of me away from work goes here.',
@@ -864,7 +1374,8 @@ const en: Copy = {
         source: 'Former manager',
       },
       {
-        quote: 'I always felt I could come to you and be honest about where things really stood.',
+        quote:
+          'I always felt I could come to you and be honest about where things really stood.',
         source: 'Former report, in a 1:1',
         featured: true,
       },
@@ -881,7 +1392,7 @@ const en: Copy = {
     ],
   },
   close: {
-    title: "Let’s talk.",
+    title: 'Let’s talk.',
     lead: 'If you are building a product team, or you want to dig into a decision I made, write to me. I have also left the full résumé as a PDF. I answer in English or Portuguese.',
     signoff: 'Thanks for reading this far.',
     ctaResume: 'Download my résumé (PDF)',
@@ -889,6 +1400,7 @@ const en: Copy = {
     copied: 'Copied!',
     copyFailed: 'I could not copy it. I selected the address for you to copy.',
     linkedin: 'LinkedIn',
+    github: 'GitHub',
     location: 'Florianópolis, SC, Brazil',
     builtWith: 'Built by me with React, Vite and Tailwind.',
     rights: '© 2026 Lucas Casanova',
@@ -897,6 +1409,8 @@ const en: Copy = {
 
 export const EMAIL = 'contato.lcasanova@gmail.com'
 export const LINKEDIN = 'https://www.linkedin.com/in/casanovahs/'
+/* O perfil de onde saem os repositórios pessoais dele, este site inclusive. */
+export const GITHUB = 'https://github.com/cas0la'
 
 const dictionary: Record<Locale, Copy> = { pt, en }
 

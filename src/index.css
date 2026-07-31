@@ -112,6 +112,15 @@
   --color-violet: #6d28d9;
   --color-violet-deep: #4c1d95;
 
+  /* ---------- As duas cores clareadas, para uso sobre tinta ----------
+     O royal e o roxo do sistema foram escolhidos contra papel branco. Sobre a
+     faixa escura do painel de evolução eles caem para perto de 2:1, abaixo do
+     piso de texto. Estes dois são as mesmas cores levadas para cima até passarem
+     de 4,5:1 contra `ink`, e **só existem para esse contexto**: usá-los sobre
+     papel os deixa lavados. */
+  --color-royal-lift: #7d97ff;
+  --color-violet-lift: #b18cff;
+
   /* ---------- Semânticos shadcn ---------- */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -600,15 +609,395 @@
   }
 
   /*
-   * Sublinhado de link. Sempre desenhado, discreto, e no hover ele encorpa e
-   * fica royal cheio, crescendo da esquerda sem mover o texto.
+   * Painel de evolução do case: o trilho, os nós e as capturas.
    *
-   * Antes ele partia de `background-size: 0%`, ou seja, **invisível até o
-   * hover**. Isso invertia a afordância da página: os trechos com ênfase colorida
-   * dentro do parágrafo pareciam link, e o link de verdade não parecia nada. Um
-   * link que só se anuncia quando o mouse já está nele não é afordância, é
-   * recompensa. O estado de repouso agora carrega o sinal.
+   * O trilho é uma linha só, montada por partes: cada estação desenha o próprio
+   * segmento, e a emenda entre eles é invisível porque o `gap` da lista também é
+   * coberto. É o que faz a linha continuar reta sem um elemento que atravesse a
+   * faixa inteira por cima das colunas.
+   *
+   * **Duas orientações.** Abaixo de `lg` a cronologia é vertical: o trilho corre à
+   * esquerda e a arte fica ao lado da legenda. Acima de `lg` ela vira faixa
+   * horizontal. É a razão de este painel ter deixado de ser uma imagem — em JPEG,
+   * a única saída no telefone seria escolher que metade da cronologia sacrificar.
    */
+  .evo-item {
+    position: relative;
+    display: flex;
+    gap: var(--spacing-gap);
+    padding-left: var(--spacing-gap);
+  }
+
+  /* Trilho vertical, no telefone. */
+  .evo-item::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 6px;
+    bottom: calc(var(--spacing-block) * -1);
+    width: 1px;
+    background-color: rgb(255 255 255 / 0.16);
+  }
+
+  .evo-item:last-child::before {
+    bottom: auto;
+    height: 100%;
+  }
+
+  /* O nó. O último é roxo: ele marca o fim da linha, e o fim é o resultado. */
+  .evo-item::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-pill);
+    background-color: rgb(255 255 255 / 0.4);
+  }
+
+  .evo-item:last-child::after {
+    background-color: var(--color-violet-lift);
+  }
+
+  .evo-art {
+    display: flex;
+    width: 108px;
+    flex-shrink: 0;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .evo-meta {
+    min-width: 0;
+    flex: 1;
+  }
+
+  /* A captura. A borda clara separa a tela branca da faixa escura sem virar
+     moldura de aparelho, que seria decoração; a sombra faz o resto. */
+  .evo-shot {
+    border: 1px solid rgb(255 255 255 / 0.14);
+    box-shadow: 0 18px 40px rgb(0 0 0 / 0.45);
+  }
+
+  @media (min-width: 1024px) {
+    .evo-item {
+      flex-direction: column;
+      gap: 0;
+      padding-left: 0;
+    }
+
+    /* Trilho horizontal. Ele se estende para a direita por metade do `gap` de cada
+       lado, o que emenda o segmento de uma estação no da seguinte. */
+    .evo-item::before {
+      left: calc(var(--spacing-gap) / -2);
+      right: calc(var(--spacing-gap) / -2);
+      top: 248px;
+      bottom: auto;
+      width: auto;
+      height: 1px;
+    }
+
+    .evo-item:first-child::before {
+      left: 0;
+    }
+
+    .evo-item:last-child::before {
+      right: 0;
+      height: 1px;
+    }
+
+    .evo-item::after {
+      left: 0;
+      top: 245px;
+    }
+
+    .evo-art {
+      width: 100%;
+      /* Altura fixa, e não `flex-1`: com `flex-1` a altura da arte dependeria da
+         altura da legenda abaixo, as legendas têm alturas diferentes, e os cinco
+         nós deixariam de cair na mesma horizontal. */
+      height: 248px;
+      justify-content: flex-start;
+      padding-bottom: var(--spacing-gap);
+    }
+
+    .evo-meta {
+      flex: none;
+      padding-top: var(--spacing-gap);
+    }
+  }
+
+  /*
+   * A assinatura do cabeçalho: tinta em repouso, gradiente royal→roxo no hover.
+   *
+   * **Este é o terceiro endereço do gradiente, e ele abre uma exceção à regra dos
+   * dois endereços fechados.** A regra existe para o gradiente não virar textura;
+   * aqui ele aparece só em resposta a um gesto, e nunca ao mesmo tempo que os
+   * outros dois — o hover está no topo da página, o botão de currículo vive no
+   * fechamento. **Um quarto endereço não entra.**
+   *
+   * A transição é de `background-size`, não de `color`: com o texto recortando o
+   * fundo, `color` não é a propriedade que pinta, e animá-la não faria nada. A
+   * faixa de gradiente entra da esquerda por trás das letras, e o que se vê é a
+   * cor varrendo o nome.
+   *
+   * O `background-color` embaixo é o que aparece onde o gradiente ainda não
+   * chegou. Sem ele, a parte não coberta ficaria transparente e o nome sumiria
+   * pela metade durante a varredura.
+   */
+  .brand-sweep {
+    background-image: linear-gradient(
+      112deg,
+      var(--color-royal) 0%,
+      var(--color-royal) 18%,
+      var(--color-violet) 100%
+    );
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
+    background-color: var(--color-ink);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    transition: background-size var(--duration-base) var(--ease-out-soft);
+  }
+
+  .brand-sweep:hover,
+  .brand-sweep:focus-visible {
+    background-size: 100% 100%;
+  }
+
+  /* Sem transição, mas o estado continua: quem pede menos movimento continua
+     vendo o nome mudar de cor no hover. */
+  @media (prefers-reduced-motion: reduce) {
+    .brand-sweep {
+      transition: none;
+    }
+  }
+
+  /*
+   * Recorte obrigatório: em alto contraste forçado e na impressão, texto que
+   * recorta o próprio fundo desaparece por inteiro. É a mesma armadilha do
+   * `.grad-text`, e o conserto é o mesmo.
+   */
+  @media (forced-colors: active), print {
+    .brand-sweep {
+      background-image: none;
+      background-color: transparent;
+      color: var(--color-ink);
+      -webkit-text-fill-color: var(--color-ink);
+    }
+  }
+
+  /*
+   * Retrato do Sobre, em dois estados.
+   *
+   * A versão anterior era estática: foto saturada, bloco royal deslocado e a faixa
+   * marcadora atravessando o terço de baixo. Os três gestos juntos gastavam numa
+   * imagem só quase todo o vocabulário gráfico do site. Distribuídos entre repouso
+   * e hover, cada estado carrega um.
+   *
+   * **Repouso:** preto e branco sobre o gradiente royal→roxo deslocado 16px.
+   * **Hover ou foco:** a cor volta, o gradiente cresce para 28px, e a ficha sobe do
+   * pé.
+   *
+   * O deslocamento cresce por `inset`, e não por `scale`: com `scale` o gradiente
+   * cresceria também para cima e para a esquerda, por trás da foto, onde ninguém o
+   * vê, e o canto arredondado dele deformaria junto.
+   */
+  .portrait-figure {
+    position: relative;
+    margin: 0;
+    /* A folga onde o gradiente aparece. Ela acomoda o estado de hover, que é o
+       maior: dimensionada para o repouso, o crescimento vazaria da coluna e, no
+       telefone, criaria rolagem horizontal. */
+    padding-right: 28px;
+    padding-bottom: 28px;
+  }
+
+  .portrait-figure:focus-visible {
+    outline: 2px solid var(--color-royal);
+    outline-offset: 6px;
+    border-radius: var(--radius-lg);
+  }
+
+  .portrait-gradient {
+    position: absolute;
+    /* 8px em repouso, metade do que era: a 16px o gradiente lia como segundo
+       bloco ao lado da foto em vez de sombra colorida dela, e o autor apontou. O
+       hover continua em 28px, e o contraste entre os dois é justamente o que faz
+       o crescimento ser percebido. */
+    inset: 8px -8px -8px 8px;
+    border-radius: var(--radius-lg);
+    background-image: linear-gradient(
+      136deg,
+      var(--color-royal) 0%,
+      var(--color-violet) 100%
+    );
+    transition: inset var(--duration-base) var(--ease-out-soft);
+  }
+
+  .portrait-figure:hover .portrait-gradient,
+  .portrait-figure:focus-visible .portrait-gradient {
+    inset: 28px -28px -28px 28px;
+  }
+
+  .portrait-frame {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    aspect-ratio: 4 / 5;
+  }
+
+  /* Acromática em repouso. O leve aumento de contraste compensa o que o preto e
+     branco tira de separação entre a pele e o fundo escuro da foto. */
+  .portrait-shot {
+    filter: grayscale(1) contrast(1.08);
+    transition: filter var(--duration-base) var(--ease-out-soft);
+  }
+
+  .portrait-figure:hover .portrait-shot,
+  .portrait-figure:focus-visible .portrait-shot {
+    filter: grayscale(0) saturate(1.2) contrast(1.08);
+  }
+
+  /*
+   * A ficha. Ela sobe do pé e traz o próprio fundo, um degradê para tinta que
+   * garante contraste sem depender do que a foto tem ali embaixo.
+   *
+   * `translateY(101%)` e não `100%`: em zoom não inteiro, 100% deixa uma fatia de
+   * meio pixel visível na borda, que lê como listra.
+   */
+  .portrait-card {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    padding: var(--spacing-gap);
+    background-image: linear-gradient(
+      to top,
+      rgb(16 19 31 / 0.97) 0%,
+      rgb(16 19 31 / 0.88) 62%,
+      rgb(16 19 31 / 0) 100%
+    );
+    transform: translateY(101%);
+    opacity: 0;
+    transition:
+      transform var(--duration-base) var(--ease-out-soft),
+      opacity var(--duration-base) var(--ease-out-soft);
+  }
+
+  .portrait-figure:hover .portrait-card,
+  .portrait-figure:focus-visible .portrait-card {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /*
+   * Em tela de toque não existe hover, e o estado de repouso ficaria sendo o único
+   * que a maioria dos visitantes veria. Lá a ficha fica sempre visível e a foto
+   * sempre colorida: o efeito era enfeite, o conteúdo não.
+   */
+  @media (hover: none) {
+    .portrait-card {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .portrait-shot {
+      filter: saturate(1.2) contrast(1.08);
+    }
+  }
+
+  /*
+   * Movimento reduzido mantém os dois estados e tira só a transição. Suprimir o
+   * efeito inteiro esconderia informação de quem pediu menos movimento, que não é
+   * o que a preferência pede.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .portrait-gradient,
+    .portrait-shot,
+    .portrait-card {
+      transition: none;
+    }
+  }
+
+  /* Em alto contraste forçado o sistema repinta os fundos: o gradiente viraria um
+     bloco chapado de cor do sistema e o degradê da ficha sumiria, deixando texto
+     branco sobre a foto. A ficha ganha fundo opaco e o gradiente sai de cena. */
+  @media (forced-colors: active) {
+    .portrait-gradient {
+      display: none;
+    }
+
+    .portrait-shot {
+      filter: none;
+    }
+
+    .portrait-card {
+      background-color: Canvas;
+      background-image: none;
+    }
+  }
+
+  /*
+   * O gatilho do case: um fio que **troca de lugar** embaixo do rótulo no hover.
+   *
+   * São dois fios no mesmo elemento, feitos com duas camadas de background:
+   *
+   * 1. O de repouso, em `hairline-strong`, ancorado à direita. No hover ele
+   *    encolhe para a direita, ou seja, sai de cena por onde estava preso.
+   * 2. O royal, ancorado à esquerda e com largura zero. No hover ele cresce da
+   *    esquerda e ocupa o lugar que o outro deixou.
+   *
+   * O royal entra com 90ms de atraso, e é esse atraso que faz o movimento ler como
+   * **deslocamento** e não como duas animações simultâneas. Sem ele os dois fios se
+   * cruzam no meio e o efeito vira piscada.
+   *
+   * Substituiu um botão royal chapado de 56px. O autor pediu algo mais atrativo e
+   * menos pesado, e a troca tem um custo que vale registrar: **fio embaixo de texto
+   * é afordância mais fraca que retângulo preenchido.** O que compensa é o corpo —
+   * o rótulo sobe para escala de título, e o alvo continua com 44px de altura em
+   * tela de toque. Se a taxa de clique nesse gatilho decepcionar, o caminho não é
+   * engrossar o fio, é voltar para o preenchimento.
+   */
+  .case-underline {
+    background-image:
+      linear-gradient(var(--color-royal), var(--color-royal)),
+      linear-gradient(var(--color-hairline-strong), var(--color-hairline-strong));
+    background-repeat: no-repeat;
+    background-size:
+      0% 2px,
+      100% 2px;
+    background-position:
+      0 100%,
+      100% 100%;
+    transition: background-size var(--duration-base) var(--ease-out-soft);
+  }
+
+  .group:hover .case-underline,
+  .group:focus-visible .case-underline {
+    background-size:
+      100% 2px,
+      0% 2px;
+    transition-delay: 90ms, 0ms;
+  }
+
+  /*
+   * Em `prefers-reduced-motion` o fio não corre: ele já chega royal e inteiro, e o
+   * hover não muda nada. Trocar a cor sem animar mantém o estado legível para quem
+   * desligou movimento, e é melhor que suprimir o sinal.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .case-underline {
+      background-size:
+        100% 2px,
+        0% 2px;
+      transition: none;
+    }
+  }
+
   .underline-draw {
     background-image: linear-gradient(
       color-mix(in srgb, var(--color-royal) 38%, transparent),

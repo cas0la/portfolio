@@ -100,16 +100,33 @@ export function Nav() {
       {/* O invólucro existe para o `ResizeObserver` ter um alvo que é só a barra.
           Medir o `<header>` incluiria o painel do menu mobile, que é filho dele. */}
       <div ref={barRef}>
-        <Container className="flex items-center justify-between gap-gap py-3.5">
+        <Container className="flex items-center justify-between gap-gap py-4">
           <a
             href="#top"
             onClick={close}
-            className="whitespace-nowrap font-display text-body-sm font-extrabold tracking-tight text-ink sm:text-h3"
+            className="brand-sweep whitespace-nowrap font-display text-body-sm font-extrabold tracking-tight sm:text-h3"
           >
             Lucas Casanova
           </a>
 
-          <div className="flex items-center gap-2.5">
+          {/*
+           * O espaçamento entre os três grupos do lado direito: links, seletor de
+           * idioma e currículo.
+           *
+           * Era `gap-2.5`, 10px, e o autor apontou que ficava grudado. **A causa é
+           * hierárquica, não de gosto:** os links do menu têm 24px entre si, então
+           * com 10px a separação *entre grupos* era menor que a separação *dentro*
+           * de um grupo, e os cinco alvos liam como uma fileira só.
+           *
+           * Agora cresce com a largura: 8px no telefone, onde a barra tem 375px e
+           * não sobra folga; 24px a partir de `md`, que empata com o intervalo dos
+           * links; e 32px a partir de `lg`, onde a separação entre grupos passa a
+           * ser maior que a interna, que é o que faz eles lerem como três coisas.
+           *
+           * Os três valores estão na grade de 8px. O `py` da barra entrou junto:
+           * era `py-3.5`, 14px, um dos valores que o DESIGN.md proíbe.
+           */}
+          <div className="flex items-center gap-2 md:gap-gap lg:gap-8">
             <nav className="hidden items-center gap-gap md:flex">
               {links.map((l) => (
                 <a

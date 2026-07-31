@@ -95,6 +95,63 @@ export function SecondaryButton({
 }
 
 /**
+ * A cápsula do sistema. Nasceu nas credenciais do Sobre e virou primitiva quando o
+ * case principal passou a precisar dela: duas listas de cápsulas com aparência
+ * própria em seções vizinhas seriam duas linguagens para a mesma coisa.
+ *
+ * Ela é `<li>` porque só existe dentro de lista. Cápsula solta é botão que não
+ * clica.
+ *
+ * **Branca com fio de cabelo, nunca colorida.** Pílula pintada como classificação
+ * é o tell corporativo que o DESIGN.md recusa desde a primeira rodada, e é
+ * justamente num case que ela apareceria primeiro. O que distingue uma cápsula de
+ * número de uma cápsula de papel é a tipografia, não o fundo.
+ */
+export function Pill({
+  children,
+  className = '',
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <li
+      className={cn(
+        'rounded-pill border border-hairline-strong bg-surface px-4 py-2',
+        className,
+      )}
+    >
+      {children}
+    </li>
+  )
+}
+
+/**
+ * A cápsula de destaque: um número em royal e, opcionalmente, a unidade ao lado.
+ *
+ * Mesmo desenho da `Pill`, mesma altura, mesmo fio. A diferença é onde a cor está
+ * — no algarismo, que é a prova, e não no fundo, que seria enfeite. Isto repete o
+ * componente `count` que os módulos do case já usavam, e é de propósito: o
+ * vocabulário para "aqui tem um número medido" é um só na página inteira.
+ *
+ * `value` aceita texto sem número ("E2E", "SaaS B2B"). Nesse caso ele fica em
+ * tinta e não em royal: royal aqui significa medição, e gastar a cor num rótulo
+ * de escopo tiraria dela exatamente o que faz o número saltar.
+ */
+export function StatPill({ value, label }: { value: string; label?: string }) {
+  const measured = /\d/.test(value)
+
+  return (
+    <Pill>
+      <span className={cn('font-extrabold', measured ? 'tnum text-royal' : 'text-ink')}>
+        {value}
+      </span>
+      {label && <span className="ml-2 text-ink-soft">{label}</span>}
+    </Pill>
+  )
+}
+
+/**
  * Nota do que ainda não existe, dita em primeira pessoa. Um fio à esquerda basta
  * para marcar que é nota, não afirmação sobre o trabalho.
  */

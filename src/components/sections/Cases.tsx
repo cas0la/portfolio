@@ -1,9 +1,10 @@
-import { ArrowUpRight } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { ArrowRight, ArrowUpRight, Image as ImageIcon } from 'lucide-react'
 import { Container } from '@/components/primitives/Container'
 import { FadeIn } from '@/components/primitives/FadeIn'
-import { RoleByline, OpenNote } from '@/components/primitives/Ui'
+import { RoleByline, OpenNote, Pill, StatPill } from '@/components/primitives/Ui'
 import { CaseCover } from '@/components/CaseCover'
-import { Rich } from '@/components/primitives/Rich'
+import { EvolutionPanel } from '@/components/EvolutionPanel'
 import { useLocale } from '@/lib/i18n'
 import { copyFor, type Build } from '@/content'
 
@@ -15,58 +16,130 @@ import { copyFor, type Build } from '@/content'
  * alternada, a página lê como um scroll contínuo em vez de caixas empilhadas.
  */
 
-/** Case principal: capa grande em cima, e o texto com os módulos embaixo. */
+/**
+ * A abertura do case principal.
+ *
+ * **A capa em imagem saiu.** Ela era um JPEG de 2100x640 composto fora do site, e
+ * no telefone encolhia para cerca de 104px de altura, onde as cinco estações da
+ * cronologia viravam borrão. No lugar entrou o `EvolutionPanel`, que é a mesma
+ * peça em HTML e reflui para vertical. Ver o comentário lá para o que a troca
+ * custou.
+ *
+ * O `cover` continua existindo no tipo `Build` e continua servindo aos cases
+ * secundários, que usam `CaseCover` em 16:10. Só o destaque tem painel.
+ */
+function MainOpening({ build }: { build: Build }) {
+  if (build.milestones) return <EvolutionPanel milestones={build.milestones} />
+  if (build.cover) return <CaseCover build={build} />
+
+  return (
+    <div className="grid aspect-[2100/640] w-full place-items-center rounded-lg bg-ink">
+      <ImageIcon className="size-8 text-white/25" aria-hidden />
+    </div>
+  )
+}
+
+/** Uma fileira de cápsulas com rótulo. */
+function PillRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <h4 className="label text-ink-soft">{label}</h4>
+      <ul className="mt-4 flex flex-wrap gap-2 text-body-sm text-ink">{children}</ul>
+    </div>
+  )
+}
+
+/**
+ * Case principal: capa de destaque com o título, as cápsulas de papel e de
+ * resultado, três linhas de texto e o botão para a página interna.
+ *
+ * **Os módulos saíram daqui.** Eles eram três blocos com número grande, e no
+ * desenho que o autor pediu esse trabalho passou para as cápsulas de destaque, que
+ * dizem o mesmo em uma fileira. Manter os dois seria dar duas vezes a mesma prova
+ * e alongar de novo o bloco que ele quer curto. Os `pieces` continuam no conteúdo,
+ * intactos, esperando a página interna — que é onde um módulo pode ser explicado
+ * em vez de anunciado.
+ *
+ * **A nota de pendência também saiu daqui**, pela mesma lógica: ela promete a
+ * decisão e o custo, e agora existe um botão que leva exatamente a isso. Nota de
+ * "ainda falta" logo acima do botão que resolve a falta é ruído.
+ */
 function MainCase({ build }: { build: Build }) {
   const { locale } = useLocale()
   const t = copyFor(locale)
 
   return (
     <article>
-      {/* Capa ao lado do texto, e não acima dele: em largura total a capa de
-          16:10 passaria de 700px de altura e engoliria o primeiro viewport da
-          seção. */}
-      <div className="grid items-center gap-block lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-        <CaseCover build={build} />
+      <MainOpening build={build} />
 
-        <div>
-          <RoleByline>{build.tag}</RoleByline>
-          <h3 className="mt-3 text-h1 font-extrabold text-ink">{build.name}</h3>
-          {build.org && <p className="mt-1 text-h3 text-ink-soft">{build.org}</p>}
-          <p className="mt-gap text-body text-ink-soft">{build.body}</p>
-          {build.pending && (
-            <div className="mt-gap">
-              <OpenNote>{build.pending}</OpenNote>
-            </div>
+      {/* O título logo abaixo da capa, na tinta cheia. Ele abre o bloco de texto
+          em vez de flutuar sobre a imagem. */}
+      <div className="mt-gap">
+        <RoleByline>{build.tag}</RoleByline>
+        <h3 className="mt-3 text-display font-extrabold text-ink">{build.name}</h3>
+        {build.org && <p className="mt-1 text-h3 text-ink-soft">{build.org}</p>}
+      </div>
+
+      <div className="mt-block grid gap-block lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:gap-x-[72px]">
+        <div className="flex flex-col gap-gap">
+          {build.roles && (
+            <PillRow label={t.builds.rolesLabel}>
+              {build.roles.map((role) => (
+                <Pill key={role}>{role}</Pill>
+              ))}
+            </PillRow>
+          )}
+
+          {build.highlights && (
+            <PillRow label={t.builds.highlightsLabel}>
+              {build.highlights.map((item) => (
+                <StatPill key={item.value} value={item.value} label={item.label} />
+              ))}
+            </PillRow>
           )}
         </div>
-      </div>
 
-      {/* Os três módulos lado a lado, um por coluna: ocupa a largura toda e lê
-          como uma linha de fatos em vez de lista estreita com metade vazia. */}
-      <div className="mt-block">
-        <h4 className="label text-ink-soft">{t.builds.piecesLabel}</h4>
-        <ul className="mt-gap grid gap-gap sm:grid-cols-2 lg:grid-cols-3 lg:gap-block">
-          {build.pieces?.map((piece) => (
-            <li key={piece.name} className="border-t border-hairline pt-gap">
-              {/* O número vem primeiro e grande: ele é a prova, e antes estava
-                  apagado em corpo pequeno, o que deixava o texto dominar. */}
-              {piece.count && (
-                <p className="flex items-baseline gap-2">
-                  <span className="tnum text-num font-extrabold text-royal">
-                    {piece.count.value}
-                  </span>
-                  <span className="text-body-sm text-ink-soft">{piece.count.unit}</span>
-                </p>
-              )}
-              <h5 className="mt-2.5 text-h3 font-semibold text-ink">{piece.name}</h5>
-              <p className="mt-1.5 text-body-sm text-ink-soft">
-                <Rich text={piece.detail} />
-              </p>
-            </li>
-          ))}
-        </ul>
+        {/* O texto e o botão numa coluna só, e o botão logo abaixo das três
+            linhas: o convite tem que estar no fim da leitura que o motiva. */}
+        <div>
+          <p className="text-body-lead text-ink">{build.body}</p>
+          {build.page && <CaseCta href={build.page}>{t.builds.openFull}</CaseCta>}
+        </div>
       </div>
     </article>
+  )
+}
+
+/**
+ * O gatilho do case: rótulo em escala de título e um fio que troca de lugar no
+ * hover. O movimento inteiro vive em `.case-underline`, onde está comentado.
+ *
+ * Era um botão royal chapado de 56px, e o autor pediu algo mais atrativo e menos
+ * pesado. **A força saiu do preenchimento e foi para o corpo do texto:** em
+ * `text-h2` peso 800 e royal cheio, o gatilho continua sendo o elemento mais alto
+ * da coluna sem precisar de um retângulo de cor.
+ *
+ * O fio é do elemento inteiro e passa por baixo do rótulo **e** da seta. Passando
+ * só sob o texto, ele terminaria antes da seta e o conjunto leria como duas coisas
+ * soltas em vez de um alvo só.
+ *
+ * `tap-h` porque em tela de toque um link de texto não tem altura própria: sem ele
+ * o alvo seria a caixa da linha, cerca de 30px, abaixo do piso de 44.
+ */
+function CaseCta({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a
+      href={href}
+      className="group tap-h mt-block inline-flex items-center text-h2 font-extrabold text-royal"
+    >
+      <span className="case-underline inline-flex items-center gap-3 pb-2">
+        {children}
+        <ArrowRight
+          className="size-5 shrink-0 transition-transform duration-300 group-hover:translate-x-1"
+          aria-hidden
+        />
+      </span>
+    </a>
   )
 }
 
@@ -85,7 +158,9 @@ function CaseCard({ build }: { build: Build }) {
         <h3 className="mt-2.5 flex items-start justify-between gap-3 text-h2 font-bold text-ink">
           <span className="min-w-0">
             <span className={linked ? 'underline-draw' : undefined}>{build.name}</span>
-            {build.org && <span className="font-normal text-ink-soft"> · {build.org}</span>}
+            {build.org && (
+              <span className="font-normal text-ink-soft"> · {build.org}</span>
+            )}
           </span>
           {linked && (
             <ArrowUpRight
