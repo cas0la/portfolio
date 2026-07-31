@@ -547,6 +547,33 @@
   }
 
   /*
+   * Arrastar para rolar a lista de experiência.
+   *
+   * `pointer: fine` e não a largura da tela: o gesto é de mouse, e no toque o
+   * arrasto nativo já faz o trabalho. Laptop com tela sensível ao toque recebe os
+   * dois tipos de ponteiro, e é o componente que separa um do outro por
+   * `pointerType` — esta consulta só cuida do cursor.
+   *
+   * O cursor depende de `data-scrollable`, escrito em JS: a mão aberta prometendo
+   * arrasto numa lista que já cabe inteira seria afordância mentindo, e CSS não
+   * sabe se um container rola.
+   *
+   * `user-select: none` entra **só durante** o arrasto. Fixo, ele proibiria copiar
+   * um cargo da lista para sempre, o que é caro numa página que existe para ser
+   * lida por quem recruta.
+   */
+  @media (pointer: fine) {
+    .timeline-scroll[data-scrollable='true'] {
+      cursor: grab;
+    }
+
+    .timeline-scroll[data-dragging='true'] {
+      cursor: grabbing;
+      user-select: none;
+    }
+  }
+
+  /*
    * Barra de rolagem no vocabulário do site: fio de cabelo forte no polegar,
    * trilho transparente, nada de cinza de sistema.
    *
@@ -671,6 +698,65 @@
   .evo-meta {
     min-width: 0;
     flex: 1;
+  }
+
+  /*
+   * As estações com peso, no telefone: coluna inteira, arte por cima da legenda.
+   *
+   * A primeira versão da lista vertical dava 108px de arte a todas as cinco. Isso
+   * repunha em pequeno o problema que tirou este painel do JPEG — os três mockups
+   * de produção ficavam com cerca de 40px cada, as dores tinham 88px de texto útil
+   * e o medidor não cabia no próprio número. **Largura igual aqui não é neutra:**
+   * ela afirma que os cinco momentos pesam o mesmo, que é o contrário do que a
+   * faixa horizontal foi desenhada para dizer.
+   *
+   * `flex-wrap` e não `flex-direction: column`: a arte precisa continuar sendo o
+   * primeiro item da linha para o nó do trilho cair na altura dela, como cai nas
+   * estações compactas. Quebrando a linha, a legenda desce inteira por baixo sem
+   * que ninguém precise reordenar nada — a ordem do DOM continua sendo a ordem de
+   * leitura, nas duas orientações e nas duas larguras.
+   *
+   * A consulta é `max-width` numa folha que é `min-width` em todo o resto, e é de
+   * propósito: estas três declarações pertencem só à orientação vertical. Escritas
+   * como base, elas venceriam por especificidade as regras da faixa horizontal
+   * logo abaixo — `.evo-item--wide .evo-meta` tem duas classes e `.evo-meta` tem
+   * uma — e o `flex-basis` vazaria para o desktop.
+   */
+  @media (max-width: 1023px) {
+    .evo-item--wide {
+      flex-wrap: wrap;
+    }
+
+    /* O `gap` da estação já vale entre as linhas depois da quebra, então a folga
+       entre arte e legenda continua sendo a mesma das estações compactas. */
+    .evo-item--wide .evo-art {
+      width: 100%;
+    }
+
+    .evo-item--wide .evo-meta {
+      flex-basis: 100%;
+    }
+  }
+
+  /*
+   * O medidor de NPS: o número tem que encolher junto com o arco.
+   *
+   * O SVG é fluido e o número era chumbado em 52px. Bastava a coluna ficar mais
+   * estreita que 196px para o arco descer até debaixo dos algarismos e "+85"
+   * transbordar dos dois lados — era o estado do telefone, onde a coluna tinha
+   * 108px e o arco desenhava 58px de altura sob um número de 52px.
+   *
+   * O contêiner é declarado aqui e o número é medido em `cqi`, que é a mesma
+   * referência que o arco já usa. **26.5cqi é exatamente 52px em 196px**: a
+   * proporção do desenho aprovado, mantida agora em qualquer largura. Unidade de
+   * viewport não resolveria — ela não sabe nada da coluna onde o medidor está.
+   */
+  .evo-score {
+    container-type: inline-size;
+  }
+
+  .evo-score-value {
+    font-size: 26.5cqi;
   }
 
   /* A captura. A borda clara separa a tela branca da faixa escura sem virar
@@ -812,8 +898,8 @@
     /* A folga onde o gradiente aparece. Ela acomoda o estado de hover, que é o
        maior: dimensionada para o repouso, o crescimento vazaria da coluna e, no
        telefone, criaria rolagem horizontal. */
-    padding-right: 28px;
-    padding-bottom: 28px;
+    padding-right: 16px;
+    padding-bottom: 16px;
   }
 
   .portrait-figure:focus-visible {
@@ -826,8 +912,8 @@
     position: absolute;
     /* 8px em repouso, metade do que era: a 16px o gradiente lia como segundo
        bloco ao lado da foto em vez de sombra colorida dela, e o autor apontou. O
-       hover continua em 28px, e o contraste entre os dois é justamente o que faz
-       o crescimento ser percebido. */
+       hover vai a 16px — o dobro do repouso, o suficiente para o crescimento ser
+       percebido. A 28px, onde estava, o deslocamento virava o assunto do bloco. */
     inset: 8px -8px -8px 8px;
     border-radius: var(--radius-lg);
     background-image: linear-gradient(
@@ -840,7 +926,7 @@
 
   .portrait-figure:hover .portrait-gradient,
   .portrait-figure:focus-visible .portrait-gradient {
-    inset: 28px -28px -28px 28px;
+    inset: 16px -16px -16px 16px;
   }
 
   .portrait-frame {

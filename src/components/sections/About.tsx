@@ -273,6 +273,74 @@ function Timeline({
 }) {
   const listRef = useRef<HTMLOListElement>(null)
   const [atEnd, setAtEnd] = useState(false)
+  const [scrollable, setScrollable] = useState(false)
+  const [dragging, setDragging] = useState(false)
+
+  /*
+   * Arrastar para rolar a lista.
+   *
+   * **Só no mouse.** No toque o arrasto nativo já rola, e um segundo gesto por
+   * cima do primeiro brigaria com ele — a lista roubaria o dedo que ia rolar a
+   * página, que é justamente a armadilha que o teto de altura evita abaixo de
+   * `lg`. `pointerType` é o que separa os dois, e não a largura da tela: laptop
+   * com tela sensível ao toque existe e recebe os dois tipos de ponteiro.
+   *
+   * **O limiar de 4px é a parte que importa.** Sem ele, todo clique com tremor de
+   * mão vira arrasto e a seleção de texto morre na lista inteira. Com ele, o
+   * gesto só é capturado depois de ficar claro que é um gesto.
+   *
+   * O custo fica registrado: **arrastar de cima para baixo dentro da lista deixou
+   * de selecionar texto** e passou a rolar. Selecionar dentro de uma linha
+   * continua funcionando, porque o movimento horizontal nunca cruza o limiar.
+   *
+   * O estado vivo do arrasto mora num ref e não em `useState`: ele muda a cada
+   * `pointermove`, e re-renderizar sete itens a cada quadro para guardar um número
+   * que ninguém desenha seria trabalho jogado fora. Só `dragging`, que o CSS lê,
+   * é estado.
+   */
+  const drag = useRef<{ id: number; y: number; top: number; active: boolean } | null>(
+    null,
+  )
+
+  function onPointerDown(e: React.PointerEvent<HTMLOListElement>) {
+    const node = listRef.current
+    if (!node || e.pointerType !== 'mouse' || e.button !== 0) return
+    if (node.scrollHeight <= node.clientHeight) return
+    drag.current = { id: e.pointerId, y: e.clientY, top: node.scrollTop, active: false }
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLOListElement>) {
+    const node = listRef.current
+    const state = drag.current
+    if (!node || !state || state.id !== e.pointerId) return
+
+    const dy = e.clientY - state.y
+
+    if (!state.active) {
+      if (Math.abs(dy) < 4) return
+      state.active = true
+      /* A captura é o que faz o arrasto sobreviver ao ponteiro sair da lista: sem
+         ela, arrastar até a beira e continuar solta o gesto no meio. */
+      node.setPointerCapture(e.pointerId)
+      /* Os 4px iniciais podem ter começado uma seleção. Limpar aqui evita a lista
+         rolar com meia linha grifada atrás. */
+      window.getSelection()?.removeAllRanges()
+      setDragging(true)
+    }
+
+    node.scrollTop = state.top - dy
+  }
+
+  function endDrag(e: React.PointerEvent<HTMLOListElement>) {
+    const node = listRef.current
+    const state = drag.current
+    if (!node || !state || state.id !== e.pointerId) return
+    if (state.active && node.hasPointerCapture(e.pointerId)) {
+      node.releasePointerCapture(e.pointerId)
+    }
+    drag.current = null
+    setDragging(false)
+  }
 
   /*
    * Diz se a rolagem chegou ao fim, para o esmaecido sair de cena.
@@ -289,6 +357,9 @@ function Timeline({
     const node = listRef.current
     if (!node) return
     setAtEnd(node.scrollHeight - node.scrollTop - node.clientHeight <= 2)
+    /* O cursor de arrasto só aparece onde há o que arrastar. Prometer o gesto numa
+       lista que já cabe inteira seria afordância mentindo. */
+    setScrollable(node.scrollHeight > node.clientHeight)
   }
 
   /* `ResizeObserver` e não só o evento de scroll: a lista muda de altura ao trocar
@@ -318,7 +389,13 @@ function Timeline({
       <ol
         ref={listRef}
         onScroll={syncEnd}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
         data-at-end={atEnd}
+        data-scrollable={scrollable}
+        data-dragging={dragging}
         className="timeline-scroll scroll-slim mt-4 flex flex-col border-t border-hairline"
         tabIndex={0}
         role="group"

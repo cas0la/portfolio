@@ -69,6 +69,19 @@ export type Milestone = {
   pains?: string[]
   /** O número que fecha a linha, com a fonte declarada. */
   score?: { value: string; label: string; source: string; min: string; max: string }
+  /**
+   * Fim do intervalo, quando o marco é um período e não uma data.
+   *
+   * Produção não foi um dia: os três módulos entraram um a um entre setembro de
+   * 2025 e março de 2026. Datar isso como "Set 2025" contaria que os três subiram
+   * juntos, que é uma afirmação mais forte e falsa.
+   *
+   * São dois campos porque o painel desenha dois `<time datetime>` de verdade. Uma
+   * única etiqueta escrita "Set 2025 – Mar 2026" dentro de um `datetime` de mês só
+   * seria marcação mentindo sobre o próprio conteúdo.
+   */
+  until?: string
+  untilIso?: string
 }
 
 export type Piece = {
@@ -115,7 +128,15 @@ export type Build = {
    * `curriculo-base.md` e da memória de métricas do produto, ambos apurados em
    * Power BI e Mixpanel em julho de 2026.
    */
-  highlights?: { value: string; label?: string }[]
+  /**
+   * Escopo e resultado, em cápsulas.
+   *
+   * `measured` marca o que é número apurado, e é ele que ganha royal e algarismo
+   * tabular. Antes isso era adivinhado por `/\d/` sobre o valor, e "SaaS B2B" e
+   * "E2E" têm dígito dentro do nome — as duas saíam coloridas como se fossem
+   * medição. Ver `StatPill` para o registro inteiro.
+   */
+  highlights?: { value: string; label?: string; measured?: boolean }[]
   /**
    * Rota interna da página do case, para o botão do case principal.
    *
@@ -554,10 +575,20 @@ const pt: Copy = {
      * não saiu como eu esperava" entrega a mesma credibilidade que a versão anterior
      * tentava arrancar do contraste.
      *
-     * "Fica à vontade" fecha convidando, no lugar de "Abre o que te interessar", que
-     * era imperativo seco. Sem travessão, pela regra de voz do autor.
+     * **A segunda frase saiu em 31/07/2026**, e o incômodo do autor tinha três
+     * causas somadas. Ela era cortesia pura, e cortesia não é informação. Ela
+     * enfraquecia o fecho: o parágrafo vinha terminando em "o que não saiu como eu
+     * esperava", que é a frase que compra confiança, e a cortesia entrava por cima
+     * dela para não dizer nada. E ela **prometia uma navegação que não existe** —
+     * "entrar pelo que te interessar" supõe três portas abertas, e hoje só o case
+     * de destaque tem página. Ela já passou por "Abre o que te interessar", que era
+     * imperativo seco, e por "Fica à vontade", que era o oposto; o problema nunca
+     * esteve no tom.
+     *
+     * Uma frase só, terminando na admissão. Sem travessão, pela regra de voz do
+     * autor.
      */
-    lead: 'Em cada um eu conto o começo, a decisão que mudou o rumo e o que veio depois, inclusive o que não saiu como eu esperava. Fica à vontade para entrar pelo que te interessar.',
+    lead: 'Em cada um eu conto o começo, a decisão que mudou o rumo e o que veio depois, inclusive o que não saiu como eu esperava.',
     rolesLabel: 'O que eu fiz',
     timelineLabel: 'Como o produto evoluiu',
     highlightsLabel: 'Escopo e resultado',
@@ -582,11 +613,39 @@ const pt: Copy = {
          * coisa que cápsula nenhuma faz, que é **contar de onde o produto veio**.
          *
          * Abre pelo problema e não pela solução, porque é o problema que prende
-         * quem avalia: um vendedor parado dentro da farmácia sem as três
-         * informações de que precisa é uma cena, e cena instiga. "Três módulos em
-         * produção" é conclusão, e conclusão fecha o assunto em vez de abrir.
+         * quem avalia. "Três módulos em produção" é conclusão, e conclusão fecha o
+         * assunto em vez de abrir.
+         *
+         * **A versão anterior contava uma cena e não contava um trabalho.** Ela
+         * abria com o vendedor parado dentro da farmácia sem preço, sem estoque e
+         * sem histórico, e pulava direto para os três módulos no ar. O que faltava
+         * era exatamente o que separa produto de encomenda: **a hipótese do cliente
+         * estava errada, e foi campo que provou isso.** O autor trouxe o material
+         * em 31/07/2026 e é a fonte de tudo o que este parágrafo afirma.
+         *
+         * Três coisas precisavam caber, e cada frase carrega uma:
+         *
+         * 1. **O pedido veio com diagnóstico pronto.** A distribuidora nomeou
+         *    "execução fragmentada". Dizer isso primeiro é o que faz a correção
+         *    seguinte valer alguma coisa.
+         * 2. **A correção custou um ano e foi feita com gente de verdade.** "Grupos
+         *    focais de regiões e carteiras diferentes" é a prova de método, e é
+         *    específico o bastante para ser conferido numa entrevista. "Pesquisa
+         *    com usuários" seria a mesma frase sem nada dentro.
+         * 3. **O que apareceu no lugar.** Faltava desempenho na mão, que é o que a
+         *    cápsula "Mobile first" diz em duas palavras, e sobrava tempo em cotação
+         *    e portfólio, que é de onde vieram dois dos três módulos.
+         *
+         * **"O que sobreviveu a esse ano" fecha de propósito.** Um ano de teste
+         * implica coisa cortada, e a frase admite isso sem precisar listar. É
+         * também o gancho honesto para a página interna, onde o `tradeoff` ainda
+         * está vazio e é o único bloqueio real dela.
+         *
+         * O parágrafo dobrou de tamanho, e o teto de três linhas que o autor pediu
+         * antes cai junto. Foi troca consciente: ele pediu melhora considerável e
+         * entregou substância que não cabia no teto anterior.
          */
-        body: 'Começou com um problema de campo: o vendedor dentro da farmácia sem preço, sem estoque e sem o histórico do cliente na mão. Hoje são três módulos em produção, e a operação comercial roda em cima deles.',
+        body: 'A distribuidora chegou com o diagnóstico pronto: execução fragmentada da equipe de vendas. Um ano de experimentação em campo, com grupos focais de regiões e carteiras diferentes, apontou outra coisa. O vendedor não estava sem indicação: estava sem o próprio desempenho na mão, e perdia o dia respondendo cotação e mostrando portfólio. Os três módulos em produção hoje são o que sobreviveu a esse ano.',
         /* Papéis exercidos neste produto, apurados da descrição de cargo no
            `curriculo-base.md`. Nenhum deles é aspiracional. */
         roles: [
@@ -608,20 +667,53 @@ const pt: Copy = {
          * ela vale principalmente para o que soa bem.
          *
          * "NPS +85" tem fonte, e ela chegou depois: o medidor que o autor mandou
-         * para a capa marca **86**. A pílula fica em "+85" por escolha dele, que é
-         * arredondar para baixo — a afirmação continua verdadeira e não precisa ser
-         * revista quando o número oscilar. Antes daqui a pílula dizia "NPS 80+", que
-         * era o que o `curriculo-base.md` sustentava.
+         * para a capa marca **86**. O site diz "+85" nos dois lugares — pílula e
+         * medidor do painel — por escolha dele, que é arredondar para baixo: a
+         * afirmação continua verdadeira e não precisa ser revista quando o número
+         * oscilar, e um número exato num medidor convida a conferência que ninguém
+         * pode fazer. Antes daqui a pílula dizia "NPS 80+", que era o que o
+         * `curriculo-base.md` sustentava.
          *
-         * **O currículo ainda diz "NPS 80+"** nos três arquivos (base e os dois
-         * publicados). Se for para alinhar, é uma edição e dois PDFs regerados.
+         * O currículo base e os dois publicados foram alinhados em "+85" junto com
+         * esta edição. **Os currículos por empresa já enviados continuam em "NPS
+         * 80+" de propósito:** eles são o registro do que o recrutador recebeu, e
+         * reescrever um documento entregue é perder o registro.
+         *
+         * **"Mobile first" entrou no lugar de "E2E", a pedido do autor.** A troca
+         * melhora a fileira por outro motivo além do pedido: "E2E" era a única
+         * cápsula que afirmava sem mostrar, e a fileira de papéis logo acima já
+         * prova a mesma coisa item a item, de discovery a instrumentação. "Mobile
+         * first" é fato de forma do produto, como "SaaS B2B" ao lado.
+         *
+         * **A fileira tem duas bandas, e a ordem é a divisão.** Primeiro os quatro
+         * rótulos de escopo em tinta, depois os três números apurados em royal. A
+         * primeira tentativa foi manter tudo numa linha só; ela custava rótulo
+         * ("de conversão" ia embora) e ainda ficava a poucos pixels de quebrar.
+         * Acrescentar cápsulas em vez de encurtar transforma a segunda linha em
+         * decisão: quem varre a fileira lê o que o produto é e depois o que ele
+         * entregou, e a cor já separava os dois grupos sem ajuda da posição.
+         *
+         * **"IA em produção" e não "AI-driven".** O fato é o mesmo e é sustentado —
+         * dois dos três módulos rodam IA generativa, um em OCR e outro em
+         * recomendação. "Em produção" diz onde a IA está, que é a parte difícil e a
+         * parte verificável; "-driven" é postura e não sobreviveria à primeira
+         * pergunta de quem entrevista. A versão em inglês diz "AI in production"
+         * pela mesma razão.
+         *
+         * **"+20 melhorias" ficou de fora.** O autor sugeriu, e o número não tem
+         * fonte em nenhum documento que eu tenha. Fora isso, melhoria sem janela de
+         * tempo é a métrica mais fraca da fileira: convida a pergunta "vinte em
+         * quanto tempo, de quantas?" ao lado de três números que resistem sozinhos.
+         * Com a janela ("+20 melhorias em 12 meses") ela entra.
          */
         highlights: [
-          { value: 'E2E' },
           { value: 'SaaS B2B' },
-          { value: '400+', label: 'usuários' },
-          { value: 'NPS +85' },
-          { value: '80%+', label: 'de conversão' },
+          { value: 'Mobile first' },
+          { value: 'Data driven' },
+          { value: 'IA em produção' },
+          { value: '400+', label: 'usuários', measured: true },
+          { value: 'NPS +85', measured: true },
+          { value: '80%+', label: 'de conversão', measured: true },
         ],
         /*
          * O painel de evolução. Ver o tipo `Milestone` para por que ele deixou de
@@ -672,8 +764,10 @@ const pt: Copy = {
           {
             iso: '2025-09',
             when: 'Set 2025',
+            untilIso: '2026-03',
+            until: 'Mar 2026',
             title: 'Em produção',
-            note: 'Três módulos no ar, com clientes reais.',
+            note: 'Três módulos no ar, com 5 operações em clientes reais.',
             shots: [
               {
                 src: '/assets/cases/ic/objetivos.jpg',
@@ -693,14 +787,15 @@ const pt: Copy = {
             iso: '2026-07',
             when: 'Jul 2026',
             title: 'NPS do produto',
-            /* A procedência é o Formbricks, informada pelo autor. Ela **fica**: o
-               site declara origem em todo número que publica, e NPS sem fonte pesa
-               menos justamente para quem sabe ler NPS. Eu já errei esta linha uma
-               vez, atribuindo ao Mixpanel — o Mixpanel mede uso da plataforma. */
+            /* A procedência é o Formbricks, informada pelo autor, e traz junto a
+               janela de medição. Ela **fica**: o site declara origem em todo número
+               que publica, e NPS sem fonte nem data pesa menos justamente para quem
+               sabe ler NPS. Eu já errei esta linha uma vez, atribuindo ao Mixpanel —
+               o Mixpanel mede uso da plataforma. */
             score: {
-              value: '86',
+              value: '+85',
               label: 'NPS do produto',
-              source: 'Formbricks',
+              source: 'Medido no Q3/2026 via Formbricks',
               min: '-100',
               max: '100',
             },
@@ -1090,7 +1185,7 @@ const en: Copy = {
   builds: {
     /* Ver os comentários na versão em português para as duas reescritas. */
     title: 'Work I like talking about',
-    lead: 'In each one I walk through the start, the decision that changed course and what came after, including what did not go the way I hoped. Feel free to begin wherever you like.',
+    lead: 'In each one I walk through the start, the decision that changed course and what came after, including what did not go the way I hoped.',
     rolesLabel: 'What I did',
     timelineLabel: 'How the product evolved',
     highlightsLabel: 'Scope and outcome',
@@ -1107,7 +1202,7 @@ const en: Copy = {
         org: 'Nexfar',
         tag: 'Product manager, from zero',
         page: '/cases/inteligencia-comercial',
-        body: 'It started with a problem in the field: the rep standing inside the pharmacy with no price, no stock and no client history at hand. Today it is three modules in production, and the commercial operation runs on them.',
+        body: 'The distributor arrived with the diagnosis already made: fragmented execution across the sales team. A year of field experimentation, with focus groups from different regions and customer bases, pointed somewhere else. Reps were not short on recommendations. They were short on seeing their own numbers at hand, and lost the day answering quotes and walking clients through the catalog. The three modules live today are what survived that year.',
         roles: [
           'Continuous discovery',
           'Vision and strategy',
@@ -1117,11 +1212,13 @@ const en: Copy = {
           'Interface design',
         ],
         highlights: [
-          { value: 'E2E' },
           { value: 'B2B SaaS' },
-          { value: '400+', label: 'users' },
-          { value: 'NPS +85' },
-          { value: '80%+', label: 'conversion' },
+          { value: 'Mobile first' },
+          { value: 'Data driven' },
+          { value: 'AI in production' },
+          { value: '400+', label: 'users', measured: true },
+          { value: 'NPS +85', measured: true },
+          { value: '80%+', label: 'conversion', measured: true },
         ],
         /* Ver os comentários na versão em português. */
         milestones: [
@@ -1163,8 +1260,10 @@ const en: Copy = {
           {
             iso: '2025-09',
             when: 'Sep 2025',
+            untilIso: '2026-03',
+            until: 'Mar 2026',
             title: 'Live',
-            note: 'Three modules shipped, with real customers.',
+            note: 'Three modules shipped, across 5 real customer operations.',
             shots: [
               {
                 src: '/assets/cases/ic/objetivos.jpg',
@@ -1185,9 +1284,9 @@ const en: Copy = {
             when: 'Jul 2026',
             title: 'Product NPS',
             score: {
-              value: '86',
+              value: '+85',
               label: 'Product NPS',
-              source: 'Formbricks',
+              source: 'Measured in Q3/2026 via Formbricks',
               min: '-100',
               max: '100',
             },

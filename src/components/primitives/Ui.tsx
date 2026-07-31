@@ -134,13 +134,27 @@ export function Pill({
  * componente `count` que os módulos do case já usavam, e é de propósito: o
  * vocabulário para "aqui tem um número medido" é um só na página inteira.
  *
- * `value` aceita texto sem número ("E2E", "SaaS B2B"). Nesse caso ele fica em
- * tinta e não em royal: royal aqui significa medição, e gastar a cor num rótulo
+ * `value` também aceita rótulo de escopo ("SaaS B2B", "Mobile first"). Esse fica
+ * em tinta e não em royal: royal aqui significa medição, e gastar a cor num rótulo
  * de escopo tiraria dela exatamente o que faz o número saltar.
+ *
+ * **Quem é medição vem declarado no conteúdo, e antes era adivinhado.** A versão
+ * anterior testava `/\d/` sobre o valor, e "SaaS B2B" e "E2E" têm dígito dentro do
+ * nome: as duas cápsulas de escopo saíam em royal por acidente, contra a regra que
+ * este comentário já enunciava. O defeito só ficou visível quando entrou o primeiro
+ * rótulo de escopo sem dígito nenhum, que então virou o único item em tinta da
+ * fileira e leu como erro. Nenhuma heurística sobre a forma do texto separa "80%+"
+ * de "B2B" com segurança, então a distinção passou a ser dado.
  */
-export function StatPill({ value, label }: { value: string; label?: string }) {
-  const measured = /\d/.test(value)
-
+export function StatPill({
+  value,
+  label,
+  measured,
+}: {
+  value: string
+  label?: string
+  measured?: boolean
+}) {
   return (
     <Pill>
       <span className={cn('font-extrabold', measured ? 'tnum text-royal' : 'text-ink')}>

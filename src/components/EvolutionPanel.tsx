@@ -43,6 +43,24 @@ const SPAN: Record<string, string> = {
   score: 'lg:flex-[1.5]',
 }
 
+/**
+ * A mesma hierarquia, no telefone.
+ *
+ * Abaixo de `lg` a cronologia vira lista, e a primeira versão dava a todas as
+ * estações a mesma coluna de arte de 108px ao lado da legenda. Isso apagava a
+ * decisão que o `SPAN` toma acima: os três mockups de produção se dividiam em
+ * 108px e ficavam com cerca de 40px cada, a lista de dores tinha 88px de texto
+ * útil para frases de cinco palavras, e o medidor encolhia enquanto o número
+ * dentro dele ficava do mesmo tamanho e transbordava o arco.
+ *
+ * **Largura igual no telefone é uma afirmação, não um padrão neutro:** ela diz
+ * que os cinco momentos pesam o mesmo, que é exatamente o que a faixa horizontal
+ * foi desenhada para negar. As três estações com peso ocupam a coluna inteira, a
+ * arte por cima da legenda como acima de `lg`; as duas capturas avulsas, que são
+ * nota de rodapé nas duas orientações, seguem compactas ao lado do texto.
+ */
+const WIDE = new Set(['pains', 'group', 'score'])
+
 function kindOf(m: Milestone) {
   if (m.pains) return 'pains'
   if (m.score) return 'score'
@@ -103,13 +121,29 @@ function Pains({ items }: { items: string[] }) {
  */
 function Score({ score }: { score: NonNullable<Milestone['score']> }) {
   /* -100 a 100 mapeado no semicírculo. O arco de raio 84 mede π·84 ≈ 264; o
-     deslocamento é a fração que falta para chegar ao valor. */
+     deslocamento é a fração que falta para chegar ao valor.
+
+     `value` é string porque é texto de tela e chega com sinal ("+85"). `Number`
+     lê o `+` inicial sem reclamar, então o arco continua certo — mas quem trocar
+     o formato precisa manter algo que `Number` saiba ler. */
   const span = Number(score.max) - Number(score.min)
   const fraction = (Number(score.value) - Number(score.min)) / span
   const LENGTH = 264
 
+  /*
+   * O número mora dentro do arco, e por isso os dois têm que encolher juntos.
+   *
+   * O SVG é fluido (`w-full`) e o número era chumbado em 52px: bastava a coluna
+   * ficar mais estreita que 196px para o arco descer até debaixo dos algarismos e
+   * "+85" transbordar dos dois lados. Era o que acontecia no telefone.
+   *
+   * A correção é `evo-score` declarar um contêiner e o número ser medido em `cqi`,
+   * a mesma unidade que o arco usa implicitamente. 26.5cqi é 52px em 196px — a
+   * proporção do desenho aprovado, agora mantida em qualquer largura. Unidade de
+   * viewport não serviria: ela não sabe nada da coluna onde o medidor está.
+   */
   return (
-    <div className="w-full max-w-[196px]">
+    <div className="evo-score w-full max-w-[196px]">
       <div className="relative">
         <svg viewBox="0 0 200 108" className="w-full" aria-hidden focusable="false">
           <path
@@ -129,7 +163,7 @@ function Score({ score }: { score: NonNullable<Milestone['score']> }) {
             strokeDashoffset={LENGTH * (1 - fraction)}
           />
         </svg>
-        <span className="absolute inset-x-0 bottom-0 text-center font-display text-[52px] font-extrabold leading-none tracking-[-.03em] text-white">
+        <span className="evo-score-value absolute inset-x-0 bottom-0 text-center font-display font-extrabold leading-none tracking-[-.03em] text-white">
           {score.value}
         </span>
       </div>
@@ -194,35 +228,56 @@ export function EvolutionPanel({ milestones }: { milestones: Milestone[] }) {
         aria-label={t.builds.timelineLabel}
         className="flex flex-col gap-block lg:flex-row lg:gap-gap"
       >
-        {milestones.map((m) => (
-          <li key={m.iso} className={`evo-item ${SPAN[kindOf(m)]}`}>
-            {/*
-             * A arte tem altura fixa acima de `lg`, e não `flex-1`. Com `flex-1` a
-             * altura de cada arte dependeria da altura da legenda abaixo dela, as
-             * legendas têm alturas diferentes, e o trilho deixaria de ser uma linha
-             * reta. Altura fixa é o que garante que os cinco nós caiam na mesma
-             * horizontal.
-             */}
-            <div className="evo-art">
-              <Art milestone={m} />
-            </div>
+        {milestones.map((m) => {
+          const kind = kindOf(m)
 
-            <div className="evo-meta">
-              {/* `<time>` com `datetime` real: a data é dado, não enfeite. */}
-              <time dateTime={m.iso} className="label block text-royal-lift">
-                {m.when}
-              </time>
-              <h4 className="mt-2 text-h3 font-extrabold text-white">{m.title}</h4>
-              {m.note && <p className="mt-1 text-body-sm text-white/55">{m.note}</p>}
-              {/* A procedência do número, declarada. O site declara origem em todo
-                  número que publica, e NPS sem fonte pesa menos justamente para
-                  quem sabe ler NPS. */}
-              {m.score && (
-                <p className="mt-1 text-body-sm text-white/40">{m.score.source}</p>
-              )}
-            </div>
-          </li>
-        ))}
+          return (
+            <li
+              key={m.iso}
+              className={`evo-item ${WIDE.has(kind) ? 'evo-item--wide' : ''} ${SPAN[kind]}`}
+            >
+              {/*
+               * A arte tem altura fixa acima de `lg`, e não `flex-1`. Com `flex-1` a
+               * altura de cada arte dependeria da altura da legenda abaixo dela, as
+               * legendas têm alturas diferentes, e o trilho deixaria de ser uma linha
+               * reta. Altura fixa é o que garante que os cinco nós caiam na mesma
+               * horizontal.
+               */}
+              <div className="evo-art">
+                <Art milestone={m} />
+              </div>
+
+              <div className="evo-meta">
+                {/*
+                 * `<time>` com `datetime` real: a data é dado, não enfeite.
+                 *
+                 * Quando o marco é período, são dois `<time>` e não uma etiqueta
+                 * escrita "Set 2025 – Mar 2026": só assim cada extremo continua
+                 * sendo uma data que a máquina lê. O travessão fica fora dos dois e
+                 * sai da árvore de acessibilidade — quem ouve a linha recebe as duas
+                 * datas, e "traço" no meio não acrescenta nada.
+                 */}
+                <p className="label text-royal-lift">
+                  <time dateTime={m.iso}>{m.when}</time>
+                  {m.until && (
+                    <>
+                      <span aria-hidden> – </span>
+                      <time dateTime={m.untilIso}>{m.until}</time>
+                    </>
+                  )}
+                </p>
+                <h4 className="mt-2 text-h3 font-extrabold text-white">{m.title}</h4>
+                {m.note && <p className="mt-1 text-body-sm text-white/55">{m.note}</p>}
+                {/* A procedência do número, declarada. O site declara origem em todo
+                    número que publica, e NPS sem fonte pesa menos justamente para
+                    quem sabe ler NPS. */}
+                {m.score && (
+                  <p className="mt-1 text-body-sm text-white/40">{m.score.source}</p>
+                )}
+              </div>
+            </li>
+          )
+        })}
       </ol>
     </div>
   )

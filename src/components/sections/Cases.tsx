@@ -70,14 +70,29 @@ function MainCase({ build }: { build: Build }) {
 
   return (
     <article>
-      <MainOpening build={build} />
-
-      {/* O título logo abaixo da capa, na tinta cheia. Ele abre o bloco de texto
-          em vez de flutuar sobre a imagem. */}
-      <div className="mt-gap">
+      {/*
+       * O título antes da faixa, e este é o terceiro lugar em que ele mora.
+       *
+       * Primeiro ele ficou **dentro** da capa, sob um véu, e saiu porque o véu
+       * disputava com a arte e no telefone ficava ilegível. Depois foi para
+       * **debaixo** da faixa, e o autor apontou o que estava errado nisso: o
+       * painel é a prova, e ela chegava antes do assunto. Quem lê encontrava cinco
+       * marcos datados de um produto que ainda não tinha nome.
+       *
+       * Em cima resolve os dois problemas de uma vez. O título fica em texto de
+       * verdade, sem véu e sem aposta na imagem, e a faixa passa a responder a uma
+       * pergunta que já foi feita em vez de abrir uma.
+       *
+       * `.case-scrim` continua removida do CSS. Não recriar.
+       */}
+      <div>
         <RoleByline>{build.tag}</RoleByline>
         <h3 className="mt-3 text-display font-extrabold text-ink">{build.name}</h3>
         {build.org && <p className="mt-1 text-h3 text-ink-soft">{build.org}</p>}
+      </div>
+
+      <div className="mt-gap">
+        <MainOpening build={build} />
       </div>
 
       <div className="mt-block grid gap-block lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:gap-x-[72px]">
@@ -93,7 +108,12 @@ function MainCase({ build }: { build: Build }) {
           {build.highlights && (
             <PillRow label={t.builds.highlightsLabel}>
               {build.highlights.map((item) => (
-                <StatPill key={item.value} value={item.value} label={item.label} />
+                <StatPill
+                  key={item.value}
+                  value={item.value}
+                  label={item.label}
+                  measured={item.measured}
+                />
               ))}
             </PillRow>
           )}
@@ -217,9 +237,16 @@ export function Cases() {
 
         {/* `beat` aqui era erro de escala: é o intervalo entre assuntos, e o case
             principal e os quatro seguintes são o mesmo assunto. Com ele os cases
-            liam como seções soltas. `section` mantém a separação sem cortar o
-            grupo. */}
-        <div className="mt-[72px] grid gap-x-block gap-y-[72px] md:mt-section md:grid-cols-2 md:gap-y-section">
+            liam como seções soltas.
+
+            O intervalo cresceu em 31/07/2026, a pedido do autor: 72→96 no telefone
+            e 96→144 acima de `md`. O case principal ganhou altura nesta rodada
+            (título acima da faixa, sete cápsulas, parágrafo maior), e a folga que
+            bastava para o bloco anterior deixou os cases seguintes encostados nele.
+            **144px continua abaixo de `beat`**, então a separação cresce sem que o
+            grupo se parta em duas seções, que é o erro que o comentário acima
+            registra. Múltiplo de 8, pela regra de escala. */}
+        <div className="mt-section grid gap-x-block gap-y-[72px] md:mt-36 md:grid-cols-2 md:gap-y-section">
           {rest.map((build, i) => (
             <FadeIn key={build.id} delay={(i % 2) * 0.06}>
               <CaseCard build={build} />
