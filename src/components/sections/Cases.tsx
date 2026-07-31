@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router'
 import { ArrowRight, ArrowUpRight, Image as ImageIcon } from 'lucide-react'
 import { Container } from '@/components/primitives/Container'
 import { FadeIn } from '@/components/primitives/FadeIn'
-import { RoleByline, OpenNote, Pill, StatPill } from '@/components/primitives/Ui'
+import { RoleByline, Pill, StatPill, WipTag } from '@/components/primitives/Ui'
 import { CaseCover } from '@/components/CaseCover'
 import { EvolutionPanel } from '@/components/EvolutionPanel'
 import { useLocale } from '@/lib/i18n'
@@ -148,8 +149,8 @@ function MainCase({ build }: { build: Build }) {
  */
 function CaseCta({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       className="group tap-h mt-block inline-flex items-center text-h2 font-extrabold text-royal"
     >
       <span className="case-underline inline-flex items-center gap-3 pb-2">
@@ -159,7 +160,7 @@ function CaseCta({ href, children }: { href: string; children: ReactNode }) {
           aria-hidden
         />
       </span>
-    </a>
+    </Link>
   )
 }
 
@@ -174,7 +175,14 @@ function CaseCard({ build }: { build: Build }) {
       <CaseCover build={build} interactive={linked} />
 
       <div className="mt-gap">
-        <RoleByline>{build.tag}</RoleByline>
+        {/* A assinatura de papel e a marca de WIP dividem uma linha só, e a linha
+            quebra: "UX RESEARCH E PRODUCT DESIGN" já ocupa quase a coluna inteira
+            do card em telas médias, e sem `flex-wrap` o "· WIP" seria empurrado
+            para fora em vez de descer. */}
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+          <RoleByline>{build.tag}</RoleByline>
+          {build.wip && <WipTag>{t.builds.wipLabel}</WipTag>}
+        </div>
         <h3 className="mt-2.5 flex items-start justify-between gap-3 text-h2 font-bold text-ink">
           <span className="min-w-0">
             <span className={linked ? 'underline-draw' : undefined}>{build.name}</span>
@@ -190,11 +198,6 @@ function CaseCard({ build }: { build: Build }) {
           )}
         </h3>
         <p className="mt-2 text-body-sm text-ink-soft">{build.body}</p>
-        {build.pending && (
-          <div className="mt-3">
-            <OpenNote>{build.pending}</OpenNote>
-          </div>
-        )}
       </div>
     </>
   )

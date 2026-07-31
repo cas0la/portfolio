@@ -30,22 +30,46 @@
  * detalhe.
  */
 
+import { Routes, Route } from 'react-router'
 import { Nav } from '@/components/sections/Nav'
-import { Hero } from '@/components/sections/Hero'
-import { Cases } from '@/components/sections/Cases'
-import { About } from '@/components/sections/About'
-import { Contact } from '@/components/sections/Contact'
+import { ScrollManager } from '@/components/ScrollManager'
+import { Home } from '@/pages/Home'
+import { CaseInteligenciaComercial } from '@/pages/CaseInteligenciaComercial'
+import { NotFound } from '@/pages/NotFound'
 import { LocaleProvider } from '@/lib/i18n'
+
+/*
+ * ROTAS
+ *
+ * O site nasceu de uma página só e ganhou roteador em 31/07/2026, para a página
+ * interna do case do Inteligência Comercial. O gatilho "Ver o case completo" já
+ * apontava para `/cases/inteligencia-comercial` desde a rodada anterior e devolvia
+ * 404 — a rota abaixo é o que fecha essa dívida.
+ *
+ * **Roteador de verdade e não um segundo HTML de entrada.** Os dois cases de
+ * pesquisa também vão querer página, e com entradas separadas o cabeçalho, o
+ * seletor de idioma e o Lenis seriam recarregados e reinicializados a cada troca —
+ * inclusive a escolha de idioma, que vive em estado de React e só sobrevive por
+ * causa do `localStorage`.
+ *
+ * O `Nav` fica **fora** do `Routes`: ele é a moldura, e remontá-lo a cada rota
+ * faria o `ResizeObserver` republicar `--header-h` e a barra piscar na navegação.
+ */
 
 export default function App() {
   return (
     <LocaleProvider>
+      <ScrollManager />
       <Nav />
       <main>
-        <Hero />
-        <Cases />
-        <About />
-        <Contact />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/cases/inteligencia-comercial"
+            element={<CaseInteligenciaComercial />}
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </main>
     </LocaleProvider>
   )

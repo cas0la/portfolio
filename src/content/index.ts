@@ -67,6 +67,20 @@ export type Milestone = {
    * onde cabe mostrar o documento como documento.
    */
   pains?: string[]
+  /**
+   * Os módulos que existiam neste marco, no marco de lançamento.
+   *
+   * **Esta lista é o argumento da estação, e o argumento é a subtração.** Cinco
+   * itens em maio de 2025, três telas em produção depois — quem varre a faixa da
+   * esquerda para a direita vê dois desaparecerem sem que nenhuma frase precise
+   * dizer isso. Era a fase que faltava na cronologia: o site contava a ideação, os
+   * rascunhos e a produção, e pulava o lançamento inteiro.
+   *
+   * Mesmo desenho da lista de `pains` — fio à esquerda, um item por linha — com a
+   * cor trocada. Roxo é a dor que motivou; royal é o que foi construído, e royal já
+   * é a cor das datas do painel.
+   */
+  modules?: string[]
   /** O número que fecha a linha, com a fonte declarada. */
   score?: { value: string; label: string; source: string; min: string; max: string }
   /**
@@ -88,10 +102,59 @@ export type Piece = {
   name: string
   detail: string
   /**
-   * Número real que o módulo sustenta, separado em valor e unidade para o valor
-   * poder ser tipografado grande e a unidade ficar discreta ao lado.
+   * De que problema o módulo nasceu, em prosa.
+   *
+   * **Cada módulo carrega a própria jornada agora.** Antes a página tinha um bloco
+   * `origin` solto que contava só a da Cotação Ágil e um tradeoff que falava só de
+   * Objetivos e Sugestões: dois textos de módulo posando de texto de produto, e os
+   * outros dois módulos sem história nenhuma. Aqui a jornada fica colada no módulo
+   * que ela explica.
    */
-  count?: { value: string; unit: string }
+  journey?: string[]
+  /**
+   * As decisões do módulo, cada uma com a tela em que ela aparece.
+   *
+   * **Decisão, não funcionalidade.** Cada item nomeia uma escolha e o que ela
+   * descartou; "o módulo tem OCR" é funcionalidade e não entra. É o princípio 1 do
+   * PRODUCT.md — um caso sem trade-off explícito não está pronto — aplicado no
+   * nível do módulo em vez de só no nível do case.
+   *
+   * A tela é **parte da decisão e não ilustração dela**: é a prova de que a escolha
+   * chegou a existir em produto. Por isso `src` mora aqui e não numa galeria
+   * separada.
+   */
+  decisions?: { title: string; body: string }[]
+  /**
+   * A jornada do módulo em telas, no slider.
+   *
+   * **Saiu de dentro das decisões e virou peça própria.** Cada decisão carregava uma
+   * captura, e isso prendia a jornada a três telas — enquanto a Cotação Ágil tem seis
+   * estados que só fazem sentido em ordem: três formatos de entrada, os ajustes, o
+   * processamento e a conferência. Amarrar tela a decisão obrigava a escolher entre
+   * contar a decisão e mostrar o fluxo.
+   *
+   * `caption` é o passo, não a explicação. O porquê fica nas decisões, acima; aqui a
+   * legenda só diz onde no fluxo aquela tela acontece, senão o slider vira um segundo
+   * texto competindo com o primeiro.
+   */
+  screens?: { src: string; alt: string; caption: string }[]
+  /**
+   * Os números que o módulo sustenta.
+   *
+   * **O primeiro é o principal e sai em corpo de display.** A ordem da lista é
+   * hierarquia, não cronologia: quem escreve põe primeiro o número que o módulo
+   * usaria para se defender sozinho.
+   *
+   * Virou lista porque um módulo tem mais de um resultado, e o anterior (`count`,
+   * um número só) obrigava a escolher o mais vistoso e jogar fora os que provavam
+   * a mesma coisa por outro ângulo.
+   *
+   * `source` é por número e não por seção. A nota de rodapé única dizia "Power BI e
+   * Mixpanel" para tudo, o que é verdade para parte e mentira para o resto — os
+   * números de OCR saem de release note, não de painel. Onde `source` falta, o
+   * rodapé da seção ainda responde.
+   */
+  results?: { value: string; unit: string; source?: string }[]
 }
 
 export type Build = {
@@ -150,10 +213,93 @@ export type Build = {
    */
   milestones?: Milestone[]
   pieces?: Piece[]
-  /** O custo da decisão. Nativo da caixa de peças, não pendurado no fim. */
-  tradeoff?: string
-  /** Marcado quando o conteúdo depende de material que o Lucas ainda não passou. */
-  pending?: string
+  /**
+   * Como o escopo continuou sendo decidido depois que o produto subiu.
+   *
+   * **Este é o único bloco em nível de case, e por isso ele existe.** A jornada de
+   * cada módulo conta de onde aquele módulo veio; este conta o método que decidiu
+   * o que entrava em todos eles. Foi o que sobrou de legítimo no nível do produto
+   * quando as origens desceram para os módulos.
+   */
+  discovery?: { title: string; body: string[]; results?: Piece['results'] }
+  /**
+   * A prova de efetividade, no fim da página.
+   *
+   * **Aqui é o único lugar onde números de origens diferentes se encostam**, e é de
+   * propósito: satisfação medida em pesquisa, adoção medida em operação e uso medido
+   * em produto dizem coisas diferentes, e a força está em elas concordarem. Nos
+   * módulos cada número prova um módulo; aqui eles provam o produto.
+   *
+   * Cada linha declara a própria fonte, sem exceção — é o fecho do case e é onde um
+   * número sem procedência estraga os outros por associação.
+   */
+  /**
+   * Onde os três módulos se encontram: a saída para o checkout da plataforma de
+   * vendas.
+   *
+   * **Existe como seção porque não é atributo de módulo nenhum.** Cada um dos três
+   * tem a própria saída, e escrever isso três vezes dentro dos módulos faria parecer
+   * três integrações parecidas em vez de uma decisão de arquitetura tomada uma vez.
+   * É também o desfecho do achado do último metro, que abre a jornada de Objetivos:
+   * o problema era de produto, e a resposta teve que ser de produto.
+   */
+  convergence?: {
+    title: string
+    body: string[]
+    items: { name: string; detail: string }[]
+  }
+  proof?: { title: string; lead: string; results: NonNullable<Piece['results']> }
+  /*
+   * `origin` MORREU AQUI, e o que ele fazia continua vivo.
+   *
+   * Era uma seção solta desta página, com título próprio, contando de onde a
+   * Cotação Ágil tinha vindo. O texto está inteiro em `Piece.journey` do módulo que
+   * ele explica. A seção caiu porque a página passou a separar as jornadas por
+   * módulo: um bloco de origem no nível do case dizia, pela posição, que aquela era
+   * *a* origem do produto, quando é a de um módulo entre três.
+   */
+  /**
+   * A mesma tela em cinco momentos, na página interna.
+   *
+   * **É a única peça do site que argumenta por comparação.** A faixa de evolução
+   * data marcos e mostra três capturas soltas de módulos diferentes; aqui é sempre
+   * a tela inicial, e o que muda entre uma e a seguinte é o argumento. Sem o
+   * mesmo assunto nas cinco, viraria galeria.
+   *
+   * `change` é uma linha só, e é o que mudou daquele passo para o anterior — não
+   * uma descrição do que a tela tem. Descrição o leitor tira da imagem sozinho.
+   *
+   * **Não tem data.** As versões do Figma dão a ordem, não o mês, e o painel logo
+   * acima já data a cronologia. Rótulo com data inventada seria pior que rótulo
+   * sem data.
+   */
+  uiEvolution?: {
+    title: string
+    lead: string
+    steps: { version: string; src: string; alt: string; change: string }[]
+  }
+  /**
+   * O custo da decisão. Nativo da caixa de peças, não pendurado no fim.
+   *
+   * **Virou lista de parágrafos e não uma frase.** Um tradeoff honesto tem dois
+   * tempos — o que eu descobri e o que eu deixei de fazer por causa disso — e os
+   * dois num parágrafo só viram uma frase longa em que o segundo tempo chega como
+   * apêndice do primeiro.
+   */
+  tradeoff?: string[]
+  /**
+   * Case em construção pública.
+   *
+   * **Substituiu as notas em primeira pessoa que diziam o que faltava.** Elas
+   * eram honestas e custavam caro: "não tenho material visual publicável deste
+   * trabalho" transforma um case em confissão, e quem lê está avaliando, não
+   * auditando. Uma marca de estado diz a mesma verdade — isto ainda não está
+   * pronto — sem entregar o motivo nem pedir desculpa por ele.
+   *
+   * A marca vive na assinatura de papel, não em pílula colorida: badge de status
+   * é o vocabulário de SaaS que o DESIGN.md recusa desde a primeira rodada.
+   */
+  wip?: boolean
   href?: string
   /**
    * Capa do case. Enquanto não existir, o componente mostra placeholder.
@@ -292,10 +438,52 @@ type Copy = {
     /** Botão do case principal, que leva para a página interna. */
     openFull: string
     piecesLabel: string
+    /**
+     * Marca de case em construção, ao lado da assinatura de papel.
+     *
+     * Fica igual nos dois idiomas de propósito: "WIP" é sigla corrente em
+     * português e em inglês, e traduzir para "Em construção" alongaria a linha da
+     * assinatura só do lado PT, desalinhando os dois cards.
+     */
+    wipLabel: string
+    /**
+     * O que a capa de case em construção diz, no lugar da arte.
+     *
+     * Aqui a frase é traduzida, ao contrário da `wipLabel`: a capa tem 16:10 de
+     * largura para gastar, e "Em construção" por extenso é mais claro que a sigla
+     * para quem cai direto no card sem ter lido a assinatura de papel.
+     */
+    coverConstruction: string
     openCase: string
     /** Avisa que o link sai do site. Entra só no rótulo acessível. */
     newTab: string
     items: Build[]
+  }
+  /**
+   * A página interna de case, que passou a existir com o roteador em 31/07/2026.
+   *
+   * Só os rótulos moram aqui. **O conteúdo do case continua no item de `builds`**,
+   * e é de propósito: o mesmo produto é contado em dois lugares com profundidades
+   * diferentes, e duplicar a narrativa num segundo objeto garantiria que um dos
+   * dois envelhecesse sozinho.
+   */
+  casePage: {
+    /** Volta para a seção de cases da home, não para o topo dela. */
+    back: string
+    timelineTitle: string
+    piecesTitle: string
+    /** De onde vêm os números dos módulos. Regra dura: número sem fonte não entra. */
+    numbersSource: string
+    journeyPrev: string
+    journeyNext: string
+    tradeoffTitle: string
+    closingTitle: string
+    closingBody: string
+    closingCta: string
+    /** A rota que não existe. */
+    notFoundTitle: string
+    notFoundBody: string
+    notFoundCta: string
   }
   inventory: {
     /** A afirmação que abre a seção, em escala de display. Promovida do texto. */
@@ -594,6 +782,8 @@ const pt: Copy = {
     highlightsLabel: 'Escopo e resultado',
     openFull: 'Ver o case completo',
     piecesLabel: 'Módulos',
+    wipLabel: 'WIP',
+    coverConstruction: 'Em construção',
     openCase: 'Ver o case no Notion',
     newTab: 'abre em nova aba',
     items: [
@@ -761,13 +951,50 @@ const pt: Copy = {
               },
             ],
           },
+          /*
+           * A estação que faltava, e faltava a fase inteira.
+           *
+           * A cronologia ia da ideação e dos dois rascunhos direto para produção,
+           * pulando o lançamento. O produto subiu em maio de 2025 com **cinco
+           * módulos** e foi apresentado ao mercado no fórum do setor em junho.
+           *
+           * **Os nomes são os do deck de lançamento**, não uma releitura de hoje:
+           * é o que estava escrito quando a decisão foi tomada, e é o que sustenta a
+           * subtração que a faixa mostra sem dizer — cinco aqui, três telas depois.
+           * "Central de novidades" saiu do produto em abril de 2026, com número de
+           * task; "Página do cliente" foi absorvida.
+           */
+          {
+            iso: '2025-05',
+            when: 'Mai 2025',
+            title: 'Lançamento',
+            note: 'Cinco módulos no ar, e a apresentação para o mercado no fórum do setor, em junho.',
+            modules: [
+              'Metas',
+              'Oportunidade de venda',
+              'Catálogo de produtos',
+              'Página do cliente',
+              'Central de novidades',
+            ],
+          },
           {
             iso: '2025-09',
             when: 'Set 2025',
-            untilIso: '2026-03',
-            until: 'Mar 2026',
+            untilIso: '2026-04',
+            until: 'Abr 2026',
             title: 'Em produção',
-            note: 'Três módulos no ar, com 5 operações em clientes reais.',
+            /*
+             * A janela fecha em abril de 2026 porque é lá que a produção deixa de
+             * ser piloto. Antes disso eram usuários focais em acesso antecipado; em
+             * abril a primeira operação vira a chave para as seis regionais dela.
+             *
+             * **Não virou estação própria de propósito.** A faixa reserva 248px de
+             * arte por estação acima de `lg`, e a virada não tem imagem nem lista
+             * que a sustente sem inventar artefato. Esticar a janela existente diz a
+             * mesma coisa e mantém os três mockups, que são a arte mais forte do
+             * painel.
+             */
+            note: 'Três módulos no ar em 5 operações. Em abril a primeira delas passa dos 15 usuários do acesso antecipado para mais de 200, nas seis regionais.',
             shots: [
               {
                 src: '/assets/cases/ic/objetivos.jpg',
@@ -801,28 +1028,408 @@ const pt: Copy = {
             },
           },
         ],
+        /*
+         * ONDE ENTRAM OS NÚMEROS QUE FALTAM. O autor vai preencher; a estrutura já
+         * espera por eles e nada aqui precisa ser reescrito quando chegarem.
+         *
+         * - **`source` vazio em três resultados**: "400+ cotações/mês", "300+
+         *   catálogos/90 dias" e "~200 pedidos/dia" não apareceram em documento
+         *   nenhum — nem na varredura do repositório, nem no export do ClickUp.
+         *   Fonte provável é Power BI, que não é acessível daqui. Enquanto `source`
+         *   faltar, o rodapé da seção responde por eles.
+         * - **Cotação Ágil e Objetivos podem receber mais resultados.** É só somar
+         *   itens em `results`; a lista não tem teto de layout.
+         * - **Catálogo Digital está sem `journey`.** É o único módulo cujo problema
+         *   de origem eu não tenho em documento, e a seção simplesmente não desenha
+         *   o bloco enquanto o campo faltar. Módulo com resultado e sem história ao
+         *   lado de dois com história parece o mais fraco dos três por falta de
+         *   texto, não por mérito.
+         */
+        /*
+         * ORDEM CANÔNICA, definida pelo autor: Objetivos e Sugestões, Cotação Ágil,
+         * Catálogo Digital. Antes a lista abria pela Cotação Ágil, que é o módulo com
+         * mais prova. A ordem do produto vence a ordem do orgulho: Objetivos nasceu
+         * primeiro e é dele que sai o achado que explica os outros dois.
+         *
+         * **As decisões são leitura minha sobre evidência documentada**, e o autor
+         * precisa confirmar o enquadramento. O fato de cada uma existe em fonte: o
+         * último metro está no slide "Período de testes" do deck de mai/2025; o
+         * checkout na plataforma de vendas é doc de produto no ClickUp; os cinco
+         * tipos de objetivo estão na documentação de jul/2026; foto, áudio, status de
+         * processamento e disponibilidade real são release notes (v0.2.6, v0.4.4,
+         * v0.5.1); catálogo web, PDF e detalhes são PRO-247, 248 e 249. O que eu
+         * escrevi por cima é **por que** cada uma foi uma escolha e não uma obviedade
+         * — e é isso que ele confirma ou corrige.
+         */
         pieces: [
+          {
+            name: 'Objetivos e Sugestões',
+            detail:
+              'Histórico do ponto de venda vira sugestão de mix e meta. É o módulo de IA do produto.',
+            /*
+             * Este parágrafo era a abertura do `tradeoff`. Ele mudou de lugar porque
+             * é achado de pesquisa **deste módulo**, e não decisão de produto: o que
+             * é decisão de produto ficou na seção de tradeoff, que agora abre por
+             * conta própria em vez de depender desta frase como antecedente.
+             */
+            journey: [
+              'A pesquisa do período de testes me deu a resposta mais desconfortável que ela podia dar: as sugestões estavam certas, e o vendedor não usava. Com o carrinho pronto para exportar, ele preferia refazer o pedido à mão na plataforma de vendas. O que faltava não era inteligência, era o último metro do caminho.',
+            ],
+            decisions: [
+              {
+                title: 'Parei de melhorar a sugestão',
+                body: 'O caminho óbvio depois daquela pesquisa era mexer no algoritmo, porque é o que um módulo de IA convida a fazer. Só que a evidência dizia o contrário: a sugestão já estava aderente e mesmo assim morria no carrinho. Investir em acerto de recomendação teria melhorado o número que já estava bom e deixado intacto o que impedia o pedido de sair.',
+              },
+              {
+                title: 'Trouxe o contexto de crédito para dentro da sugestão',
+                body: 'Sugerir mix sem dizer se o cliente pode comprar transfere para o vendedor uma conferência que ele faria em outro sistema, e é nessa troca de tela que o pedido se perde. Limite de crédito, inadimplência e positivação passaram a chegar junto com a sugestão, no mesmo cartão.',
+              },
+              {
+                title: 'Abri a meta por fabricante em vez de somar tudo',
+                body: 'Uma barra de venda total diz que se está atrás, e não onde. Quebrar por indústria custa densidade na tela e obriga a manter meta por fabricante, mas é a única forma de a informação virar próxima visita. Foi por esse caminho que os tipos de objetivo chegaram a cinco — e que a estrutura de metas passou a ser montada por cliente, com categoria nova entrando como módulo em vez de exigir uma versão do produto.',
+              },
+            ],
+            screens: [
+              {
+                src: '/assets/cases/ic/jornadas/obj-0.jpg',
+                alt: 'Tela inicial da plataforma, com o cartão Objetivos e Sugestões listando os cinco objetivos e o progresso de cada um.',
+                caption: 'A home abre pelas metas do vendedor',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/obj-1.jpg',
+                alt: 'Tela de Venda Total, com a barra de progresso do vendedor contra a meta do período.',
+                caption: 'O objetivo do período, medido contra a meta',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/obj-2.jpg',
+                alt: 'Tela de Venda Indústria, com uma barra de progresso por fabricante mostrando o valor vendido contra a meta de cada um.',
+                caption: 'A mesma meta aberta por fabricante',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/obj-3.jpg',
+                alt: 'Tela de Sugestão de Pedido, com o cliente no topo, o limite de crédito em 65%, a marca de não positivado e a lista de produtos sugeridos.',
+                caption: 'A sugestão do cliente, com crédito e positivação junto',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/obj-4.jpg',
+                alt: 'Tela de adicionar produtos à sugestão, com busca e a lista de itens disponíveis.',
+                caption: 'O vendedor completa o que a sugestão não trouxe',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/obj-5.jpg',
+                alt: 'Tela de pedido finalizado, confirmando que a sugestão virou pedido sem sair da plataforma.',
+                caption: 'O pedido sai daqui, sem redigitar em outro sistema',
+              },
+            ],
+            results: [
+              { value: '~200', unit: 'pedidos por dia saem das sugestões' },
+              {
+                value: '5',
+                unit: 'tipos de objetivo, de venda total a produtos por PDV',
+                source: 'Documentação de produto, jul/2026',
+              },
+            ],
+          },
           {
             name: 'Cotação Ágil',
             detail:
-              'A lista do cliente entra por foto e vira cotação por OCR. Poupa **mais de uma hora** de digitação por cotação, com 50 a 100 itens em média, e a comparação manual de condições. A conversão fica **acima de 80%**.',
-            count: { value: '400+', unit: 'cotações/mês' },
+              'A lista do cliente entra por foto e vira cotação por OCR, sem digitação e sem comparar condição a condição na mão.',
+            /*
+             * A jornada saiu do bloco `origin`, que era uma seção solta desta
+             * página. Ver a nota que ficou lá para o que foi confirmado pelo autor
+             * (ele não estava no evento) e para o que ficou de fora de propósito.
+             */
+            journey: [
+              'Em agosto de 2025 o produto foi para um encontro do setor. Eu desenhei a ferramenta, testei antes e acompanhei o uso em tempo real à distância, com quem estava no estande me contando o que acontecia a cada atendimento. A cena que voltava era sempre a mesma. O gerente regional atendia com uma planilha de dez páginas de SKU na mão, o cliente apontava o que queria, e o pedido era transcrito item a item na plataforma de vendas. A conexão do estande caía, e quando caía a cotação ficava guardada para o back-office lançar depois.',
+              'As oportunidades que saíram desse mapa viraram o módulo, uma a uma: ler a planilha por OCR em vez de digitar, escolher a tabela de preço sem perguntar, e emendar no pedido sem redigitar nada.',
+            ],
+            decisions: [
+              {
+                title: 'Aceitei o papel do jeito que ele chega',
+                body: 'A alternativa barata era pedir um arquivo limpo, em formato definido. Isso teria empurrado o trabalho de volta para o cliente, que é exatamente quem não ia fazer. Aceitar foto torta, lista manuscrita e planilha de dez páginas colocou o custo do desalinho no produto, onde ele podia ser resolvido uma vez em vez de a cada cotação.',
+              },
+              {
+                title: 'Mostrei a espera em vez de esconder',
+                body: 'Extrair, casar produto e buscar preço leva tempo, e a saída usual é a tela travada com um giro no meio. Optamos por dar estado ao processamento e devolver o vendedor para a lista enquanto isso roda. Custa uma tela a mais e um estado a mais para manter; evita o vendedor achar que quebrou e começar de novo na frente do cliente.',
+              },
+              {
+                title: 'Nada vira pedido sem passar pelo olho do vendedor',
+                body: 'Com extração por IA a tentação é fechar o ciclo sozinho e mostrar o resultado pronto. A cotação passou a exibir o que foi lido item a item, com o que está sem estoque marcado e o preço à vista, para o vendedor auditar antes de exportar. É mais um passo no fluxo, e é o passo que faz ele confiar no que a máquina leu.',
+              },
+            ],
+            screens: [
+              {
+                src: '/assets/cases/ic/jornadas/cot-1.jpg',
+                alt: 'Tela de importação de arquivos, com a área de envio e a lista de formatos aceitos.',
+                caption: 'Entrada por arquivo: foto, planilha ou PDF',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cot-2.jpg',
+                alt: 'Tela de gravação de áudio em andamento, com a forma de onda e o tempo corrido.',
+                caption: 'Entrada por áudio, para quem dita a lista',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cot-3.jpg',
+                alt: 'Tela de preenchimento manual de produtos, já com itens digitados.',
+                caption: 'Entrada manual, quando não há o que enviar',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cot-4.jpg',
+                alt: 'Tela de ajustes antes do processamento, com as opções de tratamento da cotação.',
+                caption: 'Os ajustes antes de mandar processar',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cot-5.jpg',
+                alt: 'Tela de processamento da cotação, com as etapas de identificação do cliente e verificação de preços.',
+                caption: 'O processamento com estado, em vez de tela travada',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cot-6.jpg',
+                alt: 'Tela de detalhes da cotação, com o resumo do cliente, o total de unidades e a lista de produtos cotados, um deles marcado como sem estoque.',
+                caption: 'A conferência item a item, antes de virar pedido',
+              },
+            ],
+            results: [
+              { value: '400+', unit: 'cotações respondidas por mês' },
+              { value: '80%+', unit: 'de conversão em pedido' },
+              { value: '1h+', unit: 'poupada por cotação, de 50 a 100 itens' },
+              {
+                value: '47',
+                unit: 'itens lidos de uma foto manuscrita, contra 4 antes',
+                source: 'Release v0.2.6',
+              },
+            ],
           },
           {
             name: 'Catálogo Digital',
             detail:
               'Preço e estoque em tempo real no lugar do catálogo impresso, com visibilidade sobre o que o cliente olhou.',
-            count: { value: '300+', unit: 'catálogos/90 dias' },
-          },
-          {
-            name: 'Objetivos e Sugestões',
-            detail:
-              'Histórico do ponto de venda vira sugestão de mix e meta. É o módulo de IA do produto.',
-            count: { value: '~200', unit: 'pedidos/dia' },
+            decisions: [
+              {
+                title: 'O catálogo deixou de ser um documento',
+                body: 'Manter o PDF e só automatizar a geração era o caminho curto, e ele preserva o problema: no dia seguinte o preço está velho e ninguém sabe. O catálogo passou a ser endereço com preço e estoque lidos na hora do acesso, com validade declarada. O PDF continua existindo para quem precisa dele, agora como saída e não como o produto.',
+              },
+              {
+                title: 'Montar virou escolher, não diagramar',
+                body: 'A montagem podia ter virado um editor, com ordem, capa e seções. Preferimos restringir a seleção de produtos ao que o vendedor de fato atende e deixar o resto por conta do sistema. Perde-se liberdade de composição; ganha-se catálogo montado entre uma visita e outra em vez de à noite.',
+              },
+              {
+                title: 'Devolvi ao vendedor o que o cliente olhou',
+                body: 'Catálogo compartilhado costuma terminar no envio, e o que acontece depois é silêncio. Passar a registrar acesso, tempo ativo e produto marcado como interesse transformou o material em sinal de próxima conversa. É também a parte que exigiu decidir o que não mostrar: o dado volta como interesse do cliente, nunca como vigilância de navegação.',
+              },
+            ],
+            screens: [
+              {
+                src: '/assets/cases/ic/jornadas/cat-1.jpg',
+                alt: 'Lista de catálogos do vendedor, cada um com nome, período e situação de publicação.',
+                caption: 'Os catálogos do vendedor, com prazo e situação',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cat-2.jpg',
+                alt: 'Tela de criação de catálogo, com a seleção de produtos e a configuração de período e disponibilidade.',
+                caption: 'A montagem: escolher produtos e prazo',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cat-3.jpg',
+                alt: 'Tela de detalhes de um catálogo publicado, com as estatísticas de interesses, acessos e tempo ativo.',
+                caption: 'O que voltou: acessos, interesses e tempo ativo',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cat-4.jpg',
+                alt: 'Catálogo aberto no navegador do cliente, em telefone, com os produtos, preço e a ação de marcar interesse.',
+                caption: 'O que o cliente abre, no navegador dele',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cat-5.jpg',
+                alt: 'Catálogo já autenticado no navegador do cliente, com os produtos por indústria, preço a partir de e o coração para marcar interesse.',
+                caption: 'Autenticado, ele vê preço e marca o que interessa',
+              },
+            ],
+            results: [{ value: '300+', unit: 'catálogos compartilhados em 90 dias' }],
           },
         ],
-        pending:
-          'Ainda falta a parte mais importante aqui: qual decisão me custou algo, e o que ela custou. Vou escrever isso junto com o histórico de versões na página interna deste case.',
+        /*
+         * Fonte: o mapa de jornada as-is do encontro do setor (out/2025), que
+         * registra planilha de dez páginas de SKU, transcrição manual do pedido na
+         * plataforma de vendas, conexão instável no estande e o back-office como
+         * plano B. As três frases do segundo parágrafo são, uma a uma, as
+         * "oportunidades" listadas naquele mesmo mapa.
+         *
+         * **Ele não estava no evento, e o texto não finge que estava.** Confirmado
+         * por ele: concebeu a ferramenta, testou antes e acompanhou o desempenho em
+         * tempo real à distância, com quem atendia no estande reportando o uso. A
+         * versão anterior dizia "eu fui atrás de como o atendimento acontecia", que
+         * é observação em primeira mão e não foi o que aconteceu. Observação
+         * mediada, dita como método, vale mais que presença inventada — e ninguém
+         * pergunta "onde você estava" para quem descreve o próprio arranjo.
+         *
+         * **O que ficou de fora de propósito:** que aquele foi o mês de maior volume
+         * de commits do repositório. É verdade e não é prova de nada que um PM queira
+         * apresentar — convida "commit mede o quê?" ao lado de números que se
+         * defendem sozinhos.
+         */
+        /*
+         * As cinco telas saem do Figma (MVP 0.1, 0.3, 0.5 e go-live) e da
+         * documentação de produto (a atual). Cortadas em 780x1688, que é o
+         * viewport de 390x844 em 2x — a mesma proporção das capturas que já estavam
+         * no painel.
+         *
+         * **O dado nas telas é simulado**, confirmado pelo autor: os nomes de rede
+         * de farmácia, os CNPJs e os valores por indústria são preenchimento de
+         * protótipo. Foi o que liberou publicar sem borrão. Se algum dia entrar
+         * captura de ambiente real aqui, a regra da lista de proibições volta a
+         * valer inteira.
+         */
+        uiEvolution: {
+          title: 'Eu refiz a tela inicial quatro vezes',
+          lead: 'A tela inicial é onde um produto declara o que ele acha que importa. Em cada versão ela declarou uma coisa diferente.',
+          steps: [
+            {
+              version: 'MVP 0.1',
+              src: '/assets/cases/ic/evolucao/v01.jpg',
+              alt: 'Primeira versão da tela inicial, com marca verde, saudação ao vendedor e uma lista de clientes identificados por CNPJ, cada um com a contagem de SKUs para reposição.',
+              change:
+                'A home é a lista de clientes, e o produto é o pedido ideal de cada um.',
+            },
+            {
+              version: 'MVP 0.3',
+              src: '/assets/cases/ic/evolucao/v03.jpg',
+              alt: 'Segunda versão, ainda verde, com as abas Pedidos Ideais, Catálogo de Produtos e Clientes acima da mesma lista.',
+              change:
+                'Entram catálogo e novidades, mas a lista continua sendo a estrutura.',
+            },
+            {
+              version: 'MVP 0.5',
+              src: '/assets/cases/ic/evolucao/v05.jpg',
+              alt: 'Terceira versão, com a marca roxa e laranja, mostrando cartões de Total de Vendas, Venda por Indústria, Mix de Produtos e Positivação de PDV, e uma barra de abas embaixo.',
+              change:
+                'A marca muda e a home deixa de ser lista: passa a ser painel de objetivos.',
+            },
+            {
+              version: 'Go-live',
+              src: '/assets/cases/ic/evolucao/golive.jpg',
+              alt: 'Versão do go-live, com o cartão Objetivos e Sugestões trazendo a quebra por indústria, e abaixo os cartões de Cotação Ágil e Catálogo Digital.',
+              change:
+                'Cada módulo ganha cartão próprio, e a cotação passa a começar por conversa.',
+            },
+            {
+              version: 'Hoje',
+              src: '/assets/cases/ic/evolucao/atual.jpg',
+              alt: 'Tela atual, com cinco objetivos medidos em barra de progresso: venda total, venda indústria aberta por fabricante, positivação de produtos, positivação de clientes e produtos por PDV.',
+              change:
+                'Os objetivos viram cinco, e cada um passa a mostrar o quanto já andou.',
+            },
+          ],
+        },
+        /*
+         * O método que decidiu o escopo, informado pelo autor em jul/2026.
+         *
+         * **As três fontes vão nomeadas uma a uma, e não como "discovery contínuo".**
+         * O nome do método é o que qualquer PM escreve; dizer o que cada frente pega
+         * que as outras não pegam é o que mostra que ele foi de fato operado.
+         *
+         * O número de melhorias é o de `PRODUCT.md` ("20+ melhorias lançadas em 3
+         * meses"), e entra sem `source` pelo mesmo motivo dos outros três: a
+         * procedência é Power BI, que não é acessível daqui.
+         *
+         * **Não afirma proporção.** A versão que eu escrevi primeiro dizia que "a
+         * maior parte" das melhorias nasceu de pedido de usuário, e isso é uma
+         * quantificação que ninguém mediu. O que ele confirmou é a origem do
+         * processo, não a fatia — e o princípio 2 do PRODUCT.md ("evidência real ou
+         * silêncio") derruba a fatia.
+         */
+        discovery: {
+          title: 'Eu nunca decidi sozinho o que entrava',
+          body: [
+            'Depois que o produto subiu, a fila de melhorias parou de sair de reunião de roadmap. Passei a manter grupo aberto com os vendedores que usam a plataforma todo dia, a entrevistar quem tinha acabado de usar, e a olhar o dado de uso ao lado dos dois.',
+            'Cada frente pega o que as outras não pegam. O grupo traz o incômodo que ninguém abre chamado para relatar. A entrevista mostra onde a pessoa hesita, que é diferente de onde ela reclama. O dado diz quantos passam pelo mesmo ponto, e é ele que separa o caso isolado do problema que vale corrigir. ++Foi assim que a fila do que entrar deixou de ser minha opinião.++',
+          ],
+          results: [{ value: '20+', unit: 'melhorias lançadas em 3 meses' }],
+        },
+        /*
+         * Fontes, nesta ordem: o deck de lançamento de maio/2025, slide "Período de
+         * testes", que registra literalmente que o vendedor preferia refazer o pedido
+         * à mão **mesmo com o carrinho pronto** e que as sugestões estavam aderentes;
+         * o roadmap do mesmo deck, que anunciava roteirização e assistente de cobrança
+         * para o mesmo ano; o código de cobrança no repositório desde set/2025; e o
+         * roadmap de hoje, que devolve os dois para o fim de 2026.
+         *
+         * **A causa é dele e não é a que eu tinha escrito.** A primeira versão dizia
+         * que corrigir o último metro da sugestão consumiu os outros dois módulos.
+         * Ele corrigiu: os dois foram adiados para polir e evoluir os três que já
+         * rodavam em produção. O tradeoff verdadeiro é profundidade contra largura,
+         * e não um módulo devorando os vizinhos — o que é uma decisão mais defensável
+         * e, por isso mesmo, precisa ser contada como decisão e não como acidente.
+         *
+         * Os nomes são os que o produto usa hoje ("Roteiro Ideal", "Assistente de
+         * Cobrança"), não os do deck de 2025 ("roteirização"). Aqui não vale a regra
+         * da estação de lançamento, que preserva o vocabulário da época: aquela faixa
+         * data o que foi anunciado, este bloco fala do que está no produto agora.
+         *
+         * **Este parágrafo errou duas vezes em direções opostas, e o meio é o certo.**
+         * A primeira versão dizia "parado no repositório desde então", inferido das
+         * datas de commit do `bill`. Eu corrigi para "prontos e desligados" ao ver
+         * tela, rota, menu e `enabledModules` no código, e ao ver os dois ligados na
+         * captura do manual. Ele corrigiu de volta: as telas do manual são ambiente
+         * simulado, e os módulos foram estruturados sem nunca serem finalizados nem
+         * publicados. Estruturado não é pronto, e código no repositório não prova
+         * produção — foi essa a distância que eu não vi.
+         *
+         * O primeiro parágrafo abre pelo desconforto e não pelo mérito. Tradeoff que
+         * começa se defendendo não é tradeoff, é conquista disfarçada.
+         */
+        convergence: {
+          title: 'As três saídas dão no mesmo lugar',
+          body: [
+            'O último metro que a pesquisa apontou nunca foi problema de um módulo só. Sugestão, cotação e catálogo terminavam cada um no seu canto, e os três cobravam do vendedor a mesma redigitação na plataforma de vendas para virar pedido.',
+            'Resolver isso uma vez, no lugar certo, valia mais que resolver três vezes na interface. Hoje qualquer um dos três desemboca no mesmo checkout com o carrinho montado — e é essa integração que faz o produto ser ferramenta de venda em vez de três relatórios bem desenhados.',
+          ],
+          items: [
+            {
+              name: 'Sugestão de pedido',
+              detail: 'o carrinho sugerido para o cliente vai inteiro para o checkout.',
+            },
+            {
+              name: 'Cotação Ágil',
+              detail: 'a cotação já conferida vira carrinho sem redigitar item nenhum.',
+            },
+            {
+              name: 'Catálogo Digital',
+              detail:
+                'os produtos que um CNPJ marcou como interesse viram carrinho daquele cliente.',
+            },
+          ],
+        },
+        proof: {
+          title: 'O que sobrou de medido',
+          lead: 'Três origens diferentes, e é por concordarem que elas valem: satisfação vem de pesquisa com quem usa, adoção vem da operação, e o uso vem do produto instrumentado.',
+          results: [
+            {
+              value: '+85',
+              unit: 'de NPS do produto, numa escala de -100 a 100',
+              source: 'Formbricks, Q3/2026',
+            },
+            {
+              value: '400+',
+              unit: 'vendedores usando em operação',
+              source: 'Power BI, jul/2026',
+            },
+            {
+              value: '5',
+              unit: 'operações migradas em 6 meses',
+              source: 'Power BI, jul/2026',
+            },
+            {
+              value: '15 → 200+',
+              unit: 'usuários na primeira operação, do acesso antecipado às seis regionais',
+              source: 'Power BI, abr/2026',
+            },
+          ],
+        },
+        tradeoff: [
+          'Os três módulos foram os que eu escolhi aprofundar, e aprofundar significou não abrir duas frentes novas.',
+          'A escolha custou o que eu mesmo tinha anunciado no lançamento. Roteiro Ideal e Assistente de Cobrança estavam prometidos para o mesmo ano. Os dois chegaram a ser estruturados, com tela desenhada e código escrito, e nenhum dos dois foi finalizado nem chegou a produção. Dezoito meses depois é que voltaram para o plano.',
+        ],
       },
       {
         id: 'electrolux-cuida',
@@ -832,8 +1439,7 @@ const pt: Copy = {
         org: 'Electrolux',
         tag: 'UX Research',
         body: 'Pesquisa de usuário como parte da estruturação do research de produtos digitais da Electrolux, área que até então olhava só para produto industrial.',
-        pending:
-          'Não tenho material visual publicável deste trabalho. O que eu tenho é o processo e o framework de pesquisa, e eles entram na página interna.',
+        wip: true,
       },
       {
         id: 'unicesumar-mundo-azul',
@@ -841,10 +1447,9 @@ const pt: Copy = {
         step: '03',
         name: 'Mundo Azul',
         org: 'Unicesumar',
-        tag: 'UX Research',
+        tag: 'UX Research e Product Design',
         body: 'Pesquisa de usuário conduzida como designer principal da conta.',
-        pending:
-          'Também não tenho material visual deste. O processo entra na página interna.',
+        wip: true,
       },
       /*
        * Banco do Brasil (Consórcios) e Sea the Future saíram por decisão do autor
@@ -861,6 +1466,26 @@ const pt: Copy = {
        * fizerem sentido de novo.
        */
     ],
+  },
+  casePage: {
+    /* "Voltar para os cases" e não "Voltar": o rótulo precisa dizer onde a pessoa
+       cai, porque ela pode ter chegado aqui por link direto e nunca ter visto a
+       home. O alvo é `/#cases`, a seção, e não o topo. */
+    back: 'Voltar para os cases',
+    timelineTitle: 'Como o produto evoluiu',
+    piecesTitle: 'Eu levei três módulos até produção',
+    numbersSource:
+      'Os números sem fonte própria são de julho de 2026, apurados em Power BI e Mixpanel.',
+    journeyPrev: 'Tela anterior',
+    journeyNext: 'Próxima tela',
+    tradeoffTitle: 'O que essa decisão custou',
+    closingTitle: 'Quer entrar no detalhe?',
+    closingBody:
+      'Posso contar como cada uma dessas decisões foi tomada, o que eu mediria de novo e o que eu faria diferente.',
+    closingCta: 'Falar comigo',
+    notFoundTitle: 'Essa página não existe.',
+    notFoundBody: 'O endereço pode ter mudado de lugar. Os cases estão todos na home.',
+    notFoundCta: 'Voltar para o começo',
   },
   inventory: {
     /*
@@ -1191,6 +1816,8 @@ const en: Copy = {
     highlightsLabel: 'Scope and outcome',
     openFull: 'Read the full case',
     piecesLabel: 'Modules',
+    wipLabel: 'WIP',
+    coverConstruction: 'In progress',
     openCase: 'Read the case on Notion',
     newTab: 'opens in a new tab',
     items: [
@@ -1257,13 +1884,27 @@ const en: Copy = {
               },
             ],
           },
+          /* Ver a nota na versão em português para por que esta estação entrou. */
+          {
+            iso: '2025-05',
+            when: 'May 2025',
+            title: 'Launch',
+            note: 'Five modules live, and the market presentation at the industry forum in June.',
+            modules: [
+              'Goals',
+              'Sales opportunity',
+              'Product catalog',
+              'Client page',
+              'News center',
+            ],
+          },
           {
             iso: '2025-09',
             when: 'Sep 2025',
-            untilIso: '2026-03',
-            until: 'Mar 2026',
+            untilIso: '2026-04',
+            until: 'Apr 2026',
             title: 'Live',
-            note: 'Three modules shipped, across 5 real customer operations.',
+            note: 'Three modules shipped across 5 customer operations. In April the first of them goes from the 15 early-access users to more than 200, across all six regions.',
             shots: [
               {
                 src: '/assets/cases/ic/objetivos.jpg',
@@ -1292,28 +1933,288 @@ const en: Copy = {
             },
           },
         ],
+        /* Ver a nota na versão em português para o que ainda falta preencher aqui:
+        /* Ver a nota na versão em português: ordem canônica, e por que as decisões
+           são leitura minha sobre evidência documentada. */
         pieces: [
+          {
+            name: 'Objetivos e Sugestões',
+            detail:
+              'The point of sale’s history becomes product mix suggestions and sales targets. This is the product’s AI module.',
+            journey: [
+              'The research from the test period gave me the most uncomfortable answer it could have: the suggestions were right, and reps were not using them. With the cart ready to export, they would rather rebuild the order by hand in the sales platform. What was missing was not intelligence. It was the last stretch of the path.',
+            ],
+            decisions: [
+              {
+                title: 'I stopped improving the suggestion',
+                body: 'The obvious move after that research was to work on the algorithm, because that is what an AI module invites you to do. The evidence said otherwise: the suggestion was already on target and still died in the cart. Investing in recommendation accuracy would have improved the number that was already good and left untouched the thing stopping the order.',
+              },
+              {
+                title: 'I pulled credit context into the suggestion',
+                body: 'Suggesting a mix without saying whether the client can buy hands the rep a check they would run in another system, and that screen switch is where the order gets lost. Credit limit, overdue balance and coverage now arrive alongside the suggestion, on the same card.',
+              },
+              {
+                title: 'I broke the target down by manufacturer instead of summing it',
+                body: 'A total-sales bar says you are behind, not where. Breaking it down by manufacturer costs screen density and forces us to maintain a target per manufacturer, but it is the only way the information turns into a next visit. That path is how the goal types grew to five, and how the target structure became something assembled per customer, with a new category arriving as a module instead of requiring a release.',
+              },
+            ],
+            screens: [
+              {
+                src: '/assets/cases/ic/jornadas/obj-0.jpg',
+                alt: 'Platform home screen, with the Goals and Suggestions card listing all five goals and the progress on each.',
+                caption: 'The home opens on the rep’s targets',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/obj-1.jpg',
+                alt: 'Total Sales screen, with the rep’s progress bar against the period target.',
+                caption: 'The period target, measured against goal',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/obj-2.jpg',
+                alt: 'Sales by Manufacturer screen, with a progress bar per manufacturer showing amount sold against each target.',
+                caption: 'The same target, broken down by manufacturer',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/obj-3.jpg',
+                alt: 'Order Suggestion screen, with the client at the top, credit limit at 65%, a not-yet-covered marker and the list of suggested products.',
+                caption: 'The client’s suggestion, with credit and coverage alongside',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/obj-4.jpg',
+                alt: 'Screen for adding products to the suggestion, with search and the list of available items.',
+                caption: 'The rep fills in what the suggestion missed',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/obj-5.jpg',
+                alt: 'Completed order screen, confirming the suggestion became an order without leaving the platform.',
+                caption: 'The order leaves from here, with no retyping',
+              },
+            ],
+            results: [
+              { value: '~200', unit: 'orders a day come from the suggestions' },
+              {
+                value: '5',
+                unit: 'goal types, from total sales to products per store',
+                source: 'Product documentation, Jul 2026',
+              },
+            ],
+          },
           {
             name: 'Cotação Ágil',
             detail:
-              'The customer’s list goes in as a photo and comes out as a quote via OCR. It saves **more than an hour** of typing per quote, at 50 to 100 items on average, plus the manual comparison of terms. Conversion runs **above 80%**.',
-            count: { value: '400+', unit: 'quotes/month' },
+              'The customer’s list goes in as a photo and comes out as a quote via OCR, with no typing and no comparing terms by hand.',
+            journey: [
+              'In August 2025 the product went to an industry gathering. I designed the tool, tested it beforehand and followed usage in real time from a distance, with the people working the stand telling me what happened on every visit. The scene coming back was always the same. The regional manager served clients holding a ten-page spreadsheet of SKUs, the client pointed at what they wanted, and the order was transcribed line by line into the sales platform. The connection at the stand kept dropping, and when it dropped the quote was set aside for the back office to enter later.',
+              'The opportunities that came out of that map became the module, one by one: read the spreadsheet with OCR instead of typing it, pick the price table without asking, and carry straight into the order without retyping anything.',
+            ],
+            decisions: [
+              {
+                title: 'I took the paper the way it arrives',
+                body: 'The cheap alternative was to ask for a clean file in a defined format. That would have pushed the work back onto the customer, who is exactly the person not going to do it. Accepting a crooked photo, a handwritten list and a ten-page spreadsheet put the cost of the mess inside the product, where it could be solved once instead of on every quote.',
+              },
+              {
+                title: 'I showed the wait instead of hiding it',
+                body: 'Extracting, matching products and fetching prices takes time, and the usual answer is a frozen screen with a spinner. We gave processing a real state and handed the rep back to the list while it runs. It costs one more screen and one more state to maintain; it avoids the rep assuming it broke and starting over in front of the client.',
+              },
+              {
+                title: 'Nothing becomes an order without the rep seeing it',
+                body: 'With AI extraction the temptation is to close the loop alone and present a finished result. The quote now shows what was read line by line, with out-of-stock items marked and the price visible, so the rep can audit it before exporting. It is one more step in the flow, and it is the step that makes them trust what the machine read.',
+              },
+            ],
+            screens: [
+              {
+                src: '/assets/cases/ic/jornadas/cot-1.jpg',
+                alt: 'File import screen, with the upload area and the list of accepted formats.',
+                caption: 'File input: photo, spreadsheet or PDF',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cot-2.jpg',
+                alt: 'Audio recording in progress, with the waveform and elapsed time.',
+                caption: 'Audio input, for reps who dictate the list',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cot-3.jpg',
+                alt: 'Manual product entry screen, already filled with items.',
+                caption: 'Manual entry, when there is nothing to upload',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cot-4.jpg',
+                alt: 'Adjustment screen before processing, with the quote handling options.',
+                caption: 'The adjustments before sending it to process',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cot-5.jpg',
+                alt: 'Quote processing screen, with the steps of client identification and price checking.',
+                caption: 'Processing with real state, instead of a frozen screen',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cot-6.jpg',
+                alt: 'Quote detail screen, with the client summary, total units and the list of quoted products, one of them marked out of stock.',
+                caption: 'The line-by-line audit, before it becomes an order',
+              },
+            ],
+            results: [
+              { value: '400+', unit: 'quotes answered per month' },
+              { value: '80%+', unit: 'converted into orders' },
+              { value: '1h+', unit: 'saved per quote, at 50 to 100 items' },
+              {
+                value: '47',
+                unit: 'items read from a handwritten photo, against 4 before',
+                source: 'Release v0.2.6',
+              },
+            ],
           },
           {
             name: 'Catálogo Digital',
             detail:
               'Real-time price and stock replacing the printed catalog, with visibility into what the customer actually looked at.',
-            count: { value: '300+', unit: 'catalogs/90 days' },
-          },
-          {
-            name: 'Objetivos e Sugestões',
-            detail:
-              'The point of sale’s history becomes product mix suggestions and sales targets. This is the product’s AI module.',
-            count: { value: '~200', unit: 'orders/day' },
+            decisions: [
+              {
+                title: 'The catalog stopped being a document',
+                body: 'Keeping the PDF and only automating its generation was the short path, and it preserves the problem: the next day the price is stale and nobody knows. The catalog became an address, with price and stock read at the moment of access and a declared validity. The PDF still exists for whoever needs it, now as an export rather than as the product.',
+              },
+              {
+                title: 'Building became choosing, not laying out',
+                body: 'Assembly could have become an editor, with ordering, a cover and sections. We chose to restrict product selection to what the rep actually serves and let the system handle the rest. You lose compositional freedom; you gain a catalog built between two visits instead of at night.',
+              },
+              {
+                title: 'I gave the rep back what the customer looked at',
+                body: 'A shared catalog usually ends at the send, and what happens next is silence. Recording access, time active and products marked as interest turned the material into a signal for the next conversation. It is also the part that required deciding what not to show: the data comes back as customer interest, never as browsing surveillance.',
+              },
+            ],
+            screens: [
+              {
+                src: '/assets/cases/ic/jornadas/cat-1.jpg',
+                alt: 'The rep’s catalog list, each entry showing name, period and publication status.',
+                caption: 'The rep’s catalogs, with deadline and status',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cat-2.jpg',
+                alt: 'Catalog creation screen, with product selection and the configuration of period and availability.',
+                caption: 'Building it: pick products and a period',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cat-3.jpg',
+                alt: 'Detail screen for a published catalog, with interest, view and time-active stats.',
+                caption: 'What came back: views, interests and time active',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cat-4.jpg',
+                alt: 'The catalog open in the customer’s phone browser, with products, price and the action to mark interest.',
+                caption: 'What the customer opens, in their own browser',
+              },
+              {
+                src: '/assets/cases/ic/jornadas/cat-5.jpg',
+                alt: 'The authenticated catalog in the customer’s browser, with products grouped by manufacturer, starting price and a heart to mark interest.',
+                caption: 'Once in, they see prices and flag what they want',
+              },
+            ],
+            results: [{ value: '300+', unit: 'catalogs shared in 90 days' }],
           },
         ],
-        pending:
-          "The most important part is still missing here: which decision cost me something, and what it cost. I will write that up with the version history on this case's own page.",
+        /* Ver a nota na versão em português para de onde vêm as cinco telas e por
+           que elas vão sem borrão. */
+        uiEvolution: {
+          title: 'I rebuilt the home screen four times',
+          lead: 'The home screen is where a product states what it thinks matters. In each version it stated something different.',
+          steps: [
+            {
+              version: 'MVP 0.1',
+              src: '/assets/cases/ic/evolucao/v01.jpg',
+              alt: 'First version of the home screen, in green branding, with a greeting and a list of clients identified by tax ID, each showing how many SKUs need restocking.',
+              change:
+                'The home is the client list, and the product is an ideal order for each one.',
+            },
+            {
+              version: 'MVP 0.3',
+              src: '/assets/cases/ic/evolucao/v03.jpg',
+              alt: 'Second version, still green, with Ideal Orders, Product Catalogue and Clients tabs above the same list.',
+              change: 'Catalogue and news arrive, but the list is still the structure.',
+            },
+            {
+              version: 'MVP 0.5',
+              src: '/assets/cases/ic/evolucao/v05.jpg',
+              alt: 'Third version, in purple and orange branding, showing cards for total sales, sales by manufacturer, product mix and store coverage, with a bottom tab bar.',
+              change:
+                'The branding changes and the home stops being a list: it becomes a goals panel.',
+            },
+            {
+              version: 'Go-live',
+              src: '/assets/cases/ic/evolucao/golive.jpg',
+              alt: 'Go-live version, with the Goals and Suggestions card showing the breakdown by manufacturer, and Cotação Ágil and Catálogo Digital cards below it.',
+              change:
+                'Each module gets its own card, and quoting now starts as a conversation.',
+            },
+            {
+              version: 'Today',
+              src: '/assets/cases/ic/evolucao/atual.jpg',
+              alt: 'Current screen, with five goals tracked as progress bars: total sales, sales broken down by manufacturer, product coverage, client coverage and products per store.',
+              change: 'Goals grow to five, and each one now shows how far along it is.',
+            },
+          ],
+        },
+        /* Ver a nota na versão em português: por que as três frentes vão nomeadas
+           uma a uma e por que o texto não afirma proporção. */
+        discovery: {
+          title: 'I never decided alone what went in',
+          body: [
+            'Once the product was live, the improvement queue stopped coming out of roadmap meetings. I kept a standing group with the reps who use the platform every day, interviewed people right after they used it, and read the usage data alongside both.',
+            'Each front catches what the others miss. The group surfaces the friction nobody files a ticket about. The interview shows where someone hesitates, which is not where they complain. The data says how many people hit the same spot, and that is what separates one bad day from a problem worth fixing. ++That is how the queue stopped being my opinion.++',
+          ],
+          results: [{ value: '20+', unit: 'improvements shipped in 3 months' }],
+        },
+        convergence: {
+          title: 'All three exits lead to the same place',
+          body: [
+            'The last stretch the research pointed at was never a single module’s problem. Suggestion, quote and catalog each ended in their own corner, and all three charged the rep the same retyping in the sales platform to become an order.',
+            'Solving that once, in the right place, was worth more than solving it three times in the interface. Today any of the three lands in the same checkout with the cart already built — and that integration is what makes this a selling tool rather than three well-drawn reports.',
+          ],
+          items: [
+            {
+              name: 'Order suggestion',
+              detail: 'the cart suggested for the client goes to checkout as it is.',
+            },
+            {
+              name: 'Cotação Ágil',
+              detail: 'the audited quote becomes a cart with no line retyped.',
+            },
+            {
+              name: 'Catálogo Digital',
+              detail:
+                'the products a customer marked as interest become that customer’s cart.',
+            },
+          ],
+        },
+        proof: {
+          title: 'What held up under measurement',
+          lead: 'Three different sources, and they count because they agree: satisfaction comes from surveying the people who use it, adoption comes from the operation, and usage comes from the instrumented product.',
+          results: [
+            {
+              value: '+85',
+              unit: 'product NPS, on a -100 to 100 scale',
+              source: 'Formbricks, Q3/2026',
+            },
+            {
+              value: '400+',
+              unit: 'reps using it in live operations',
+              source: 'Power BI, Jul 2026',
+            },
+            {
+              value: '5',
+              unit: 'operations migrated in 6 months',
+              source: 'Power BI, Jul 2026',
+            },
+            {
+              value: '15 → 200+',
+              unit: 'users at the first operation, from early access to all six regions',
+              source: 'Power BI, Apr 2026',
+            },
+          ],
+        },
+        tradeoff: [
+          'The three modules were the ones I chose to go deeper on, and going deeper meant not opening two new fronts.',
+          'That choice cost what I had announced at launch myself. Roteiro Ideal and Assistente de Cobrança were promised for the same year. Both got as far as being structured, with screens designed and code written, and neither was finished or reached production. It took eighteen months for them to come back on the plan.',
+        ],
       },
       {
         id: 'electrolux-cuida',
@@ -1323,8 +2224,7 @@ const en: Copy = {
         org: 'Electrolux',
         tag: 'UX research',
         body: 'User research as part of standing up digital-product research at Electrolux, an area that until then only looked at industrial products.',
-        pending:
-          'I have no publishable visual material from this work. What I do have is the process and the research framework, and they go on the case page.',
+        wip: true,
       },
       {
         id: 'unicesumar-mundo-azul',
@@ -1332,13 +2232,29 @@ const en: Copy = {
         step: '03',
         name: 'Mundo Azul',
         org: 'Unicesumar',
-        tag: 'UX research',
+        tag: 'UX research and product design',
         body: 'User research run as lead designer on the account.',
-        pending:
-          'No visual material for this one either. The process goes on the case page.',
+        wip: true,
       },
       /* Ver a nota na versão em português: os dois cases de UI pura saíram. */
     ],
+  },
+  casePage: {
+    back: 'Back to the cases',
+    timelineTitle: 'How the product evolved',
+    piecesTitle: 'I took three modules to production',
+    numbersSource:
+      'Figures without their own source are from July 2026, measured in Power BI and Mixpanel.',
+    journeyPrev: 'Previous screen',
+    journeyNext: 'Next screen',
+    tradeoffTitle: 'What that decision cost',
+    closingTitle: 'Want to go deeper?',
+    closingBody:
+      'I can walk you through how each of these decisions was made, what I would measure again and what I would do differently.',
+    closingCta: 'Talk to me',
+    notFoundTitle: 'This page does not exist.',
+    notFoundBody: 'The address may have moved. Every case lives on the home page.',
+    notFoundCta: 'Back to the start',
   },
   inventory: {
     statement: 'From design to Product Manager',

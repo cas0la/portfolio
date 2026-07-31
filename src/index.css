@@ -1,6 +1,6 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 /*
  * Portfólio de Lucas Casanova. A autoridade é o DESIGN.md na raiz de 0-pessoal;
@@ -29,11 +29,11 @@
      600. Ver `.accent`, que corrige o tracking: itálico não pode herdar o tracking
      negativo da grotesca.
      `sans` — Public Sans, todo o parágrafo. */
-  --font-sans: "Public Sans", system-ui, -apple-system, sans-serif;
-  --font-display: "Bricolage Grotesque", "Public Sans", system-ui, sans-serif;
-  --font-heading: "Bricolage Grotesque", "Public Sans", system-ui, sans-serif;
-  --font-accent: "Newsreader", Georgia, serif;
-  --font-mono: "Public Sans", system-ui, sans-serif;
+  --font-sans: 'Public Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Public Sans', system-ui, sans-serif;
+  --font-heading: 'Bricolage Grotesque', 'Public Sans', system-ui, sans-serif;
+  --font-accent: 'Newsreader', Georgia, serif;
+  --font-mono: 'Public Sans', system-ui, sans-serif;
 
   /* ---------- Rampa tipográfica ----------
      GRADE DE 4px, base 16px = 1rem. Todo corpo de fonte é múltiplo de 4px, e as
@@ -537,7 +537,11 @@
       overflow-y: auto;
       overscroll-behavior: contain;
       mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent 100%);
-      -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent 100%);
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        #000 calc(100% - 40px),
+        transparent 100%
+      );
       transition: mask-image var(--duration-base) var(--ease-out-soft);
     }
     .timeline-scroll[data-at-end='true'] {
@@ -924,7 +928,19 @@
     transition: inset var(--duration-base) var(--ease-out-soft);
   }
 
-  .portrait-figure:hover .portrait-gradient,
+  /*
+   * **O crescimento do gradiente é só de quem tem ponteiro.** No telefone não existe
+   * hover, e o que restava era o `:active` de um toque acidental mexendo o bloco sem
+   * ninguém ter pedido. `hover: hover` guarda o efeito para mouse e trackpad; o
+   * `:focus-visible` fica de fora da guarda porque teclado existe em qualquer
+   * aparelho e ali o crescimento é o próprio sinal de foco.
+   */
+  @media (hover: hover) {
+    .portrait-figure:hover .portrait-gradient {
+      inset: 16px -16px -16px 16px;
+    }
+  }
+
   .portrait-figure:focus-visible .portrait-gradient {
     inset: 16px -16px -16px 16px;
   }
@@ -944,7 +960,12 @@
     transition: filter var(--duration-base) var(--ease-out-soft);
   }
 
-  .portrait-figure:hover .portrait-shot,
+  @media (hover: hover) {
+    .portrait-figure:hover .portrait-shot {
+      filter: grayscale(0) saturate(1.2) contrast(1.08);
+    }
+  }
+
   .portrait-figure:focus-visible .portrait-shot {
     filter: grayscale(0) saturate(1.2) contrast(1.08);
   }
@@ -1024,6 +1045,219 @@
     .portrait-card {
       background-color: Canvas;
       background-image: none;
+    }
+  }
+
+  /*
+   * O tramado da capa de case em construção.
+   *
+   * Fio de cabelo a 45°, passo de 12px, na cor de separação da página inteira —
+   * o mesmo fio que divide as seções, só que repetido. É de propósito que ele
+   * seja quase invisível: a capa precisa dizer "ainda não" sem competir com as
+   * capas de verdade que vão ficar ao lado dela na mesma grade.
+   *
+   * A listra vem em 1px cheio e não em fração: a 45° o subpixel vira faixa cinza
+   * borrada em tela sem retina, e o desenho perde a régua.
+   */
+  .case-hatch {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--color-hairline) 0,
+      var(--color-hairline) 1px,
+      transparent 1px,
+      transparent 12px
+    );
+  }
+
+  /*
+   * A tira de evolução da interface, na página do case.
+   *
+   * **O item divide a linha em vez de ter largura fixa.** Com largura fixa a quinta
+   * tela ficava cortada na borda do contêiner, e a peça inteira existe para as cinco
+   * serem vistas juntas. `flex: 1 1 0` com `min-width` faz as duas coisas: acima do
+   * piso as cinco dividem a largura disponível, abaixo dele o piso vence e a tira
+   * rola, o que é o comportamento certo no telefone.
+   *
+   * O piso é 8.5rem porque abaixo disso o cabeçalho da tela deixa de ser legível e
+   * as versões param de se distinguir — que é o único trabalho da peça.
+   *
+   * A moldura é o oposto da do painel: lá a captura branca precisa se separar de
+   * uma faixa escura e usa borda clara com sombra pesada; aqui ela pousa sobre
+   * papel e precisa de fio de cabelo com sombra rasa, senão a tela flutua.
+   */
+  .ui-eva {
+    /* Rolagem sem barra visível no que suporta, e sem quebrar quem não suporta —
+       o gesto e as setas do teclado continuam funcionando de qualquer forma. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-hairline-strong) transparent;
+  }
+
+  .ui-eva-item {
+    flex: 1 1 0;
+    min-width: 8.5rem;
+  }
+
+  .ui-eva-shot {
+    border: 1px solid var(--color-hairline-strong);
+    box-shadow: 0 10px 24px rgb(20 42 133 / 0.08);
+  }
+
+  /*
+   * O palco das decisões de módulo: a tela que fica presa enquanto o texto rola.
+   *
+   * **`sticky` ancorado no mesmo lugar que as âncoras de seção.** O cabeçalho é
+   * fixo e mede a própria altura em tempo de execução (`--header-h`), então travar
+   * em `top: 0` esconderia o topo da tela atrás dele. Reusar `--header-h` mais o ar
+   * de rolagem é o que já governa `.scroll-anchor`, e uma segunda régua para a
+   * mesma medida sairia do lugar na primeira vez que o cabeçalho mudasse.
+   *
+   * As telas ficam **empilhadas em posição absoluta sobre a primeira**, que é a
+   * única em fluxo. É ela que dá altura ao quadro: com todas absolutas o quadro
+   * teria altura zero, e com todas em fluxo elas se enfileirariam. Todas têm a mesma
+   * proporção, então a primeira mede certo por qualquer uma.
+   */
+  .mj-stage {
+    position: sticky;
+    top: calc(var(--header-h, 72px) + var(--scroll-air, 24px));
+    align-self: start;
+  }
+
+  /*
+   * A moldura de aparelho em volta da jornada.
+   *
+   * **É a única peça decorativa da página, e ela se paga.** A régua de craft
+   * desconfia de retângulo arredondado com sombra fazendo as vezes de conteúdo —
+   * aqui o conteúdo é a captura de produto, e a moldura só diz "isto é um telefone
+   * de verdade", que é o que separa prova de mockup de apresentação.
+   *
+   * **Sem ilha nem entalhe.** As capturas já trazem a barra de status do sistema
+   * (hora, sinal, bateria) no topo; desenhar uma ilha por cima duplicaria o
+   * aparelho dentro do aparelho.
+   *
+   * O raio de 2.25rem está fora da escala de cantos do sistema, que para em 20px, e
+   * é intencional: aqui ele não é linguagem de superfície, é a forma física de um
+   * telefone. Nenhum outro elemento deve puxar este valor.
+   */
+  .mj-device {
+    padding: 9px;
+    border-radius: 2.25rem;
+    background: linear-gradient(158deg, #39415c 0%, var(--color-ink) 55%);
+    box-shadow:
+      0 26px 60px rgb(20 42 133 / 0.2),
+      0 2px 6px rgb(16 19 31 / 0.24),
+      inset 0 0 0 1px rgb(255 255 255 / 0.1);
+  }
+
+  .mj-device .mj-shot {
+    border-radius: 1.65rem;
+    display: block;
+  }
+
+  .mj-frame > .mj-shot:not(:first-child) {
+    position: absolute;
+    inset: 0;
+  }
+
+  .mj-shot {
+    opacity: 0;
+    transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .mj-shot[data-active='true'] {
+    opacity: 1;
+  }
+
+  /* Sem JavaScript nenhuma tela recebe `data-active`, e o quadro ficaria vazio. A
+     primeira assume o posto por conta própria, e o seletor perde para o de cima
+     assim que o observador começa a marcar. */
+  .mj-frame > .mj-shot:first-child {
+    opacity: 1;
+  }
+
+  .mj-frame:has(.mj-shot[data-active='true']) > .mj-shot:first-child:not([data-active]) {
+    opacity: 0;
+  }
+
+  /*
+   * O ponto é a marca; quem recebe o toque é um alvo bem maior à volta dele.
+   *
+   * Seis pixels é tamanho de sinal, não de botão. O `.mj-dot-hit` leva os 24px que
+   * um dedo precisa e fica transparente, então o desenho continua sendo o ponto e a
+   * área de acerto deixa de ser uma armadilha no telefone.
+   */
+  .mj-dot-hit {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+  }
+
+  .mj-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--color-hairline-strong);
+    transition:
+      background-color 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .mj-dot[data-active='true'] {
+    background: var(--color-royal);
+    transform: scale(1.5);
+  }
+
+  .mj-dot-hit:hover .mj-dot,
+  .mj-dot-hit:active .mj-dot {
+    background: var(--color-ink-soft);
+  }
+
+  /*
+   * **No toque os alvos crescem; a marca não.** 24px de área e 32px de seta passam
+   * no mouse e reprovam no dedo, onde o piso é 44px. `pointer: coarse` engorda só a
+   * área de acerto — o ponto continua com 6px e a seta com o mesmo desenho, porque
+   * aumentar a marca junto encheria a coluna de controle de player.
+   */
+  @media (pointer: coarse) {
+    .mj-dot-hit {
+      width: 44px;
+      height: 44px;
+    }
+
+    .mj-arrow {
+      width: 44px;
+      height: 44px;
+    }
+  }
+
+  .mj-arrow {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: var(--radius-pill);
+    color: var(--color-ink-soft);
+    cursor: pointer;
+    transition:
+      color 200ms ease-out,
+      border-color 200ms ease-out;
+  }
+
+  /* `:active` acompanha o `:hover` porque quem toca nunca passa por hover: sem ele
+     a seta não devolve nada no telefone e o toque parece não ter pegado. */
+  .mj-arrow:hover,
+  .mj-arrow:active {
+    color: var(--color-royal);
+    border-color: var(--color-royal);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mj-shot,
+    .mj-dot {
+      transition-duration: 1ms;
     }
   }
 

@@ -39,6 +39,7 @@ import type { Milestone } from '@/content'
 const SPAN: Record<string, string> = {
   pains: 'lg:flex-[2]',
   single: 'lg:flex-[1]',
+  modules: 'lg:flex-[1.9]',
   group: 'lg:flex-[3.4]',
   score: 'lg:flex-[1.5]',
 }
@@ -59,10 +60,11 @@ const SPAN: Record<string, string> = {
  * arte por cima da legenda como acima de `lg`; as duas capturas avulsas, que são
  * nota de rodapé nas duas orientações, seguem compactas ao lado do texto.
  */
-const WIDE = new Set(['pains', 'group', 'score'])
+const WIDE = new Set(['pains', 'modules', 'group', 'score'])
 
 function kindOf(m: Milestone) {
   if (m.pains) return 'pains'
+  if (m.modules) return 'modules'
   if (m.score) return 'score'
   return m.shots && m.shots.length > 1 ? 'group' : 'single'
 }
@@ -103,6 +105,32 @@ function Pains({ items }: { items: string[] }) {
           className="border-l-2 border-violet-lift/60 pl-4 text-body-sm text-white/75"
         >
           {pain}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/**
+ * Os módulos no ar num marco, no mesmo desenho das dores e em royal.
+ *
+ * **A troca de cor é a diferença entre motivo e resultado.** Roxo abre a faixa
+ * dizendo o que doía; royal, que é a cor das datas e do que este site trata como
+ * feito, diz o que existiu. Sem isso, duas listas idênticas em pontos diferentes
+ * da linha pareceriam a mesma informação repetida.
+ *
+ * `gap-2.5` e não `gap-3`: são cinco itens contra três, e no mesmo bloco de 248px
+ * o espaçamento das dores estouraria a altura da estação.
+ */
+function Modules({ items }: { items: string[] }) {
+  return (
+    <ul className="flex w-full flex-col gap-2.5">
+      {items.map((mod) => (
+        <li
+          key={mod}
+          className="border-l-2 border-royal-lift/60 pl-4 text-body-sm text-white/75"
+        >
+          {mod}
         </li>
       ))}
     </ul>
@@ -177,6 +205,7 @@ function Score({ score }: { score: NonNullable<Milestone['score']> }) {
 
 function Art({ milestone }: { milestone: Milestone }) {
   if (milestone.pains) return <Pains items={milestone.pains} />
+  if (milestone.modules) return <Modules items={milestone.modules} />
   if (milestone.score) return <Score score={milestone.score} />
 
   const shots = milestone.shots ?? []

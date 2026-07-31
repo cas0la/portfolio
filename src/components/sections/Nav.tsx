@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { Link, useLocation } from 'react-router'
 import { motion, AnimatePresence, type Variants } from 'motion/react'
 import { Download } from 'lucide-react'
 import { Container } from '@/components/primitives/Container'
@@ -38,6 +39,47 @@ function Bar({
 }
 
 /**
+ * Um item do menu, que muda de natureza conforme a rota.
+ *
+ * Na home as seções existem na página, então o link é âncora crua e quem faz a
+ * rolagem suave é o Lenis, que trata `#` sozinho (`anchors: true`).
+ *
+ * Fora da home a mesma seção está em **outro documento**, e âncora crua não teria
+ * onde pousar. Aí vira `Link` do roteador para `/#seção`: a troca acontece sem
+ * recarregar o site, e o `ScrollManager` leva até a seção depois que a home monta.
+ *
+ * O `motion` não entra aqui: quem anima é o painel do menu mobile, e ele passa o
+ * `variants` no elemento que envolve este.
+ */
+function NavItem({
+  hash,
+  atHome,
+  onNavigate,
+  className,
+  children,
+}: {
+  hash: string
+  atHome: boolean
+  onNavigate: () => void
+  className: string
+  children: ReactNode
+}) {
+  if (atHome) {
+    return (
+      <a href={hash} onClick={onNavigate} className={className}>
+        {children}
+      </a>
+    )
+  }
+
+  return (
+    <Link to={`/${hash}`} onClick={onNavigate} className={className}>
+      {children}
+    </Link>
+  )
+}
+
+/**
  * Cabeçalho. O menu é o de menos: o que importa é o botão de currículo e o
  * seletor de idioma, e os dois ficam visíveis em qualquer largura, fora do
  * hambúrguer.
@@ -48,6 +90,15 @@ export function Nav() {
   const t = copyFor(locale)
   const close = () => setOpen(false)
   const barRef = useRef<HTMLDivElement>(null)
+  const { pathname } = useLocation()
+  const atHome = pathname === '/'
+
+  // Trocar de rota com o menu aberto deixava o painel montado por cima da página
+  // nova. Fechar aqui cobre também o botão de voltar do navegador, que não passa
+  // pelo `onClick` de link nenhum.
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
 
   /*
    * Publica a altura real do cabeçalho em `--header-h`, que é de onde saem o
@@ -83,13 +134,15 @@ export function Nav() {
   }, [])
 
   const links = [
-    { label: t.nav.builds, href: '#cases' },
-    { label: t.nav.inventory, href: '#about' },
-    { label: t.nav.contact, href: '#contact' },
+    { label: t.nav.builds, hash: '#cases' },
+    { label: t.nav.inventory, hash: '#about' },
+    { label: t.nav.contact, hash: '#contact' },
   ]
 
   return (
     <header className="sticky top-0 z-50 border-b border-hairline bg-page/85 backdrop-blur-md">
+      {/* Toda rota carrega um `id="top"` na primeira seção, então o pulo de
+          conteúdo continua sendo âncora crua em qualquer página. */}
       <a
         href="#top"
         className="sr-only focus:not-sr-only focus:absolute focus:left-gap focus:top-2 focus:z-50 focus:rounded-sm focus:bg-surface focus:px-3 focus:py-1.5 focus:text-body-sm focus:font-semibold focus:shadow-soft"
@@ -101,13 +154,14 @@ export function Nav() {
           Medir o `<header>` incluiria o painel do menu mobile, que é filho dele. */}
       <div ref={barRef}>
         <Container className="flex items-center justify-between gap-gap py-4">
-          <a
-            href="#top"
-            onClick={close}
+          <NavItem
+            hash="#top"
+            atHome={atHome}
+            onNavigate={close}
             className="brand-sweep whitespace-nowrap font-display text-body-sm font-extrabold tracking-tight sm:text-h3"
           >
             Lucas Casanova
-          </a>
+          </NavItem>
 
           {/*
            * O espaçamento entre os três grupos do lado direito: links, seletor de
@@ -129,13 +183,15 @@ export function Nav() {
           <div className="flex items-center gap-2 md:gap-gap lg:gap-8">
             <nav className="hidden items-center gap-gap md:flex">
               {links.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
+                <NavItem
+                  key={l.hash}
+                  hash={l.hash}
+                  atHome={atHome}
+                  onNavigate={close}
                   className="text-body-sm font-medium text-ink-soft transition-colors hover:text-royal"
                 >
                   {l.label}
-                </a>
+                </NavItem>
               ))}
             </nav>
 
@@ -186,16 +242,20 @@ export function Nav() {
                   show: { transition: { staggerChildren: 0.05, delayChildren: 0.04 } },
                 }}
               >
+                {/* O invólucro `motion.div` existe porque o item agora pode ser um
+                    `Link` do roteador, e `motion.a` animaria a tag errada. A
+                    animação é do item, não do elemento clicável. */}
                 {links.map((l) => (
-                  <motion.a
-                    key={l.href}
-                    variants={itemV}
-                    href={l.href}
-                    onClick={close}
-                    className="rounded-sm px-3 py-3 text-h3 font-semibold text-ink transition-colors hover:bg-page"
-                  >
-                    {l.label}
-                  </motion.a>
+                  <motion.div key={l.hash} variants={itemV}>
+                    <NavItem
+                      hash={l.hash}
+                      atHome={atHome}
+                      onNavigate={close}
+                      className="block rounded-sm px-3 py-3 text-h3 font-semibold text-ink transition-colors hover:bg-page"
+                    >
+                      {l.label}
+                    </NavItem>
+                  </motion.div>
                 ))}
                 <motion.a
                   variants={itemV}

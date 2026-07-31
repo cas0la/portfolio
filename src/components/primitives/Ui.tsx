@@ -168,11 +168,39 @@ export function StatPill({
 /**
  * Nota do que ainda não existe, dita em primeira pessoa. Um fio à esquerda basta
  * para marcar que é nota, não afirmação sobre o trabalho.
+ *
+ * **Nenhum case usa mais isto.** As três notas de pendência saíram em 31/07/2026:
+ * explicar em primeira pessoa que falta material transforma o card numa confissão
+ * diante de quem está avaliando. Quem substituiu foi a `WipTag`. A primitiva fica
+ * porque a forma continua certa para nota de contexto — o que estava errado era o
+ * texto que ela carregava.
  */
 export function OpenNote({ children }: { children: ReactNode }) {
   return (
     <p className="border-l border-hairline-strong pl-3.5 text-body-sm italic text-ink-soft">
       {children}
     </p>
+  )
+}
+
+/**
+ * Marca de case em construção, colada na assinatura de papel.
+ *
+ * **Não é badge.** Mesma escala e mesmo tracking da `RoleByline`, em tinta suave em
+ * vez de roxo: a linha lê como uma informação só ("UX RESEARCH · WIP"), e não como
+ * um rótulo de status pendurado no card. Pílula colorida aqui seria exatamente a
+ * etiqueta de SaaS que o DESIGN.md recusou na primeira rodada.
+ *
+ * O ponto separador é `aria-hidden` porque é pontuação visual: quem ouve a página
+ * recebe as duas palavras em sequência, que já é a leitura correta.
+ */
+export function WipTag({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <span aria-hidden className="text-ink-soft/50">
+        ·
+      </span>
+      <span className="label text-ink-soft">{children}</span>
+    </>
   )
 }
