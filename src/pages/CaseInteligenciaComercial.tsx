@@ -60,8 +60,11 @@ function UiEvolution({
 }: {
   data: NonNullable<ReturnType<typeof copyFor>['builds']['items'][number]['uiEvolution']>
 }) {
+  // O intervalo encolhe no telefone: com 48px entre itens, quatro intervalos
+  // gastavam 192px dos 342px disponíveis, e sobrava menos de uma tela e meia
+  // visível por arrasto numa peça cujo argumento é a comparação.
   return (
-    <ul className="ui-eva mt-block flex snap-x snap-mandatory items-start gap-block overflow-x-auto pb-2">
+    <ul className="ui-eva mt-block flex snap-x snap-mandatory items-start gap-gap overflow-x-auto pb-2 md:gap-block">
       {data.steps.map((step) => (
         <li key={step.version} className="ui-eva-item snap-start">
           <img
@@ -100,7 +103,19 @@ function UiEvolution({
  * (`prefers-reduced-motion`), caso em que o slider nasce parado e inteiramente
  * manual.
  */
-const SLIDE_MS = 5200
+/*
+ * **7,4s por tela, e não 5,2s.** O intervalo anterior foi calibrado contra a tela
+ * sozinha, e ele não é o tempo de olhar uma captura: é o tempo de ler o parágrafo
+ * ao lado, olhar para a tela e voltar. Com 5,2s a jornada trocava no meio desse
+ * percurso, e quem tinha acabado de baixar o olho encontrava outra coisa.
+ *
+ * O número desconta a passagem: 900ms dos 7,4s são transição, então cada tela fica
+ * parada cerca de 6,5s.
+ */
+const SLIDE_MS = 7400
+
+/* Abaixo disto o gesto é tremor de mão, não intenção de trocar de tela. */
+const SWIPE_MIN_PX = 40
 
 function ModuleJourney({
   screens,
@@ -112,7 +127,26 @@ function ModuleJourney({
   const [active, setActive] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [taken, setTaken] = useState(false)
+  const [focusIndex, setFocusIndex] = useState<number | null>(null)
   const stageRef = useRef<HTMLDivElement | null>(null)
+  const dragRef = useRef<{ x: number; y: number; id: number } | null>(null)
+
+  /*
+   * A janela mostra três pontos, ou todos quando são menos que três, e desliza
+   * para manter em vista o ponto que importa. O deslocamento tenta deixá-lo no
+   * meio (`- 1`) e é limitado às duas pontas, então no primeiro e no último a
+   * janela para em vez de mostrar vazio ao lado da fileira.
+   *
+   * Quem manda é o ponto em foco, e só na falta dele o ponto ativo: navegando por
+   * teclado, o foco anda antes de a tela trocar, e é o foco que precisa
+   * permanecer visível.
+   */
+  const windowSize = Math.min(3, screens.length)
+  const anchor = focusIndex ?? active
+  const windowOffset = Math.min(
+    Math.max(anchor - 1, 0),
+    Math.max(screens.length - windowSize, 0),
+  )
 
   /* Toca só enquanto o palco está à vista. Slider rodando fora da tela gasta
      bateria para ninguém e chega no meio da sequência quando a pessoa enfim rola
@@ -143,9 +177,49 @@ function ModuleJourney({
     setActive((index + screens.length) % screens.length)
   }
 
+  /*
+   * **No dedo, o arrasto substitui as setas.** Duas setas de 44px ao lado de seis
+   * pontos de 44px não cabem numa coluna de telefone, e era essa fileira que
+   * empurrava a página inteira para o lado. Em vez de espremer os alvos abaixo do
+   * piso de toque, o gesto que a moldura de telefone já convida assume o trabalho
+   * e as setas saem — elas continuam inteiras no mouse, que não tem arrasto.
+   *
+   * O custo fica registrado: **arrastar não se anuncia.** Quem não tentar depende
+   * dos pontos, que continuam sendo botões com rótulo e alcançam qualquer tela —
+   * inclusive por leitor de tela, que é o que impede a saída das setas de custar
+   * navegação a alguém.
+   *
+   * A separação é por `pointerType` e não por largura, como na linha do tempo do
+   * Sobre: laptop com tela sensível ao toque recebe os dois tipos de ponteiro, e
+   * quem chega pelo dedo ganha o gesto sem que o mouse perca as setas.
+   */
+  function onPointerDown(e: React.PointerEvent) {
+    if (e.pointerType === 'mouse') return
+    dragRef.current = { x: e.clientX, y: e.clientY, id: e.pointerId }
+  }
+
+  function onPointerUp(e: React.PointerEvent) {
+    const start = dragRef.current
+    dragRef.current = null
+    if (!start || start.id !== e.pointerId) return
+    const dx = e.clientX - start.x
+    const dy = e.clientY - start.y
+    // Um arrasto mais vertical que horizontal é alguém rolando a página com o
+    // dedo em cima da tela, e trocar de slide ali seria roubo de gesto.
+    if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) <= Math.abs(dy)) return
+    goTo(active + (dx < 0 ? 1 : -1))
+  }
+
   return (
     <div ref={stageRef} className="mj-stage">
-      <div className="mj-device">
+      <div
+        className="mj-device"
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={() => {
+          dragRef.current = null
+        }}
+      >
         <div className="mj-frame relative">
           {screens.map((screen, i) => (
             <img
@@ -165,14 +239,18 @@ function ModuleJourney({
         </div>
       </div>
 
-      <p className="mt-gap text-body-sm text-ink" aria-live="polite">
+      <p className="mj-caption mt-gap text-body-sm text-ink" aria-live="polite">
         {screens[active].caption}
       </p>
 
       {/* Os controles ficam **abaixo da legenda**, não sobre a tela. Seta em cima de
           captura de produto some no fundo claro e obriga a pintar uma pastilha, que
           é moldura de player onde deveria haver prova de trabalho. */}
-      <div className="mt-gap flex items-center gap-3">
+      {/* `items-start` e não `items-center`: com o contador abaixo dos pontos, o
+          centro do bloco desce e as setas desceriam junto, saindo da altura da
+          fileira que elas comandam. A janela carrega a altura da seta, então
+          alinhados pelo topo os três ficam no mesmo eixo. */}
+      <div className="mt-gap flex items-start gap-3">
         <button
           type="button"
           onClick={() => goTo(active - 1)}
@@ -182,24 +260,43 @@ function ModuleJourney({
           <ArrowLeft size={16} strokeWidth={2} aria-hidden="true" />
         </button>
 
-        <ol className="flex items-center gap-2">
-          {screens.map((screen, i) => (
-            <li key={screen.src}>
-              <button
-                type="button"
-                onClick={() => goTo(i)}
-                className="mj-dot-hit"
-                aria-label={screen.caption}
-                aria-current={i === active ? 'true' : undefined}
-              >
-                <span
-                  className="mj-dot"
-                  data-active={i === active ? 'true' : undefined}
-                />
-              </button>
-            </li>
-          ))}
-        </ol>
+        <div>
+          <div
+            className="mj-dots-window"
+            style={{ ['--mj-window' as string]: windowSize }}
+          >
+            <ol
+              className="mj-dots"
+              style={{ transform: `translateX(calc(var(--mj-slot) * -${windowOffset}))` }}
+            >
+              {screens.map((screen, i) => (
+                <li key={screen.src}>
+                  <button
+                    type="button"
+                    onClick={() => goTo(i)}
+                    /* O foco arrasta a janela sem trocar a tela. Sem isto, quem
+                       navega por teclado passaria por botões recortados fora da
+                       janela: o foco existiria num alvo que ninguém vê. */
+                    onFocus={() => setFocusIndex(i)}
+                    onBlur={() => setFocusIndex(null)}
+                    className="mj-dot-hit"
+                    aria-label={screen.caption}
+                    aria-current={i === active ? 'true' : undefined}
+                  >
+                    <span
+                      className="mj-dot"
+                      data-active={i === active ? 'true' : undefined}
+                    />
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <span className="mj-count tnum mt-2 text-body-sm text-ink-soft">
+            {active + 1}/{screens.length}
+          </span>
+        </div>
 
         <button
           type="button"
@@ -209,10 +306,6 @@ function ModuleJourney({
         >
           <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
         </button>
-
-        <span className="tnum ml-auto text-body-sm text-ink-soft">
-          {active + 1}/{screens.length}
-        </span>
       </div>
     </div>
   )

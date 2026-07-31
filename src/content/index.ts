@@ -1039,11 +1039,11 @@ const pt: Copy = {
          *   faltar, o rodapé da seção responde por eles.
          * - **Cotação Ágil e Objetivos podem receber mais resultados.** É só somar
          *   itens em `results`; a lista não tem teto de layout.
-         * - **Catálogo Digital está sem `journey`.** É o único módulo cujo problema
-         *   de origem eu não tenho em documento, e a seção simplesmente não desenha
-         *   o bloco enquanto o campo faltar. Módulo com resultado e sem história ao
-         *   lado de dois com história parece o mais fraco dos três por falta de
-         *   texto, não por mérito.
+         * - **Catálogo Digital ganhou `journey` em 31/07/2026.** Ela não é achado de
+         *   origem, como nos outros dois: é o problema que o módulo encontrou depois
+         *   de existir, o PDF que envelhece contra o link que se atualiza. A fonte
+         *   está na nota junto ao módulo. Se algum dia aparecer a pesquisa que
+         *   explica por que ele nasceu, ela entra antes destes dois parágrafos.
          */
         /*
          * ORDEM CANÔNICA, definida pelo autor: Objetivos e Sugestões, Cotação Ágil,
@@ -1204,6 +1204,40 @@ const pt: Copy = {
             name: 'Catálogo Digital',
             detail:
               'Preço e estoque em tempo real no lugar do catálogo impresso, com visibilidade sobre o que o cliente olhou.',
+            /*
+             * **A jornada do Catálogo deixou de faltar, e a fonte é o manual do
+             * produto** (`prd-docs/nf-ic/clickup-export/docs/manuais-de-uso/`,
+             * variantes "com preço" e "sem preço", export de 31/07/2026). Ele é
+             * quem registra, com todas as letras, cada fato dos dois parágrafos:
+             *
+             * - o link web aparece rotulado "recomendado" e o PDF como "arquivo
+             *   estático, útil para impressão ou registro, mas não reflete
+             *   atualizações após o download";
+             * - no encerramento, "o link web fica indisponível imediatamente para
+             *   todos os clientes; PDFs já compartilhados continuam acessíveis, mas
+             *   não refletem atualizações de preço e disponibilidade";
+             * - na edição, "as alterações refletem imediatamente no link web; o PDF
+             *   gerado anteriormente não é atualizado automaticamente";
+             * - os três sinais de retorno (interesses, acessos, tempo ativo) e a
+             *   nota de que a contagem de acessos é real, "não uma estimativa";
+             * - "envie o link antes da visita: quando o cliente já explorou o
+             *   catálogo, a conversa começa pelos produtos de interesse".
+             *
+             * **O que não foi escrito, porque não tem fonte:** um achado de campo
+             * de origem, do tipo que Objetivos e Cotação Ágil têm. Não existe
+             * documento contando por que o módulo nasceu, e a jornada aqui é o
+             * problema que ele encontrou depois de existir. Isso é honesto e é
+             * diferente dos outros dois; se houver a pesquisa de origem, ela entra
+             * antes destes dois parágrafos.
+             *
+             * **Pendente de confirmação do autor:** o enquadramento é leitura minha
+             * sobre o manual, como nas decisões. Os fatos têm fonte; chamar a
+             * assimetria de retorno de "a diferença que mais pesou" é meu.
+             */
+            journey: [
+              'O catálogo saiu com duas formas de chegar ao cliente, link web e PDF, e elas não envelhecem igual. O PDF sai do produto e não volta: no dia seguinte o preço mudou, o item acabou, e o arquivo segue circulando dizendo o contrário. O encerramento é onde isso fica mais claro. Quando o vendedor encerra um catálogo, o link fica indisponível na hora, e o PDF que ele já enviou continua aberto, com preço velho, fora do alcance de qualquer correção.',
+              'A diferença que mais pesou, porém, não é a de conteúdo, é a de retorno. O link conta quem abriu, por quanto tempo o catálogo ficou de pé e qual produto o cliente marcou; o PDF não devolve nada. E o retorno muda a visita: quando o link vai antes, o vendedor chega sabendo o que o cliente já olhou, e ++a conversa começa pelos produtos marcados em vez de começar do portfólio inteiro++.',
+            ],
             decisions: [
               {
                 title: 'O catálogo deixou de ser um documento',
@@ -2068,6 +2102,11 @@ const en: Copy = {
             name: 'Catálogo Digital',
             detail:
               'Real-time price and stock replacing the printed catalog, with visibility into what the customer actually looked at.',
+            /* Ver a nota de fontes na versão em português deste módulo. */
+            journey: [
+              'The catalog shipped with two ways of reaching the customer, a web link and a PDF, and they do not age the same way. The PDF leaves the product and never comes back: the next day the price has changed, the item is out of stock, and the file keeps circulating saying otherwise. Closing a catalog is where this shows most clearly. When the rep closes one, the link goes down immediately, and the PDF he already sent stays open, with stale prices, out of reach of any correction.',
+              'The difference that weighed most, though, is not one of content, it is one of return. The link counts who opened it, how long the catalog stayed up and which product the customer flagged; the PDF returns nothing. And that return changes the visit: when the link goes out beforehand, the rep arrives knowing what the customer already looked at, and ++the conversation starts from the flagged products instead of from the whole portfolio++.',
+            ],
             decisions: [
               {
                 title: 'The catalog stopped being a document',

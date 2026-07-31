@@ -1117,9 +1117,25 @@
    * proporção, então a primeira mede certo por qualquer uma.
    */
   .mj-stage {
-    position: sticky;
-    top: calc(var(--header-h, 72px) + var(--scroll-air, 24px));
     align-self: start;
+    /* Sem isto o palco é uma coluna de grade `auto`, e o mínimo dele — a fileira
+       de controle — empurrava a página inteira para a direita. Coluna de grade
+       tem mínimo automático, então quem não declara zero promete acomodar o
+       conteúdo mais largo que tiver dentro. */
+    min-width: 0;
+  }
+
+  /*
+   * **Grudar só onde existe a segunda coluna.** Abaixo de `lg` o palco é uma
+   * linha inteira da grade, e um elemento preso dentro de uma linha da própria
+   * altura não tem para onde andar: o navegador recalculava posição a cada frame
+   * de rolagem em troca de movimento nenhum.
+   */
+  @media (min-width: 1024px) {
+    .mj-stage {
+      position: sticky;
+      top: calc(var(--header-h, 72px) + var(--scroll-air, 24px));
+    }
   }
 
   /*
@@ -1139,9 +1155,32 @@
    * telefone. Nenhum outro elemento deve puxar este valor.
    */
   .mj-device {
+    /*
+     * **O teto é de altura, escrito em largura.** A grade só limitava o palco a
+     * partir de `lg`; abaixo disso o aparelho tomava a largura inteira do
+     * container e virava uma moldura de 342 por 740px numa tela de 844 — em
+     * 768px de viewport chegava a 1454px de altura, mais de uma tela e meia de
+     * mockup para uma legenda de duas linhas.
+     *
+     * A proporção é 390/844, então altura vira largura por um fator fixo: 26svh
+     * de largura dá cerca de 56% da janela em altura, em qualquer aparelho.
+     * `vh` não serviria — ele ignora a barra do navegador e prometeria uma altura
+     * que o telefone não tem.
+     */
+    max-width: min(17rem, 26svh);
+    /*
+     * O arrasto horizontal é nosso, o vertical continua sendo do navegador. Sem
+     * isto o gesto de trocar de tela roubaria o dedo de quem só queria rolar a
+     * página.
+     */
+    touch-action: pan-y;
     padding: 9px;
     border-radius: 2.25rem;
-    background: linear-gradient(158deg, #39415c 0%, var(--color-ink) 55%);
+    background: linear-gradient(
+      158deg,
+      color-mix(in srgb, var(--color-ink) 74%, white) 0%,
+      var(--color-ink) 55%
+    );
     box-shadow:
       0 26px 60px rgb(20 42 133 / 0.2),
       0 2px 6px rgb(16 19 31 / 0.24),
@@ -1153,18 +1192,45 @@
     display: block;
   }
 
+  /* O quadro recorta, e isso é o que permite a tela entrar crescendo: sem o
+     recorte, os 2% de escala do estado de repouso vazariam por cima do bisel. O
+     raio repete o da captura para o corte cair exatamente no canto dela. */
+  .mj-frame {
+    overflow: hidden;
+    border-radius: 1.65rem;
+  }
+
   .mj-frame > .mj-shot:not(:first-child) {
     position: absolute;
     inset: 0;
   }
 
+  /*
+   * **A troca era um corte, não uma passagem.** 420ms de opacidade pura, entre
+   * duas capturas claras do mesmo produto, lê como a tela piscando: não há tempo
+   * para o olho registrar que uma coisa saiu e outra chegou.
+   *
+   * A correção tem duas partes. A dissolução vai a 760ms, e a tela que entra
+   * **assenta** — nasce 2% maior e resolve no tamanho certo em 900ms, com a
+   * mesma curva exponencial do resto do site. A escala é curta de propósito: em
+   * 2% ela dá direção ao movimento sem virar zoom, que numa captura de produto
+   * pareceria defeito de renderização.
+   *
+   * O transform corre mais lento que a opacidade para a imagem continuar
+   * assentando depois de já estar opaca. Terminando junto, o movimento acaba no
+   * mesmo instante em que o olho chega nele.
+   */
   .mj-shot {
     opacity: 0;
-    transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform: scale(1.02);
+    transition:
+      opacity 760ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .mj-shot[data-active='true'] {
     opacity: 1;
+    transform: scale(1);
   }
 
   /* Sem JavaScript nenhuma tela recebe `data-active`, e o quadro ficaria vazio. A
@@ -1194,6 +1260,16 @@
     cursor: pointer;
   }
 
+  /*
+   * **O ativo estica, não incha.** Um ponto de 6px ampliado 1,5 vez vira um ponto
+   * um pouco maior, e a diferença some numa fileira de seis. Virando barra ele diz
+   * duas coisas de uma vez — onde a leitura está e que a sequência tem direção —,
+   * que é o trabalho de um stepper e não o de um marcador de slide.
+   *
+   * A largura é a propriedade animada porque é ela que carrega o significado. Ela
+   * não dispara layout na página: a fileira é flex e os alvos de acerto têm largura
+   * própria, então a barra cresce dentro de um quadro que não se mexe.
+   */
   .mj-dot {
     width: 6px;
     height: 6px;
@@ -1201,12 +1277,12 @@
     background: var(--color-hairline-strong);
     transition:
       background-color 420ms cubic-bezier(0.22, 1, 0.36, 1),
-      transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+      width 520ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .mj-dot[data-active='true'] {
+    width: 20px;
     background: var(--color-royal);
-    transform: scale(1.5);
   }
 
   .mj-dot-hit:hover .mj-dot,
@@ -1215,21 +1291,76 @@
   }
 
   /*
-   * **No toque os alvos crescem; a marca não.** 24px de área e 32px de seta passam
-   * no mouse e reprovam no dedo, onde o piso é 44px. `pointer: coarse` engorda só a
-   * área de acerto — o ponto continua com 6px e a seta com o mesmo desenho, porque
-   * aumentar a marca junto encheria a coluna de controle de player.
+   * **A legenda reserva duas linhas, sempre.** Ela tem comprimento variável — de
+   * "Entrada por áudio, para quem dita a lista" a "A sugestão do cliente, com
+   * crédito e positivação junto" —, e na coluna de 17rem umas resolvem em uma
+   * linha e outras em duas. Como o stepper vem logo abaixo, cada troca de tela
+   * movia os controles 24px para cima ou para baixo: o alvo saía de debaixo do
+   * dedo entre a intenção e o toque.
+   *
+   * Reservar é o único conserto que sobrevive à tradução. Encurtar toda legenda
+   * até caber numa linha custaria informação, e ainda assim falharia — o ponto de
+   * quebra muda com a largura da coluna, e o inglês quebra em lugar diferente do
+   * português. 3rem são duas linhas de `body-sm`, que é o teto real do texto mais
+   * longo dos dois idiomas.
+   *
+   * O `text-wrap: balance` divide as duas linhas em partes parecidas em vez de
+   * deixar uma palavra órfã embaixo de uma linha cheia.
    */
-  @media (pointer: coarse) {
-    .mj-dot-hit {
-      width: 44px;
-      height: 44px;
-    }
+  .mj-caption {
+    min-height: 3rem;
+    text-wrap: balance;
+  }
 
-    .mj-arrow {
-      width: 44px;
-      height: 44px;
-    }
+  /*
+   * **A janela de três, e por que ela conserta o alinhamento.**
+   *
+   * O contador estava ancorado à direita da fileira inteira, então a distância
+   * entre ele e o último ponto mudava a cada módulo: seis telas em Objetivos,
+   * seis em Cotação, cinco em Catálogo. Centrá-lo sobre uma fileira de largura
+   * variável só trocaria um desalinhamento por outro.
+   *
+   * Limitar a janela a três resolve na raiz: **o grupo de controle passa a ter a
+   * mesma largura em qualquer módulo**, e o contador centrado nele cai sempre no
+   * mesmo lugar. A fileira inteira continua existindo e rolando por baixo do
+   * recorte, o que preserva um botão real por tela — quem navega por teclado ou
+   * leitor de tela alcança qualquer uma sem passar pelas do meio.
+   *
+   * `clip` e não `hidden`: um contêiner `hidden` continua rolável por programa, e
+   * o navegador rolaria por conta própria ao focar um ponto fora da janela,
+   * brigando com o `transform` que já faz esse trabalho.
+   */
+  .mj-dots-window {
+    --mj-hit: 24px;
+    --mj-gap: 8px;
+    --mj-slot: calc(var(--mj-hit) + var(--mj-gap));
+    width: calc(var(--mj-slot) * var(--mj-window, 3) - var(--mj-gap));
+    overflow: clip;
+    /* A janela assume a altura da seta para que as duas se alinhem pelo topo, com
+       os pontos centrados dentro dela. Sem isto, uma fileira de 24px ao lado de
+       um botão de 32px alinharia por cima e deixaria os pontos altos demais. */
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+  }
+
+  .mj-dots {
+    display: flex;
+    align-items: center;
+    gap: var(--mj-gap, 8px);
+    transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .mj-dot-hit {
+    width: var(--mj-hit, 24px);
+  }
+
+  /* O contador herda a largura da janela e centra nela. `tnum` é o que impede o
+     "1/6" de dançar horizontalmente ao virar "2/6": sem largura tabular, cada
+     algarismo tem avanço próprio e o texto centrado se desloca a cada troca. */
+  .mj-count {
+    display: block;
+    text-align: center;
   }
 
   .mj-arrow {
@@ -1246,6 +1377,42 @@
       border-color 200ms ease-out;
   }
 
+  /*
+   * **No toque a área de acerto cresce, a marca não, e a seta sai.**
+   *
+   * O piso de 24px passa no mouse e reprova no dedo, onde são 44px. Só que 44px
+   * vezes seis pontos, mais duas setas de 44px e os intervalos, pedia cerca de
+   * 430px numa coluna de 342px — e como o palco é coluna de grade, esse mínimo
+   * empurrava o documento inteiro e produzia rolagem lateral em toda a página. O
+   * defeito só existia no dedo: no mouse a mesma fileira cabe.
+   *
+   * A saída é dar o trabalho das setas ao arrasto, que a moldura de telefone já
+   * convida (ver `ModuleJourney`). Sobram os pontos, e com as áreas de acerto
+   * encostadas — 44px de centro a centro continua sendo o dobro do intervalo
+   * confortável, e o ponto desenhado segue com 6px.
+   *
+   * O bloco antigo tentava dar 44px à seta e não dava: ele vinha **antes** da
+   * regra de 32px, então perdia na ordem de origem. A seta nunca chegou a ter alvo
+   * de toque adequado, e agora não precisa ter.
+   */
+  @media (pointer: coarse) {
+    /* Os dois valores viram variável da janela porque ela precisa deles para
+       calcular a própria largura e o passo do deslocamento. Escritos direto no
+       alvo, a janela ficaria medindo 24px enquanto o alvo mede 44. */
+    .mj-dots-window {
+      --mj-hit: 44px;
+      --mj-gap: 0px;
+    }
+
+    .mj-dot-hit {
+      height: 44px;
+    }
+
+    .mj-arrow {
+      display: none;
+    }
+  }
+
   /* `:active` acompanha o `:hover` porque quem toca nunca passa por hover: sem ele
      a seta não devolve nada no telefone e o toque parece não ter pegado. */
   .mj-arrow:hover,
@@ -1254,9 +1421,18 @@
     border-color: var(--color-royal);
   }
 
+  /* A troca continua acontecendo para quem pediu menos movimento — o que sai é a
+     passagem, não o conteúdo. A escala é zerada no repouso também, senão a tela
+     inativa ficaria 2% maior para sempre, sem nunca ter a transição que a
+     resolveria. */
   @media (prefers-reduced-motion: reduce) {
-    .mj-shot,
-    .mj-dot {
+    .mj-shot {
+      transform: none;
+      transition-duration: 1ms;
+    }
+
+    .mj-dot,
+    .mj-dots {
       transition-duration: 1ms;
     }
   }
