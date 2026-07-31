@@ -1564,13 +1564,22 @@ const pt: Copy = {
    * `banco.bradesco` · Nexfar `nexfar.com.br` · Unicesumar `unicesumar.edu.br` ·
    * myTapp `mytapp.com.br` · Brivia `brivia.com.br` · Garupa `garupa.com.vc`.
    *
-   * **A Brivia é a única que não aparece em `curriculo/`.** As outras sete estão
-   * nos três arquivos. Princípio 5 do PRODUCT.md: o que o site afirma tem que
-   * bater com o currículo, então ou ela entra lá ou sai daqui.
+   * **A Brivia não aparece em `curriculo/`, e o autor explicou por quê** (31/07/2026):
+   * ela foi a parceira do projeto da Unicesumar, que ele tocou como contratado. O
+   * currículo credita esse trabalho ao período da Garupa Design
+   * (`curriculo-base.md:83`), que é o vínculo empregatício, e a parceira não
+   * aparece em lugar nenhum.
+   *
+   * **Pendência do princípio 5:** ou a linha do currículo passa a mencionar a
+   * Brivia, ou fica a divergência de um nome que só existe no site. É decisão do
+   * autor, e o currículo não foi tocado.
+   *
+   * Foi essa conversa que corrigiu a ressalva abaixo do título: ela dizia
+   * "parcerias de projeto", que não descreve trabalho como contratado.
    */
   brands: {
     title: 'Marcas com as quais eu já trabalhei',
-    lead: 'Entre empregos, clientes de agência e parcerias de projeto.',
+    lead: 'Entre empregos, clientes de agência e projetos em que eu entrei como contratado.',
     items: [
       { name: 'Electrolux' },
       { name: 'Banco do Brasil' },
@@ -2361,7 +2370,7 @@ const en: Copy = {
   /* Ver a nota de ordem, endereços e a pendência da Brivia na versão em português. */
   brands: {
     title: 'Brands I have worked with',
-    lead: 'Across employers, agency clients and project partners.',
+    lead: 'Across employers, agency clients and projects I came into as a contractor.',
     items: [
       { name: 'Electrolux' },
       { name: 'Banco do Brasil' },
