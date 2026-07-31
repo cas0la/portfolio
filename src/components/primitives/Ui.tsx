@@ -31,6 +31,13 @@ export function RoleByline({ children }: { children: ReactNode }) {
 /**
  * Ação primária: o gradiente royal para roxo, reservado ao download do currículo.
  * Sobe 1px no hover, o suficiente para responder sem chamar atenção.
+ *
+ * A cápsula segue a régua da faixa de ações do fechamento, que é onde ela vive:
+ * 48px de altura, glifo de 18px, `gap-2`, rótulo em `body` e respiro lateral de
+ * 16px que vira 24px a partir de `sm`. A régua está escrita por extenso em
+ * `ACTION_CAPSULE`, no `Contact.tsx`, junto com o motivo de cada medida — este
+ * botão não a importa de lá porque é primitiva e não pode depender de uma seção.
+ * **Mexer numa das duas pede conferir a outra.**
  */
 export function PrimaryButton({
   href,
@@ -48,8 +55,8 @@ export function PrimaryButton({
       href={href}
       download={download}
       className={cn(
-        'grad-royal-violet group inline-flex h-12 items-center gap-2.5 rounded-md px-6',
-        'text-h3 font-semibold text-white shadow-soft',
+        'grad-royal-violet group inline-flex h-12 items-center justify-center gap-2 rounded-md px-4 sm:px-6',
+        'text-body font-semibold text-white shadow-soft',
         'transition-all duration-200 hover:-translate-y-px hover:shadow-lift',
         'active:translate-y-0 active:shadow-soft',
         className,
@@ -78,8 +85,8 @@ export function SecondaryButton({
     <a
       href={href}
       className={cn(
-        'group inline-flex h-12 items-center gap-2.5 rounded-md border border-hairline-strong',
-        'bg-surface px-6 text-h3 font-semibold text-ink',
+        'group inline-flex h-12 items-center justify-center gap-2 rounded-md border border-hairline-strong px-4 sm:px-6',
+        'bg-surface text-body font-semibold text-ink',
         'transition-all duration-200 hover:-translate-y-px hover:border-royal hover:text-royal',
         'active:translate-y-0',
         className,

@@ -8,6 +8,44 @@ import { useLocale } from '@/lib/i18n'
 import { copyFor, EMAIL, GITHUB, LINKEDIN } from '@/content'
 
 /**
+ * A régua de cápsula da faixa de ações do fechamento, numa string só.
+ *
+ * São quatro controles lado a lado — currículo, e-mail, LinkedIn, GitHub — e antes
+ * cada um carregava a própria lista de classes. A deriva que isso produziu era
+ * visível principalmente no telefone: rótulos de 20px ao lado de um de 14px, glifos
+ * de 18px ao lado de um de 16px, respiro lateral em três valores diferentes
+ * (`px-6`, `px-4`, `pl-4 pr-3`) e o campo de e-mail com 52px de altura contra os
+ * 48px dos outros três, porque ele era o único sem altura fixa — a caixa de 32px do
+ * ícone mais `py-2.5` somava quatro pixels a mais.
+ *
+ * **O rótulo é `body` (16px) em qualquer largura, sem degrau.** Ele já não podia ser
+ * maior no telefone: `contato.lcasanova@gmail.com` mede 284px em 20px de Public
+ * Sans semibold, e com respiro e glifo a cápsula pediria cerca de 350px de largura
+ * útil contra os 312px que um telefone de 360px oferece depois do respiro do
+ * container. Em 16px o endereço mede 227px e a cápsula fecha em 285px. No desktop
+ * havia folga de sobra para 20px, e por um tempo foi assim — o autor tirou em
+ * 31/07/2026 por leitura de peso: rótulo de 20px em cápsula de 48px lê como título
+ * dentro de um botão, e a faixa inteira ganhava mais voz que a assinatura logo
+ * acima. Uma medida só nas duas pontas também apaga a classe inteira de defeito que
+ * originou esta régua, que era rótulo mudando de tamanho entre controles vizinhos.
+ *
+ * **O alinhamento interno fica fora daqui, e é de propósito.** Abaixo de `sm` as
+ * cápsulas têm todas a largura cheia, e aí o conteúdo precisa decidir onde encosta:
+ * currículo, LinkedIn e GitHub centram, porque o par glifo+rótulo é um bloco só e
+ * centrado ele lê como coluna alinhada; o campo de e-mail usa `justify-between`, a
+ * pedido do autor, porque ali os dois lados são coisas diferentes — o endereço é o
+ * conteúdo e o ícone é a ação, e prender a ação na borda direita é o que faz o
+ * botão parecer um campo com botão, e não uma frase com um desenho no fim. Acima de
+ * `sm` as cápsulas voltam à largura do próprio conteúdo e `justify` deixa de ter
+ * efeito nas três; a do e-mail mantém o mesmo par, agora encostado.
+ */
+const ACTION_CAPSULE =
+  'inline-flex h-12 w-full items-center gap-2 rounded-md px-4 text-body sm:w-auto sm:px-6'
+
+/** Glifos e ícones da faixa, todos na mesma medida óptica. */
+const ACTION_GLYPH = 'size-[18px] shrink-0'
+
+/**
  * Glifo do LinkedIn. O lucide-react 1.x removeu ícones de marca por política de
  * trademark, então o path vem inline. Uso nominativo, só para linkar o perfil.
  */
@@ -106,6 +144,11 @@ function copyByExecCommand(text: string): boolean {
  * O glifo fica em royal e o rótulo em tinta: a marca é o que identifica o destino
  * de relance, e pintar o texto junto faria dois links coloridos disputarem a linha
  * com o botão de currículo, que é o gatilho principal desta faixa.
+ *
+ * As classes de cápsula são as mesmas dos outros três controles da faixa — altura,
+ * tipo, `gap` e respiro lateral saem de `ACTION_CAPSULE`. O que era próprio daqui e
+ * divergia: `text-h3` fixo, que no telefone punha rótulo de 20px ao lado do e-mail
+ * de 14px, e `px-4` sem degrau.
  */
 function SocialLink({
   href,
@@ -121,7 +164,7 @@ function SocialLink({
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex h-12 items-center gap-2 rounded-md border border-hairline-strong bg-surface px-4 text-h3 font-semibold text-ink transition-colors hover:border-royal hover:text-royal"
+      className={`${ACTION_CAPSULE} justify-center border border-hairline-strong bg-surface font-semibold text-ink transition-colors hover:border-royal hover:text-royal`}
     >
       {children}
       {label}
@@ -190,7 +233,7 @@ function CopyEmail() {
   }
 
   return (
-    <span className="inline-flex max-w-full flex-col items-start gap-1.5">
+    <span className="inline-flex w-full max-w-full flex-col items-start gap-1.5 sm:w-auto">
       <button
         type="button"
         onClick={copy}
@@ -200,17 +243,18 @@ function CopyEmail() {
            navegação por elementos ouviria um relato, não um botão. O resultado é
            trabalho da região `role="status"`. */
         aria-label={`${t.close.copy}: ${EMAIL}`}
-        className="group relative inline-flex max-w-full items-center gap-3.5 overflow-hidden rounded-md border border-hairline-strong bg-surface py-2.5 pl-4 pr-3 text-left transition-colors hover:border-royal"
+        className={`${ACTION_CAPSULE} group relative max-w-full justify-between overflow-hidden border border-hairline-strong bg-surface text-left transition-colors hover:border-royal`}
       >
-        <span
-          ref={emailRef}
-          className="min-w-0 truncate text-body-sm font-semibold text-ink sm:text-h3"
-        >
+        <span ref={emailRef} className="min-w-0 truncate font-semibold text-ink">
           {EMAIL}
         </span>
-        <span className="grid size-8 shrink-0 place-items-center text-ink-soft transition-colors group-hover:text-royal">
-          <Copy className="size-4" aria-hidden />
-        </span>
+        {/* O ícone era `size-4` dentro de uma caixa de 32px. A caixa não servia de
+            alvo — o botão inteiro é clicável — e era ela que empurrava a cápsula
+            para 52px, quatro a mais que as outras três da faixa. */}
+        <Copy
+          className={`${ACTION_GLYPH} text-ink-soft transition-colors group-hover:text-royal`}
+          aria-hidden
+        />
 
         {/*
           Confirmação: "Copiado!" encostado na direita do campo, sobre uma placa
@@ -238,12 +282,14 @@ function CopyEmail() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={COPY_FADE}
-              className="copy-plate absolute inset-y-0 right-0 flex items-center pr-3"
+              className="copy-plate absolute inset-y-0 right-0 flex items-center pr-4 sm:pr-6"
             >
               {/* Os 4px são o `p-1`: a placa branca sobra 4px em volta do rótulo,
-                  o suficiente para ele não encostar no e-mail que passa por baixo. */}
-              <span className="inline-flex items-center gap-2 rounded-sm bg-surface p-1 text-body-sm font-semibold text-royal sm:text-h3">
-                <Check className="size-4" aria-hidden />
+                  o suficiente para ele não encostar no e-mail que passa por baixo.
+                  O respiro à direita acompanha o da cápsula, para "Copiado!" nascer
+                  exatamente onde o ícone de copiar estava. */}
+              <span className="inline-flex items-center gap-2 rounded-sm bg-surface p-1 text-body font-semibold text-royal">
+                <Check className={ACTION_GLYPH} aria-hidden />
                 {t.close.copied}
               </span>
             </motion.span>
@@ -297,16 +343,20 @@ export function Contact() {
         </FadeIn>
 
         <FadeIn delay={0.06}>
-          <div className="mt-block flex flex-wrap items-center gap-snug">
+          {/* Coluna no telefone, linha a partir de `sm`. Empilhado, cada cápsula
+              ocupa a largura inteira: quatro controles de larguras diferentes um
+              embaixo do outro criam uma borda direita serrilhada, que lê como
+              desalinhamento mesmo estando tudo alinhado à esquerda. */}
+          <div className="mt-block flex flex-col items-stretch gap-snug sm:flex-row sm:flex-wrap sm:items-center">
             <PrimaryButton href={t.nav.resumeFile} download>
               {t.close.ctaResume}
             </PrimaryButton>
             <CopyEmail />
             <SocialLink href={LINKEDIN} label={t.close.linkedin}>
-              <LinkedInGlyph className="size-[18px] text-royal" />
+              <LinkedInGlyph className={`${ACTION_GLYPH} text-royal`} />
             </SocialLink>
             <SocialLink href={GITHUB} label={t.close.github}>
-              <GitHubGlyph className="size-[18px] text-royal" />
+              <GitHubGlyph className={`${ACTION_GLYPH} text-royal`} />
             </SocialLink>
           </div>
         </FadeIn>
