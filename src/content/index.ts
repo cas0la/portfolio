@@ -1808,8 +1808,8 @@ const pt: Copy = {
       { name: 'Português', level: 'Nativo' },
       {
         name: 'Inglês',
-        level: 'B2',
-        note: 'Leio e escrevo em inglês com fluência; na conversação estou em nível intermediário.',
+        level: 'C1',
+        note: 'Leio, escrevo e converso em inglês; a escrita é onde tenho mais prática.',
       },
     ],
     /* Recortada em 4:5 a partir de um quadrado de 1280px e **espelhada de volta**:
@@ -2541,8 +2541,8 @@ const en: Copy = {
       { name: 'Portuguese', level: 'Native' },
       {
         name: 'English',
-        level: 'B2',
-        note: 'I read and write English fluently; my conversation is at an intermediate level.',
+        level: 'C1',
+        note: 'I read, write and speak English; writing is where I have the most practice.',
       },
     ],
     portrait: {
