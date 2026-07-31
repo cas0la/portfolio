@@ -207,9 +207,7 @@ function PillList({ label, items }: { label: string; items: string[] }) {
       <h3 className="label text-ink-soft">{label}</h3>
       <ul className="mt-4 flex flex-wrap gap-2 text-body-sm text-ink">
         {items.map((item) => (
-          <Pill key={item} live reserve={item}>
-            {item}
-          </Pill>
+          <Pill key={item}>{item}</Pill>
         ))}
       </ul>
     </div>
@@ -235,7 +233,7 @@ function LanguageList({ label, items }: { label: string; items: Language[] }) {
       <h3 className="label text-ink-soft">{label}</h3>
       <ul className="mt-4 flex flex-wrap gap-2 text-body-sm">
         {items.map((item) => (
-          <Pill key={item.name} live className="text-ink">
+          <Pill key={item.name} className="text-ink">
             {item.name}
             <span aria-hidden className="px-2 text-hairline-strong">
               ·
