@@ -1606,10 +1606,8 @@ const pt: Copy = {
     lead: 'Funcionário em umas, agência ou contratado em outras. Oito contextos de negócio, e em nenhum deles o problema já chegava formulado.',
     items: [
       { name: 'Electrolux', logo: '/assets/marcas/electrolux.svg' },
-      // Duas cores que carregam a marca inteira: o achatamento em preto devolvia
-      // um quadrado sólido. Esta é a única que anda em escala de cinza.
-      { name: 'Banco do Brasil', logo: '/assets/marcas/bb.svg', tone: 'gray' },
-      { name: 'Bradesco', logo: '/assets/marcas/bradesco.png' },
+      { name: 'Banco do Brasil', logo: '/assets/marcas/bb.svg' },
+      { name: 'Bradesco', logo: '/assets/marcas/bradesco.svg' },
       { name: 'Nexfar', logo: '/assets/marcas/nexfar.png' },
       { name: 'Unicesumar', logo: '/assets/marcas/unicesumar.svg' },
       { name: 'myTapp', logo: '/assets/marcas/mytapp.svg' },
@@ -2409,10 +2407,8 @@ const en: Copy = {
     lead: 'On staff at some, agency or contractor at others. Eight business contexts, and in none of them did the problem arrive already framed.',
     items: [
       { name: 'Electrolux', logo: '/assets/marcas/electrolux.svg' },
-      // Duas cores que carregam a marca inteira: o achatamento em preto devolvia
-      // um quadrado sólido. Esta é a única que anda em escala de cinza.
-      { name: 'Banco do Brasil', logo: '/assets/marcas/bb.svg', tone: 'gray' },
-      { name: 'Bradesco', logo: '/assets/marcas/bradesco.png' },
+      { name: 'Banco do Brasil', logo: '/assets/marcas/bb.svg' },
+      { name: 'Bradesco', logo: '/assets/marcas/bradesco.svg' },
       { name: 'Nexfar', logo: '/assets/marcas/nexfar.png' },
       { name: 'Unicesumar', logo: '/assets/marcas/unicesumar.svg' },
       { name: 'myTapp', logo: '/assets/marcas/mytapp.svg' },
