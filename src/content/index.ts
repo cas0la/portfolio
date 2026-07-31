@@ -547,6 +547,14 @@ type Copy = {
     /** Etiqueta da posição atual na linha do tempo. */
     nowLabel: string
     skillsLabel: string
+    /**
+     * As soft skills, pedidas pelo autor em 31/07/2026. Lista própria e não
+     * misturada às hard skills: o tratamento visual é o mesmo de propósito, porque
+     * o DESIGN.md proíbe inventar hierarquia entre credenciais do mesmo nível, e é
+     * o rótulo acima que diz de que tipo é cada grupo.
+     */
+    softSkillsLabel: string
+    softSkills: string[]
     skills: string[]
     toolsLabel: string
     tools: string[]
@@ -1722,7 +1730,7 @@ const pt: Copy = {
        design entrar como o que sustenta o PM, e nunca como oferta alternativa de
        serviço. Uma lista de skills de design ao lado de uma de produto é
        exatamente a dúvida que o avaliador não pode ter. */
-    skillsLabel: 'Skills',
+    skillsLabel: 'Hard skills',
     /* TETO DE 20 CARACTERES POR ITEM. A lista vive numa coluna de cerca de 380px, e
        ali um rótulo mais longo que isso não divide fileira com nenhum outro: cada
        item passa a custar uma linha inteira. Foi o que aconteceu na primeira versão
@@ -1764,6 +1772,18 @@ const pt: Copy = {
          outro PM sênior. Sem tradução na versão em inglês — o termo já é inglês, e
          traduzir "vibe coding" produziria uma frase que ninguém procura. */
       'Vibe coding',
+    ],
+    softSkillsLabel: 'Soft skills',
+    /* **"Compartilhamento de conhecimento" tem 32 caracteres e fura o teto de 20
+       que o DESIGN.md impõe à cápsula.** As palavras são do autor e ficam como ele
+       escreveu; o custo é que este item nunca divide fileira com outro e gasta uma
+       linha inteira da coluna. A alternativa dentro do teto seria "Troca de
+       conhecimento", e é decisão dele, não minha. */
+    softSkills: [
+      'Colaboração',
+      'Flexibilidade',
+      'Adaptabilidade',
+      'Compartilhamento de conhecimento',
     ],
     toolsLabel: 'Ferramentas',
     tools: [
@@ -2483,7 +2503,7 @@ const en: Copy = {
         org: 'Garupa Design and Dzigual Golinelli',
       },
     ],
-    skillsLabel: 'Skills',
+    skillsLabel: 'Hard skills',
     /* Mesmo teto de 20 caracteres da versão em português, e os mesmos cortes. Ver
        o comentário lá para o raciocínio e para o que se perdeu. */
     skills: [
@@ -2500,6 +2520,10 @@ const en: Copy = {
       'Build vs. buy',
       'Vibe coding',
     ],
+    softSkillsLabel: 'Soft skills',
+    /* Ver a nota na versão em português sobre o teto de 20 caracteres. Em inglês o
+       item mais longo cabe, então lá o problema não existe. */
+    softSkills: ['Collaboration', 'Flexibility', 'Adaptability', 'Knowledge sharing'],
     toolsLabel: 'Tools',
     tools: [
       'Figma',

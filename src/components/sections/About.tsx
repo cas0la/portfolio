@@ -207,7 +207,9 @@ function PillList({ label, items }: { label: string; items: string[] }) {
       <h3 className="label text-ink-soft">{label}</h3>
       <ul className="mt-4 flex flex-wrap gap-2 text-body-sm text-ink">
         {items.map((item) => (
-          <Pill key={item}>{item}</Pill>
+          <Pill key={item} live reserve={item}>
+            {item}
+          </Pill>
         ))}
       </ul>
     </div>
@@ -233,7 +235,7 @@ function LanguageList({ label, items }: { label: string; items: Language[] }) {
       <h3 className="label text-ink-soft">{label}</h3>
       <ul className="mt-4 flex flex-wrap gap-2 text-body-sm">
         {items.map((item) => (
-          <Pill key={item.name} className="text-ink">
+          <Pill key={item.name} live className="text-ink">
             {item.name}
             <span aria-hidden className="px-2 text-hairline-strong">
               ·
@@ -590,6 +592,15 @@ export function About() {
           <FadeIn delay={0.22}>
             <div className="flex flex-col gap-block">
               <PillList label={t.inventory.skillsLabel} items={t.inventory.skills} />
+              {/* As soft skills logo abaixo das hard, com tratamento idêntico. O
+                  DESIGN.md manda um tratamento só para as três listas de
+                  credencial, porque diferenciá-las por cor ou peso inventaria
+                  hierarquia entre coisas do mesmo nível. Quem diz de que tipo é
+                  cada grupo é o rótulo em caixa-alta acima dele. */}
+              <PillList
+                label={t.inventory.softSkillsLabel}
+                items={t.inventory.softSkills}
+              />
               <PillList label={t.inventory.toolsLabel} items={t.inventory.tools} />
               <LanguageList
                 label={t.inventory.languagesLabel}

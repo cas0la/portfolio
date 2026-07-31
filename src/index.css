@@ -1312,6 +1312,123 @@
    * O `text-wrap: balance` divide as duas linhas em partes parecidas em vez de
    * deixar uma palavra órfã embaixo de uma linha cheia.
    */
+  /*
+   * A cápsula de credencial em resposta ao ponteiro.
+   *
+   * **Este é o quarto endereço do gradiente, e ele foi aberto pelo autor em
+   * 31/07/2026.** A regra dos três endereços fechados existe para o gradiente não
+   * virar textura, e continua valendo com uma condição que este caso cumpre: aqui
+   * ele só existe enquanto o cursor está em cima, nunca em repouso, como já
+   * acontece na assinatura do cabeçalho. **Gradiente parado na página continua
+   * limitado aos dois endereços originais.**
+   *
+   * O preenchimento segue branco em todo estado. O que o documento proíbe é
+   * cápsula pintada como classificação; pintura que só aparece sob o cursor não
+   * classifica nada.
+   *
+   * O fio é feito com duas camadas de fundo em vez de `border-image`, que ignora
+   * `border-radius` e devolveria um retângulo de gradiente atrás de uma cápsula
+   * arredondada. A camada de baixo pinta a borda, a de cima devolve o papel
+   * branco por dentro.
+   *
+   * **Os dois gradientes têm o mesmo ângulo e as mesmas três paradas de
+   * propósito.** Gradientes com contagem de paradas diferente não interpolam, e a
+   * transição viraria um corte seco.
+   *
+   * A espessura é 1,5px em repouso e em hover, e não 1 crescendo para 1,5: numa
+   * fileira que quebra em linhas, engordar a borda alarga a caixa e pode empurrar
+   * a cápsula vizinha para baixo, remontando a lista debaixo do cursor. O ganho de
+   * peso vem da saturação, que sobe de cinza-claro para royal cheio.
+   */
+  .pill-live {
+    border-width: 1.5px;
+    border-color: transparent;
+    background-image:
+      linear-gradient(var(--color-surface), var(--color-surface)),
+      linear-gradient(
+        112deg,
+        var(--color-hairline-strong) 0%,
+        var(--color-hairline-strong) 18%,
+        var(--color-hairline-strong) 100%
+      );
+    background-origin: padding-box, border-box;
+    background-clip: padding-box, border-box;
+    background-repeat: no-repeat;
+    transition: background-image 260ms var(--ease-out-soft);
+  }
+
+  .pill-ink {
+    display: inline-block;
+  }
+
+  /*
+   * A largura do negrito, reservada desde o repouso.
+   *
+   * Sem ela o hover engorda o texto, a cápsula cresce e a fileira se remonta. O
+   * pseudo carrega o mesmo texto em 600, com altura zero, então ele não aparece,
+   * não entra na árvore de acessibilidade por causa do `visibility`, e mesmo assim
+   * força a caixa a nascer com a largura maior das duas.
+   */
+  .pill-ink[data-reserve]::after {
+    content: attr(data-reserve);
+    display: block;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    font-weight: 600;
+    pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    .pill-live:hover {
+      background-image:
+        linear-gradient(var(--color-surface), var(--color-surface)),
+        linear-gradient(
+          112deg,
+          var(--color-royal) 0%,
+          var(--color-royal) 18%,
+          var(--color-violet) 100%
+        );
+    }
+
+    .pill-live:hover .pill-ink {
+      background-image: linear-gradient(
+        112deg,
+        var(--color-royal) 0%,
+        var(--color-royal) 18%,
+        var(--color-violet) 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Só engorda quem reservou largura. A cápsula de idioma carrega três nós de
+       cores diferentes em vez de uma string, não tem o que reservar, e ganha a
+       pintura sem o peso. */
+    .pill-live:hover .pill-ink[data-reserve] {
+      font-weight: 600;
+    }
+  }
+
+  /*
+   * O escape obrigatório do texto pintado. Em alto contraste e na impressão, texto
+   * que recorta o próprio fundo desaparece por inteiro — o fundo não é pintado e o
+   * preenchimento é transparente. O fio volta a ter cor pelo mesmo motivo.
+   */
+  @media (forced-colors: active), print {
+    .pill-live:hover .pill-ink {
+      background-image: none;
+      color: var(--color-ink);
+      -webkit-text-fill-color: currentColor;
+    }
+
+    .pill-live {
+      border-color: var(--color-hairline-strong);
+    }
+  }
+
   /* O marcador da decisão. Mesmo ponto de 6px do stepper e da assinatura, na cor
      que o sistema reserva para elemento pequeno. Ver a nota no `PieceCard`. */
   .decision-dot {

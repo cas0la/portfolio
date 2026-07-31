@@ -110,18 +110,51 @@ export function SecondaryButton({
 export function Pill({
   children,
   className = '',
+  live = false,
+  reserve,
 }: {
   children: ReactNode
   className?: string
+  /**
+   * Liga a resposta ao ponteiro: fio e texto em gradiente royal→roxo enquanto o
+   * cursor está em cima. **Só nas listas de credencial do Sobre**, e nunca na
+   * cápsula de número do case, onde o royal já significa medição e um segundo
+   * royal no mesmo elemento apagaria essa distinção.
+   *
+   * O preenchimento continua branco em qualquer estado. O que o DESIGN.md proíbe
+   * é cápsula pintada como classificação; pintura que só existe em resposta a um
+   * gesto não classifica coisa nenhuma.
+   */
+  live?: boolean
+  /**
+   * O texto da cápsula, para reservar a largura que ela terá em negrito.
+   *
+   * **Sem isto o hover reflui a lista inteira.** As cápsulas vivem em `flex-wrap`,
+   * então engordar o texto de uma alarga a caixa dela e pode empurrar a vizinha
+   * para a fileira de baixo — a lista se remonta debaixo do cursor. Com a largura
+   * do negrito reservada desde o repouso, a caixa não muda e o peso é a única
+   * coisa que se move.
+   *
+   * Ausente, a cápsula ganha gradiente mas não engorda. É o caso da cápsula de
+   * idioma, cujo conteúdo são três nós com cores diferentes e não uma string.
+   */
+  reserve?: string
 }) {
   return (
     <li
       className={cn(
         'rounded-pill border border-hairline-strong bg-surface px-4 py-2',
+        live && 'pill-live',
         className,
       )}
     >
-      {children}
+      {live ? (
+        <span className="pill-ink" data-reserve={reserve}>
+          {children}
+        </span>
+      ) : (
+        children
+      )}
     </li>
   )
 }
