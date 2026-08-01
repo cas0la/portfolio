@@ -1,28 +1,39 @@
 import { useEffect, useRef, useState } from 'react'
-import { Container } from '@/components/primitives/Container'
 import { FadeIn } from '@/components/primitives/FadeIn'
 import { useLocale } from '@/lib/i18n'
 import { copyFor, type Brand } from '@/content'
 
 /**
- * A faixa de marcas, entre os cases e o Sobre.
+ * A faixa de marcas, entre o hero e os cases.
  *
- * **Ela existe como credencial, e o lugar dela é depois da prova.** Antes dos
- * cases, uma fileira de logos pediria confiança antes de ter mostrado trabalho,
- * que é como uma landing page se apresenta. Depois deles, ela responde a uma
- * pergunta que a leitura já fez: em que contextos isso aconteceu.
+ * **Ela é só a pista, sem título nem linha de apoio, por decisão do autor em
+ * 31/07/2026.** Antes tinha os dois, vivia depois dos cases, e o argumento
+ * registrado era que credencial pedida antes da prova é postura de landing page.
+ * O que mudou não foi o argumento, foi o objeto: uma faixa com título é uma
+ * afirmação e precisa ter sido merecida; uma pista de logos sozinha é contexto, e
+ * contexto pertence perto da abertura. **Se o título voltar, o lugar volta com
+ * ele** — os dois foram a mesma decisão.
  *
- * **A ressalva de qualidade é obrigatória.** Oito marcas em fila afirmam, por
- * associação, que ele trabalhou em todas elas como empregado. A linha abaixo do
- * título diz que não, e é o que separa esta faixa de uma afirmação inflada.
+ * **O que se perdeu junto, e é o custo real: a ressalva de qualidade.** Ela vivia
+ * na linha abaixo do título e dizia que estas oito não são oito empregos — sem
+ * ela, oito marcas em fila afirmam por associação uma carreira que não é a dele.
+ * O texto continua em `brands.lead`, sem ninguém renderizar. **A leitura inflada
+ * é hoje um risco aberto**, e há três saídas se ele incomodar: devolver a linha
+ * sozinha sob a pista, qualificar no `alt` de cada marca, ou voltar o par
+ * título+ressalva e com ele o lugar antigo.
  *
  * **Este é o segundo movimento em laço do site, e o registro importa.** O
  * DESIGN.md dizia que a seta do hero era o único, com o argumento de que um
  * segundo laço tira dela o que a faz convidar. O autor derrubou a regra ao
  * escolher o laço contínuo, e o argumento continua valendo como limite: um
- * terceiro não entra. Os dois convivem porque nunca estão na mesma tela e porque
- * fazem coisas diferentes — a seta convida a descer, a faixa mostra que a lista
- * não acabou na borda.
+ * terceiro não entra. Eles faziam coisas diferentes — a seta convida a descer, a
+ * pista mostra que a lista não acabou na borda — e não se cruzavam, porque uma
+ * vivia no pé da primeira dobra e a outra depois dos cases.
+ *
+ * **Subir a pista para logo abaixo do hero derrubou a metade "nunca na mesma
+ * tela".** O chevron e os logos em marcha podem aparecer juntos durante a
+ * rolagem, e isso é risco novo, não decisão tomada. Se o conjunto ficar inquieto,
+ * quem cede é a pista, que anda por decoração, e não o chevron, que convida.
  */
 /*
  * **Marcas se igualam por área, não por altura nem por largura.**
@@ -90,7 +101,10 @@ function BrandItem({ brand }: { brand: Brand }) {
 export function Brands() {
   const { locale } = useLocale()
   const t = copyFor(locale)
-  const { title, lead, items } = t.brands
+  /* `title` e `lead` continuam no arquivo de textos e não são lidos aqui. É
+     conteúdo em espera, igual ao bloco de fotos do Sobre: se a ressalva voltar,
+     ela volta pronta e nos dois idiomas. */
+  const { items } = t.brands
   const railRef = useRef<HTMLDivElement | null>(null)
   const setRef = useRef<HTMLUListElement | null>(null)
   const [copies, setCopies] = useState(2)
@@ -135,47 +149,24 @@ export function Brands() {
 
   return (
     /*
-     * **Esta é a única seção que abre com padding, e é exceção declarada.**
+     * **A exceção de abrir com padding acabou junto com o título.**
      *
-     * A regra do DESIGN.md é que seção fecha com `pb` e nunca abre, para o
-     * intervalo entre duas seções ser contado uma vez só em vez de somar duas
-     * margens. Aqui somar é o objetivo. As outras seções têm altura de sobra para
-     * ocupar a própria dobra; esta tem título, uma linha e uma faixa, e com o
-     * intervalo padrão ela aparecia junto com o pé dos cases ou com o topo do
-     * Sobre, o que a fazia ler como rodapé da seção vizinha em vez de assunto
-     * próprio.
+     * A seção somava `pt` ao `pb` da vizinha de cima porque tinha três coisas
+     * dentro e precisava de ar dos dois lados para não ler como rodapé da seção
+     * anterior. Com só a pista, somar 96px em cima dos 208px do hero afastaria os
+     * logos do que eles qualificam.
      *
-     * **Os dois lados têm que somar igual, e é isso que a conta abaixo faz.** O vão
-     * de cima é o fecho dos cases mais a abertura desta seção; o de baixo é só o
-     * fecho dela, porque o Sobre não abre com padding. Repetindo o mesmo `pb` das
-     * outras seções, a marca ficava com 160px em cima e 112px embaixo, e o autor
-     * leu a diferença de imediato. O `pb` daqui é a soma que o topo já produz:
-     * 112 + 48 no telefone, 208 + 96 acima de md.
+     * Hoje ela obedece a regra geral do DESIGN.md — seção fecha com `pb` e nunca
+     * abre — e o resultado é simetria de graça: o `pb` do hero põe a pista a
+     * 112/208px abaixo dele, e este `pb`, que é o mesmo, põe os cases à mesma
+     * distância. A pista fica entre as duas seções sem pertencer a nenhuma.
      */
-    <section className="pt-block pb-[160px] md:pt-section md:pb-[304px]">
-      <Container>
-        <FadeIn>
-          {/* `mt-4` e não `mt-3`. A grade de espaçamento do DESIGN.md é de 8px, o
-              que na escala do Tailwind quer dizer só os pares; `mt-3` são 12px e
-              fura. Doze contra dezesseis não se vê sozinho, e é justamente por
-              isso que a grade existe: o que se vê é a página inteira meio fora de
-              esquadro depois de vinte decisões dessas. */}
-          <h2 className="measure text-balance text-h1 font-extrabold text-ink">
-            {title}
-          </h2>
-          {/* `text-pretty` no lead porque ele quebra em duas linhas na maioria das
-              larguras, e sem isso a primeira terminava no "e" solto de "negócio,
-              e". Conjunção órfã no fim da linha faz o olho voltar para conferir se
-              perdeu alguma coisa. */}
-          <p className="measure mt-4 text-pretty text-body text-ink-soft">{lead}</p>
-        </FadeIn>
-      </Container>
-
+    <section className="pb-[112px] md:pb-beat">
       {/* A faixa vive **fora do Container** para correr de borda a borda. Dentro
           dele ela pararia no respiro lateral, e a máscara desbotaria contra uma
           margem em vez de contra a borda da tela, que é onde o corte incomoda. */}
-      <FadeIn delay={0.06}>
-        <div className="brand-rail mt-block" ref={railRef}>
+      <FadeIn>
+        <div className="brand-rail" ref={railRef}>
           <div className="brand-run" style={{ ['--brand-copies' as string]: copies }}>
             <ul className="brand-set" ref={setRef}>
               {items.map((brand) => (

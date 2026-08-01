@@ -5,6 +5,7 @@ import { FadeIn } from '@/components/primitives/FadeIn'
 import { Rich } from '@/components/primitives/Rich'
 import { Pill } from '@/components/primitives/Ui'
 import { useLocale } from '@/lib/i18n'
+import { cn } from '@/lib/utils'
 import { copyFor } from '@/content'
 import type { InventoryRow, Language, Testimonial } from '@/content'
 
@@ -396,39 +397,77 @@ function Timeline({
         data-at-end={atEnd}
         data-scrollable={scrollable}
         data-dragging={dragging}
-        className="timeline-scroll scroll-slim mt-4 flex flex-col border-t border-hairline"
+        /* O `-ml-4` devolve os 16px que o `pl-4` de cada linha consome, para o
+           texto continuar nascendo no mesmo x do rótulo acima e da prosa ao lado.
+           Sem ele, a coluna inteira andaria para a direita e a linha do tempo
+           passaria a ler como bloco recuado. O que sobra do lado de fora é o fio
+           divisor, que avança 16px sobre a calha — no telefone ele para a 8px da
+           borda, e acima de `lg` cai dentro dos 72px que separam as duas colunas.
+           **Deslocamento negativo aqui só pode ser da caixa, nunca do conteúdo:**
+           acima de `lg` esta lista rola, e rolagem no eixo Y corta o eixo X. */
+        className="timeline-scroll scroll-slim -ml-4 mt-4 flex flex-col border-t border-hairline"
         tabIndex={0}
         role="group"
         aria-labelledby="timeline-label"
       >
-        {rows.map((row) => (
-          <li
-            key={`${row.role}-${row.org}`}
-            className="flex flex-col gap-1 border-b border-hairline py-4 sm:flex-row sm:gap-gap"
-          >
-            {/* Largura fixa no ano para os sete alinharem numa coluna, e `tnum`
-                para os dígitos não dançarem entre "2025" e "2023–2025". */}
-            <div className="flex shrink-0 items-baseline gap-2 sm:w-[104px] sm:flex-col sm:items-start sm:gap-1">
-              <span className="tnum text-body-sm text-ink-soft">{row.when}</span>
-              {row.current && (
-                <span className="label rounded-pill bg-royal-wash px-2 py-0.5 text-royal">
-                  {nowLabel}
-                </span>
+        {rows.map((row, i) => {
+          /*
+           * Duas linhas vizinhas com a mesma empresa são a mesma passagem, e o fio
+           * à esquerda é o que diz isso. **A ligação é derivada do próprio `org`,
+           * nunca marcada à mão:** um sinalizador no conteúdo envelheceria calado
+           * na primeira vez que alguém inserisse um cargo no meio da lista.
+           *
+           * São duas passagens hoje — Product Designer para Product Manager na
+           * Nexfar, e Product Designer para Lead na Garupa. Nos dois casos o que a
+           * lista dizia antes era troca de emprego, quando foi promoção.
+           *
+           * A empresa continua repetida na linha de baixo. Ela é redundante para
+           * quem vê o fio, e é a única âncora para quem lê a linha sozinha, que é
+           * como um leitor de tela percorre uma lista. Redundância barata ganha.
+           *
+           * O fio é `hairline-strong` e não royal: royal neste sistema significa
+           * medição, e gastá-lo aqui tiraria dele o que faz um número saltar.
+           */
+          const joinsBelow = rows[i + 1]?.org === row.org
+          const joinsAbove = rows[i - 1]?.org === row.org
+
+          return (
+            <li
+              key={`${row.when}-${row.role}-${row.org}`}
+              className={cn(
+                'flex flex-col gap-1 border-l py-4 pl-4 sm:flex-row sm:gap-gap',
+                joinsAbove || joinsBelow
+                  ? 'border-l-hairline-strong'
+                  : 'border-l-transparent',
+                /* O divisor some entre as duas, senão o fio ligaria dois blocos
+                   que uma linha horizontal acabou de separar. */
+                !joinsBelow && 'border-b border-b-hairline',
               )}
-            </div>
-            <div className="min-w-0">
-              {/* O cargo em itálico de serifa. É a segunda voz do sistema fazendo o
-                  trabalho que ela faz melhor: separar sem precisar de mais peso nem
-                  de mais corpo. Antes era grotesca 600, e numa lista de sete o peso
-                  repetido sete vezes vira mancha em vez de hierarquia. */}
-              <span className="accent block text-h3 text-ink">{row.role}</span>
-              {row.squad && (
-                <span className="block text-body-sm text-ink">{row.squad}</span>
-              )}
-              <span className="block text-body-sm text-ink-soft">{row.org}</span>
-            </div>
-          </li>
-        ))}
+            >
+              {/* Largura fixa no ano para os oito alinharem numa coluna, e `tnum`
+                  para os dígitos não dançarem entre "2025" e "2023–2025". */}
+              <div className="flex shrink-0 items-baseline gap-2 sm:w-[104px] sm:flex-col sm:items-start sm:gap-1">
+                <span className="tnum text-body-sm text-ink-soft">{row.when}</span>
+                {row.current && (
+                  <span className="label rounded-pill bg-royal-wash px-2 py-0.5 text-royal">
+                    {nowLabel}
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0">
+                {/* O cargo em itálico de serifa. É a segunda voz do sistema fazendo
+                    o trabalho que ela faz melhor: separar sem precisar de mais peso
+                    nem de mais corpo. Antes era grotesca 600, e numa lista de oito o
+                    peso repetido vira mancha em vez de hierarquia. */}
+                <span className="accent block text-h3 text-ink">{row.role}</span>
+                {row.squad && (
+                  <span className="block text-body-sm text-ink">{row.squad}</span>
+                )}
+                <span className="block text-body-sm text-ink-soft">{row.org}</span>
+              </div>
+            </li>
+          )
+        })}
       </ol>
     </div>
   )
@@ -588,7 +627,22 @@ export function About() {
           </FadeIn>
 
           <FadeIn delay={0.22}>
-            <div className="flex flex-col gap-block">
+            {/* `gap-gap` e não `gap-block`. Os 48px eram intervalo de seção usado
+                entre grupos irmãos dentro de uma coluna só, e com quatro grupos
+                isso somava 144px de vão que a coluna do retrato não tinha como
+                acompanhar — o retrato é 4:5 e tem altura fechada. Em 24px a coluna
+                encurta 72px e as duas terminam mais perto.
+
+                **Não fecha a diferença, e não deveria.** As cápsulas de credencial
+                ocupam bem mais altura que uma foto 4:5 nesta largura; igualar as
+                duas exigiria cortar credencial, que é conteúdo. O que se busca aqui
+                é aproximar, não alinhar.
+
+                Vinte e quatro é o degrau seguinte da escala do DESIGN.md (8/16/24/48).
+                Um valor intermediário como 32px daria uma redução mais suave e não
+                existe como token — inventá-lo aqui abriria a escala para o próximo
+                palpite. */}
+            <div className="flex flex-col gap-gap">
               <PillList label={t.inventory.skillsLabel} items={t.inventory.skills} />
               {/* As soft skills logo abaixo das hard, com tratamento idêntico. O
                   DESIGN.md manda um tratamento só para as três listas de

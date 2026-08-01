@@ -1694,6 +1694,16 @@ const pt: Copy = {
         squad: 'Time de 9 designers',
         org: 'Garupa Design',
       },
+      /* O cargo com que ele volta à Garupa, antes de virar Lead. A linha do tempo
+         desenha as duas juntas sozinha, por serem vizinhas com o mesmo `org` — ver
+         `Timeline` no `About.tsx`. Ela não existia, e sem ela a leitura era de que
+         ele voltou já liderando nove pessoas. */
+      {
+        when: '2021',
+        role: 'Product Designer, Sênior',
+        squad: 'Produtos digitais',
+        org: 'Garupa Design',
+      },
       {
         when: '2020–2021',
         role: 'Product Designer, Pleno',
@@ -2480,6 +2490,13 @@ const en: Copy = {
         when: '2021–2022',
         role: 'Lead Designer',
         squad: 'Team of 9 designers',
+        org: 'Garupa Design',
+      },
+      /* Mesma linha da versão em português. Ver o comentário lá. */
+      {
+        when: '2021',
+        role: 'Senior Product Designer',
+        squad: 'Digital products',
         org: 'Garupa Design',
       },
       {
