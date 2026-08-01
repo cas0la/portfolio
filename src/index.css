@@ -899,11 +899,31 @@
   .portrait-figure {
     position: relative;
     margin: 0;
-    /* A folga onde o gradiente aparece. Ela acomoda o estado de hover, que é o
-       maior: dimensionada para o repouso, o crescimento vazaria da coluna e, no
-       telefone, criaria rolagem horizontal. */
-    padding-right: 16px;
-    padding-bottom: 16px;
+    /*
+     * A folga que encolhe a foto dentro da coluna. **É ela, e não o `inset` do
+     * gradiente, que governa a espessura da sobra colorida:** o gradiente ocupa a
+     * caixa cheia do `<figure>` e a foto ocupa a caixa de conteúdo, então o que
+     * aparece de cor é `padding + o quanto o gradiente sangra para fora`.
+     *
+     * 24px, e eram 16. A pedido do autor em 31/07/2026: ele queria o repouso lendo
+     * mais deslocado sem o bloco crescer. **Crescer o `inset` do gradiente teria
+     * feito o conjunto ocupar mais espaço; crescer o padding faz o contrário** — a
+     * foto encolhe 8px, a sobra passa de 24px para 32px, a largura total não muda
+     * e a altura cai 3px, porque a foto é 4:5 e perde 10px de altura para ganhar
+     * 8px de sobra.
+     *
+     * O teto conhecido fica registrado: uma versão antiga tinha sobra de 44px e o
+     * autor a recusou — naquela espessura o gradiente lia como um segundo bloco ao
+     * lado da foto, e não como sombra dela. 32px em repouso e 40px no hover ficam
+     * abaixo disso de propósito.
+     *
+     * **Este valor não protege contra rolagem horizontal, e já não protegia.** O
+     * gradiente sangra 8px para fora do `<figure>` em repouso e 16px no hover, nos
+     * dois casos por causa do `inset` negativo. Quem absorve isso é a calha da
+     * grade acima de `lg` e o respiro do container no telefone.
+     */
+    padding-right: 24px;
+    padding-bottom: 24px;
   }
 
   .portrait-figure:focus-visible {
@@ -914,11 +934,37 @@
 
   .portrait-gradient {
     position: absolute;
-    /* 8px em repouso, metade do que era: a 16px o gradiente lia como segundo
-       bloco ao lado da foto em vez de sombra colorida dela, e o autor apontou. O
-       hover vai a 16px — o dobro do repouso, o suficiente para o crescimento ser
-       percebido. A 28px, onde estava, o deslocamento virava o assunto do bloco. */
-    inset: 8px -8px -8px 8px;
+    /*
+     * **Os quatro lados fazem trabalhos diferentes, e confundi-los foi o erro das
+     * duas passadas anteriores.**
+     *
+     * - **Direita e baixo (`-8px`) são o deslocamento.** Junto com o padding do
+     *   `<figure>`, eles dão a espessura da sobra colorida: 24px de padding mais
+     *   8px de sangria são os 32px que se veem. Mexer aqui muda o quanto o bloco
+     *   avança para fora da foto.
+     * - **Topo e esquerda (`48px`) são o tamanho.** Eles dizem onde a sobra
+     *   *começa*: em 8px, que era o valor antigo, o gradiente nascia praticamente
+     *   no canto da foto e a faixa de cor corria a altura e a largura inteiras,
+     *   canto a canto. Isso lê como um segundo retângulo do mesmo tamanho, não
+     *   como um bloco menor atrás.
+     *
+     * A 48px o gradiente mede cerca de 425x535 contra os 441x551 da foto — menor
+     * nos dois eixos, com os cantos arredondados dele aparecendo no alto à direita
+     * e embaixo à esquerda, que é o que faz o bloco existir como objeto. **O
+     * deslocamento não mudou em nenhuma das duas passadas:** a sobra continua com
+     * 32px.
+     *
+     * **A faixa de valor útil é estreita e os dois extremos estão testados.** Em
+     * 8px não há bloco, é um segundo retângulo. Em 88px, onde esta passada foi
+     * primeiro, o autor leu exagero: com a sobra começando a um sexto da altura, o
+     * bloco vira o assunto e a foto passa a ser o que sobra dele. 48px é o meio, e
+     * é onde ele parou.
+     *
+     * O hover soma 8px nos quatro lados. O bloco não cresce nem encolhe: ele
+     * escorrega mais 8px na diagonal, e a sobra vai a 40px. A 44px o autor já
+     * recusou uma versão, então este é o teto prático.
+     */
+    inset: 48px -8px -8px 48px;
     border-radius: var(--radius-lg);
     background-image: linear-gradient(
       136deg,
@@ -937,19 +983,30 @@
    */
   @media (hover: hover) {
     .portrait-figure:hover .portrait-gradient {
-      inset: 16px -16px -16px 16px;
+      inset: 56px -16px -16px 56px;
     }
   }
 
   .portrait-figure:focus-visible .portrait-gradient {
-    inset: 16px -16px -16px 16px;
+    inset: 56px -16px -16px 56px;
   }
 
+  /*
+   * **O canto de dentro é menor que o de fora.** A foto ficava em `lg`, igual ao
+   * gradiente atrás dela, e o autor leu isso como estranheza. Dois cantos de mesmo
+   * raio em elementos sobrepostos não alinham opticamente: o de trás tem a curva
+   * afastada pelo deslocamento, e no encontro dos dois a sobra colorida estrangula
+   * no canto em vez de manter a espessura. Com a foto em `md`, a curva de dentro
+   * fecha antes e a faixa passa por fora com largura constante.
+   *
+   * Regra geral, não exceção deste bloco: **elemento por cima recebe raio menor
+   * que o elemento por baixo.**
+   */
   .portrait-frame {
     position: relative;
     z-index: 1;
     overflow: hidden;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     aspect-ratio: 4 / 5;
   }
 

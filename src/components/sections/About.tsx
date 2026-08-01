@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ImagePlus } from 'lucide-react'
 import { Container } from '@/components/primitives/Container'
 import { FadeIn } from '@/components/primitives/FadeIn'
@@ -157,9 +157,9 @@ function PortraitSlot({
 
                     Corpo em `body`, 16px, ao lado de um rótulo em `body-sm`, 14px.
                     Ele é maior que o texto de propósito: emoji ocupa menos da caixa
-                    em do que letra latina, e no mesmo corpo pareceria menor. Era
-                    `text-[18px]`, valor fora da rampa escolhido a olho — 16px casa
-                    igualmente bem e é um degrau documentado. */}
+                    em do que letra latina, e no mesmo corpo pareceria menor. Era um
+                    valor arbitrário entre os dois degraus, escolhido a olho e fora da
+                    rampa; `body` casa igualmente bem e é degrau documentado. */}
                 <span aria-hidden className="text-body leading-none">
                   {item.emoji}
                 </span>
@@ -363,6 +363,36 @@ function Timeline({
     setScrollable(node.scrollHeight > node.clientHeight)
   }
 
+  /*
+   * **A empresa é a entrada da lista, e os cargos são o que aconteceu dentro
+   * dela.** Linhas vizinhas com o mesmo `org` viram um bloco só: um divisor, um
+   * nome de empresa, e os cargos empilhados na ordem em que a lista já estava.
+   *
+   * São duas passagens hoje — Product Designer para Product Manager na Nexfar, e
+   * Product Designer para Lead na Garupa. Enquanto cada cargo era uma entrada com
+   * o nome da empresa embaixo, a lista contava quatro empregos onde houve dois,
+   * com duas promoções dentro.
+   *
+   * **O agrupamento sai do próprio `org`, nunca de um sinalizador no conteúdo.**
+   * Um campo marcado à mão envelheceria calado na primeira vez que alguém
+   * inserisse um cargo no meio da lista. A comparação é de string exata e é isso
+   * que mantém "Garupa Design" separada de "Garupa Design e Dzigual Golinelli",
+   * que é a primeira passagem dele pela empresa e não pertence ao mesmo bloco.
+   *
+   * **Só agrupa quem é vizinho.** Empresa repetida com outra no meio continua
+   * sendo duas entradas, porque foram duas passagens — juntá-las apagaria a saída
+   * e a volta, que é informação.
+   */
+  const groups = useMemo(() => {
+    const out: { org: string; rows: InventoryRow[] }[] = []
+    for (const row of rows) {
+      const last = out[out.length - 1]
+      if (last && last.org === row.org) last.rows.push(row)
+      else out.push({ org: row.org, rows: [row] })
+    }
+    return out
+  }, [rows])
+
   /* `ResizeObserver` e não só o evento de scroll: a lista muda de altura ao trocar
      de idioma e ao cruzar o breakpoint, e nos dois casos nenhum scroll acontece —
      sem isto, o esmaecido ficaria preso no estado da largura anterior. */
@@ -397,74 +427,107 @@ function Timeline({
         data-at-end={atEnd}
         data-scrollable={scrollable}
         data-dragging={dragging}
-        /* O `-ml-4` devolve os 16px que o `pl-4` de cada linha consome, para o
-           texto continuar nascendo no mesmo x do rótulo acima e da prosa ao lado.
-           Sem ele, a coluna inteira andaria para a direita e a linha do tempo
-           passaria a ler como bloco recuado. O que sobra do lado de fora é o fio
-           divisor, que avança 16px sobre a calha — no telefone ele para a 8px da
-           borda, e acima de `lg` cai dentro dos 72px que separam as duas colunas.
-           **Deslocamento negativo aqui só pode ser da caixa, nunca do conteúdo:**
-           acima de `lg` esta lista rola, e rolagem no eixo Y corta o eixo X. */
-        className="timeline-scroll scroll-slim -ml-4 mt-4 flex flex-col border-t border-hairline"
+        className="timeline-scroll scroll-slim mt-4 flex flex-col border-t border-hairline"
         tabIndex={0}
         role="group"
         aria-labelledby="timeline-label"
       >
-        {rows.map((row, i) => {
+        {groups.map((group) => {
           /*
-           * Duas linhas vizinhas com a mesma empresa são a mesma passagem, e o fio
-           * à esquerda é o que diz isso. **A ligação é derivada do próprio `org`,
-           * nunca marcada à mão:** um sinalizador no conteúdo envelheceria calado
-           * na primeira vez que alguém inserisse um cargo no meio da lista.
+           * **O conector é o trilho com um ponto por cargo**, o padrão que o autor
+           * apontou no LinkedIn. Duas tentativas anteriores falharam pelo mesmo
+           * motivo, e o registro evita a terceira: um fio cinza de 1px à esquerda
+           * das linhas não distingue passagem de separação, porque o divisor entre
+           * empresas é o mesmo cinza de 1px; e um traço roxo curto na coluna do ano
+           * marcava o ponto sem ligar coisa nenhuma. **O que faltava nos dois era o
+           * ponto** — o trilho diz "isto continua", o ponto diz "aqui houve um
+           * cargo", e é o par que conta a passagem.
            *
-           * São duas passagens hoje — Product Designer para Product Manager na
-           * Nexfar, e Product Designer para Lead na Garupa. Nos dois casos o que a
-           * lista dizia antes era troca de emprego, quando foi promoção.
-           *
-           * A empresa continua repetida na linha de baixo. Ela é redundante para
-           * quem vê o fio, e é a única âncora para quem lê a linha sozinha, que é
-           * como um leitor de tela percorre uma lista. Redundância barata ganha.
-           *
-           * O fio é `hairline-strong` e não royal: royal neste sistema significa
-           * medição, e gastá-lo aqui tiraria dele o que faz um número saltar.
+           * Ele só aparece em grupo de mais de um cargo. Trilho de um ponto só é
+           * enfeite: não há o que ligar.
            */
-          const joinsBelow = rows[i + 1]?.org === row.org
-          const joinsAbove = rows[i - 1]?.org === row.org
+          const linked = group.rows.length > 1
 
           return (
             <li
-              key={`${row.when}-${row.role}-${row.org}`}
-              className={cn(
-                'flex flex-col gap-1 border-l py-4 pl-4 sm:flex-row sm:gap-gap',
-                joinsAbove || joinsBelow
-                  ? 'border-l-hairline-strong'
-                  : 'border-l-transparent',
-                /* O divisor some entre as duas, senão o fio ligaria dois blocos
-                   que uma linha horizontal acabou de separar. */
-                !joinsBelow && 'border-b border-b-hairline',
-              )}
+              key={`${group.org}-${group.rows[0].when}`}
+              /* A calha de 24px existe em **todo** grupo, com trilho ou sem. Dada
+                 só a quem tem trilho, as entradas de um cargo começariam 24px à
+                 esquerda das outras, e a lista ganharia dois recuos onde deveria
+                 ter um. O divisor continua nascendo em zero e atravessa a calha. */
+              className="flex flex-col gap-4 border-b border-hairline py-4 pl-6"
             >
-              {/* Largura fixa no ano para os oito alinharem numa coluna, e `tnum`
-                  para os dígitos não dançarem entre "2025" e "2023–2025". */}
-              <div className="flex shrink-0 items-baseline gap-2 sm:w-[104px] sm:flex-col sm:items-start sm:gap-1">
-                <span className="tnum text-body-sm text-ink-soft">{row.when}</span>
-                {row.current && (
-                  <span className="label rounded-pill bg-royal-wash px-2 py-0.5 text-royal">
-                    {nowLabel}
-                  </span>
-                )}
-              </div>
-              <div className="min-w-0">
-                {/* O cargo em itálico de serifa. É a segunda voz do sistema fazendo
-                    o trabalho que ela faz melhor: separar sem precisar de mais peso
-                    nem de mais corpo. Antes era grotesca 600, e numa lista de oito o
-                    peso repetido vira mancha em vez de hierarquia. */}
-                <span className="accent block text-h3 text-ink">{row.role}</span>
-                {row.squad && (
-                  <span className="block text-body-sm text-ink">{row.squad}</span>
-                )}
-                <span className="block text-body-sm text-ink-soft">{row.org}</span>
-              </div>
+              {group.rows.map((row, j) => (
+                <div
+                  key={`${row.when}-${row.role}`}
+                  className="relative flex flex-col gap-1 sm:flex-row sm:gap-gap"
+                >
+                  {linked && (
+                    <>
+                      {/*
+                       * O segmento de trilho de cada cargo, desenhado por linha em
+                       * vez de um traço só no grupo: a altura das linhas é ditada
+                       * pelo texto e nenhum dos dois lados sabe onde o ponto do
+                       * vizinho caiu. Cada linha resolve a própria metade.
+                       *
+                       * O primeiro cargo desenha do próprio ponto para baixo, o
+                       * último do ponto para cima, e um cargo do meio atravessa
+                       * inteiro. Os 16px de sangria são exatamente o `gap-4` entre
+                       * as linhas, então as pontas se encontram no vão e o trilho
+                       * fecha sem emenda visível.
+                       */}
+                      <span
+                        aria-hidden
+                        className={cn(
+                          /* Meio pixel à esquerda do centro do ponto, que fica em
+                             3px: um fio de 1px centrado num ponto de 6px. */
+                          'absolute left-[calc(-1.5rem+2.5px)] w-px bg-hairline-strong',
+                          j === 0 && 'top-3 -bottom-4',
+                          j > 0 && j < group.rows.length - 1 && '-top-4 -bottom-4',
+                          j === group.rows.length - 1 &&
+                            '-top-4 bottom-[calc(100%-0.75rem)]',
+                        )}
+                      />
+                      {/* O ponto centra na primeira linha de texto da entrada, que é
+                          o ano: 24px de entrelinha, logo 12px do topo, menos os 3px
+                          de metade do ponto. */}
+                      <span
+                        aria-hidden
+                        className="absolute -left-6 top-[9px] size-1.5 rounded-full bg-hairline-strong"
+                      />
+                    </>
+                  )}
+                  {/* Largura fixa no ano para todos alinharem numa coluna, e `tnum`
+                      para os dígitos não dançarem entre "2025" e "2023–2025". */}
+                  <div className="flex shrink-0 items-baseline gap-2 sm:w-[104px] sm:flex-col sm:items-start sm:gap-1">
+                    <span className="tnum text-body-sm text-ink-soft">{row.when}</span>
+                    {row.current && (
+                      <span className="label rounded-pill bg-royal-wash px-2 py-0.5 text-royal">
+                        {nowLabel}
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    {/* O cargo em itálico de serifa. É a segunda voz do sistema
+                        fazendo o trabalho que ela faz melhor: separar sem precisar de
+                        mais peso nem de mais corpo. Antes era grotesca 600, e numa
+                        lista deste tamanho o peso repetido vira mancha em vez de
+                        hierarquia. */}
+                    <span className="accent block text-h3 text-ink">{row.role}</span>
+                    {row.squad && (
+                      <span className="block text-body-sm text-ink">{row.squad}</span>
+                    )}
+                    {/* A empresa fecha o grupo, e aparece uma vez só. Repetida embaixo
+                        de cada cargo ela dizia dois empregos onde houve uma promoção;
+                        dita uma vez, ela é o que os cargos têm em comum. */}
+                    {j === group.rows.length - 1 && (
+                      <span className="block text-body-sm text-ink-soft">
+                        {group.org}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </li>
           )
         })}
