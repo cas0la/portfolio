@@ -312,6 +312,146 @@ function ModuleJourney({
 }
 
 /**
+ * A lista de números de um bloco: um líder opcional e os apoios abaixo dele.
+ *
+ * **Existe porque era o mesmo JSX três vezes.** Os módulos, o método e a prova
+ * desenhavam listas de resultado com as mesmas strings de classe copiadas — três
+ * cópias que só continuariam iguais por vigilância, e que já tinham começado a
+ * divergir (a prova ganhou `text-body-sm` explícito na fonte, o método não).
+ *
+ * **O defeito que ela conserta é horizontal, não vertical.** O autor disse que a
+ * legenda parecia desalinhada da informação, e a suspeita óbvia era baseline. As
+ * baselines estavam perfeitas: 0,0px de diferença, medido. O que estava torto era o
+ * eixo x — o numeral era `shrink-0` numa fileira flex, então **cada legenda começava
+ * onde aquele numeral por acaso tinha terminado**. Na prova, as bordas esquerdas
+ * caíam em 469, 454, 394 e 543px a 1920px: 149px de ziguezague numa lista de quatro
+ * linhas, e a linha da fonte herdava o mesmo x, virando uma escada de oito degraus.
+ *
+ * Daí `subgrid`. A coluna dos numerais é dimensionada uma vez, no `<ul>`, pelo mais
+ * largo de todos (`max-content`), e cada `<li>` se pendura nessa mesma trilha em vez
+ * de negociar a própria. **Um x só para todas as legendas**, sem largura fixa
+ * chutada e sem quebrar quando o conteúdo mudar de idioma.
+ *
+ * Abaixo de `sm` a grade é abandonada de propósito e a lista volta a empilhar. Numa
+ * coluna de 178px, `15 → 200+` empurrava a legenda 145px para a direita e sobrava
+ * espaço para nada: a legenda quebrava em quatro linhas. Duas colunas só existem
+ * quando há largura para duas colunas.
+ *
+ * **O líder fica fora da grade.** Ele é a afirmação do bloco e não uma linha da
+ * tabela; dentro da grade, o corpo de display dele definiria a coluna dos numerais e
+ * jogaria todas as legendas de apoio para bem longe do próprio número.
+ */
+function ResultList({
+  results,
+  className = 'mt-block',
+}: {
+  results: NonNullable<Piece['results']>
+  className?: string
+}) {
+  const lead = results.find((result) => result.lead)
+  const rest = results.filter((result) => result !== lead)
+
+  return (
+    <div className={className}>
+      {lead && (
+        <div>
+          <p className="font-display text-display font-extrabold leading-none text-royal">
+            <ResultValue result={lead} />
+          </p>
+          <p className="measure mt-snug text-body text-ink">{lead.unit}</p>
+          {lead.source && <ResultSource>{lead.source}</ResultSource>}
+        </div>
+      )}
+
+      {rest.length > 0 && (
+        <ul
+          className={`flex flex-col gap-snug sm:grid sm:grid-cols-[max-content_1fr] sm:gap-x-gap ${
+            lead ? 'mt-gap' : ''
+          }`}
+        >
+          {rest.map((result) => (
+            <li
+              key={result.value + result.unit}
+              /* `sm:gap-x-gap` repetido aqui de propósito. Um `subgrid` herda as
+                 calhas do pai, mas só enquanto não declarar as próprias — e o
+                 `gap-tight` que separa número de legenda no telefone é uma
+                 declaração, então sem esta linha a calha de 24px viraria os 8px do
+                 empilhamento. */
+              className="flex flex-col gap-tight sm:col-span-full sm:grid sm:grid-cols-subgrid sm:items-baseline sm:gap-x-gap"
+            >
+              {/* **Os apoios são tinta, não royal.** Antes cada número da lista saía
+                  em royal, e o resultado era que a cor deixava de destacar: o olho
+                  compara massa de tinta colorida, e `15 → 200+` a 36px mede 171px
+                  contra os 92px do `+85` a 56px — o apoio tinha 1,86× a tinta do
+                  líder. Um acento por bloco é o que faz o acento significar algo.
+
+                  `.tnum` saiu daqui. Figura tabular só compra alinhamento em coluna
+                  alinhada à direita, e esta é alinhada à esquerda: era `font-feature-settings`
+                  ligado sem nada em troca. */}
+              <span className="font-display text-num font-extrabold text-ink">
+                <ResultValue result={result} />
+              </span>
+              <span className="measure text-body text-ink-soft">
+                {result.unit}
+                {result.source && <ResultSource>{result.source}</ResultSource>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+/**
+ * O valor de um resultado, dito uma vez para o olho e outra para o ouvido.
+ *
+ * **Os dois carregam a mesma medida por motivos opostos.** A versão visível precisa
+ * dos sinais — `~` diz aproximado, `→` diz virou, `+` diz pelo menos — e é justamente
+ * deles que o leitor de tela faz sopa: `~200` sai como "til 200" e `15 → 200+` como
+ * "15 seta para a direita 200 mais". A versão falada é a mesma medida por extenso, e
+ * ela vem do conteúdo (`spoken`), nunca montada aqui: transformar sinal em palavra é
+ * decisão de idioma, e esta página existe em dois.
+ *
+ * Onde `spoken` falta, ou onde ele repete o que já está escrito, sai só um nó — um
+ * `sr-only` duplicando o texto visível faria o leitor de tela dizer o número duas
+ * vezes.
+ */
+function ResultValue({ result }: { result: NonNullable<Piece['results']>[number] }) {
+  const spoken = result.spoken && result.spoken !== result.value ? result.spoken : null
+  if (!spoken) return <>{result.value}</>
+
+  return (
+    <>
+      <span aria-hidden>{result.value}</span>
+      <span className="sr-only">{spoken}</span>
+    </>
+  )
+}
+
+/**
+ * A procedência de um número.
+ *
+ * **Distinção por tamanho, nunca por transparência.** A primeira versão usava
+ * `ink-soft/70`, que dá 3,0:1 sobre o papel — abaixo do piso de 4,5:1. A segunda
+ * corrigiu o contraste subindo para `ink-soft` cheio, e com isso a fonte ficou
+ * tipograficamente idêntica à legenda que ela acompanha: mesmo corpo de 14px, mesma
+ * cor, mesmo peso, em cinco das seis ocorrências. Duas informações diferentes com a
+ * mesma voz.
+ *
+ * A escala `label` (12px) resolve as duas: a fonte é menor que a legenda, e
+ * `ink-soft` cheio mantém 5,54:1. `tracking-normal` desfaz o entreletras de 0,09em da
+ * escala, que existe para versalete e não para "Power BI, ago/2026".
+ */
+function ResultSource({ children }: { children: string }) {
+  return (
+    <span className="mt-tight block text-label tracking-normal text-ink-soft">
+      {children}
+    </span>
+  )
+}
+
+/**
  * Um módulo, com a jornada que o originou e os números que ele sustenta.
  *
  * **O nome subiu de `h3` para `h2` e o fio ganhou ar acima.** Enquanto o módulo era
@@ -420,56 +560,13 @@ function PieceCard({
           uma frase ("poupada por cotação, de 50 a 100 itens"), e frase em coluna
           de grade quebra em três linhas enquanto o número ao lado fica sozinho.
 
-          **O primeiro sai em corpo de display, os outros em corpo de número.** O
-          autor pediu mais destaque para os números grandes, e a resposta é
-          hierarquia e não tamanho igual para todos: quatro números no mesmo corpo
-          é exatamente a faixa de métrica que o DESIGN.md proíbe, e ela fica mais
-          proibida quanto maiores forem. Um número que se defende sozinho, e os
-          outros logo abaixo o sustentando. */}
-          {piece.results && (
-            <ul className="mt-block flex flex-col gap-snug">
-              {piece.results.map((result, i) => (
-                <li
-                  key={result.value + result.unit}
-                  className={
-                    i === 0
-                      ? 'flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4'
-                      : 'flex items-baseline gap-3'
-                  }
-                >
-                  <span
-                    className={
-                      i === 0
-                        ? 'tnum shrink-0 font-display text-display font-extrabold leading-none text-royal'
-                        : 'tnum shrink-0 font-display text-num font-extrabold text-royal'
-                    }
-                  >
-                    {result.value}
-                  </span>
-                  <span
-                    className={
-                      i === 0 ? 'text-body text-ink' : 'text-body-sm text-ink-soft'
-                    }
-                  >
-                    {result.unit}
-                    {/* A procedência colada no número que ela cobre, não numa nota de
-                    rodapé única: "Power BI e Mixpanel" é verdade para uns e
-                    mentira para outros, e uma fonte errada custa mais que nenhuma.
-
-                    **Em `ink-soft` cheio.** A primeira versão usava `ink-soft/70`
-                    para diferenciar da unidade, e 70% sobre o papel dá 3,0:1 — abaixo
-                    do piso de 4,5:1 para texto. A distinção agora é hierárquica e
-                    não de contraste: a fonte quebra em linha própria. */}
-                    {result.source && (
-                      <span className="block text-body-sm text-ink-soft">
-                        {result.source}
-                      </span>
-                    )}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+          **Quem sai em corpo de display é quem foi marcado, e não quem chegou
+          primeiro.** A régua era `i === 0`, posicional, e regra posicional faz
+          afirmação que ninguém escreveu: o Catálogo Digital tem um resultado só e
+          por isso ganhava a mesma voz do NPS do case inteiro. Hoje o campo `lead`
+          diz quem lidera, e módulo de número único não leva nenhum. Ver a nota do
+          campo em `content/index.ts`. */}
+          {piece.results && <ResultList results={piece.results} />}
         </div>
 
         {piece.screens && <ModuleJourney screens={piece.screens} labels={labels} />}
@@ -486,6 +583,10 @@ export function CaseInteligenciaComercial() {
   // Conteúdo removido do `content` não pode derrubar a rota inteira em tela
   // branca: sem o case, o endereço deixou de existir e é isso que a página diz.
   if (!build) return <NotFound />
+
+  // As cápsulas que descrevem o escopo, sem as que carregam número medido. Ver a
+  // nota junto ao bloco que as desenha.
+  const traits = build.highlights?.filter((item) => !item.measured) ?? []
 
   /*
    * O topo encolheu de `block`/`section` para `gap`/`block`. O cabeçalho é fixo e já
@@ -537,23 +638,46 @@ export function CaseInteligenciaComercial() {
               </div>
             )}
 
-            {build.highlights && (
+            {/* **Só as cápsulas de escopo, sem as medidas.** Na home elas são o
+                resumo inteiro do case e os números precisam estar ali. Aqui a prova
+                vem logo abaixo, em corpo de display e com fonte declarada — e a
+                mesma medida dita duas vezes em duas vozes não reforça, divide: a
+                cápsula de 14px diz o número antes, mais baixo, e sem procedência,
+                então quando ele reaparece grande já foi lido. Filtro na página, não
+                no conteúdo: `Cases.tsx` come o mesmo dado e não muda. */}
+            {traits.length > 0 && (
               <div>
                 <h2 className="label text-ink-soft">{t.builds.highlightsLabel}</h2>
                 <ul className="mt-4 flex flex-wrap gap-2 text-body-sm text-ink">
-                  {build.highlights.map((item) => (
-                    <StatPill
-                      key={item.value}
-                      value={item.value}
-                      label={item.label}
-                      measured={item.measured}
-                    />
+                  {traits.map((item) => (
+                    <StatPill key={item.value} value={item.value} label={item.label} />
                   ))}
                 </ul>
               </div>
             )}
           </div>
         </FadeIn>
+
+        {/* **A prova subiu para cá, e é a segunda coisa da página.** O leitor típico
+            chega por link direto de um currículo e decide em segundos se continua;
+            no fim da página, o único bloco capaz de segurá-lo só era encontrado por
+            quem já estava convencido.
+
+            Ela cabe aqui porque não depende de nada acima dela: cada linha carrega a
+            própria procedência, e é justamente por serem de origens diferentes —
+            pesquisa, operação e produto instrumentado — que elas se sustentam sem os
+            módulos terem sido lidos ainda. */}
+        {build.proof && (
+          <FadeIn delay={0.06}>
+            <section className="mt-section lg:mt-beat">
+              <h2 className="measure text-h1 font-extrabold text-ink">
+                {build.proof.title}
+              </h2>
+              <p className="measure mt-gap text-body-lead text-ink">{build.proof.lead}</p>
+              <ResultList results={build.proof.results} />
+            </section>
+          </FadeIn>
+        )}
 
         {/*
          * A FAIXA DE EVOLUÇÃO SAIU DAQUI, e continua viva na home.
@@ -566,9 +690,9 @@ export function CaseInteligenciaComercial() {
          *
          * **O que ficou órfão está listado para o autor**: as quatro dores da
          * ideação, os dois rascunhos de interface, o lançamento de mai/2025 com os
-         * cinco módulos do deck, a janela de produção com as 5 operações e a virada
-         * de 15 para mais de 200 usuários, e o NPS com a fonte (Formbricks, Q3/2026)
-         * — o número sobrevive na cápsula do cabeçalho, a procedência não.
+         * cinco módulos do deck, e a janela de produção com as 5 operações. O NPS com
+         * a fonte, a virada de 15 para mais de 200 usuários e a contagem de operações
+         * deixaram de ser órfãos: vivem no bloco de prova, que agora abre a página.
          *
          * `Build.milestones` **fica no conteúdo**, porque a home ainda desenha a
          * faixa. Ver `Cases.tsx`.
@@ -682,22 +806,7 @@ export function CaseInteligenciaComercial() {
               </div>
 
               {build.discovery.results && (
-                <ul className="mt-block flex flex-col gap-snug">
-                  {build.discovery.results.map((result) => (
-                    <li
-                      key={result.value + result.unit}
-                      className="flex items-baseline gap-3"
-                    >
-                      <span className="tnum shrink-0 font-display text-num font-extrabold text-royal">
-                        {result.value}
-                      </span>
-                      <span className="text-body-sm text-ink-soft">
-                        {result.unit}
-                        {result.source && <span className="block">{result.source}</span>}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <ResultList results={build.discovery.results} />
               )}
             </section>
           </FadeIn>
@@ -707,59 +816,13 @@ export function CaseInteligenciaComercial() {
             título e sem conteúdo seria a promessa quebrada em tamanho de título,
             pior que a ausência. Enquanto o `tradeoff` estiver vazio, a página
             termina no convite abaixo. */}
-        {/* A prova fecha a página, depois do método e antes do custo. É o único
-            lugar onde números de origens diferentes se encostam, e cada linha
-            carrega a própria procedência: é o fecho do case, e aqui um número sem
-            fonte estragaria os outros por associação.
-
-            O primeiro é o NPS, e ele sai maior que os demais pelo mesmo motivo que
-            no módulo: quatro números do mesmo tamanho seriam a faixa de métrica que
-            o DESIGN.md proíbe. */}
-        {build.proof && (
-          <FadeIn delay={0.06}>
-            <section className="mt-section lg:mt-beat">
-              <h2 className="measure text-h1 font-extrabold text-ink">
-                {build.proof.title}
-              </h2>
-              <p className="measure mt-gap text-body-lead text-ink">{build.proof.lead}</p>
-
-              <ul className="mt-block flex flex-col gap-snug">
-                {build.proof.results.map((result, i) => (
-                  <li
-                    key={result.value + result.unit}
-                    className={
-                      i === 0
-                        ? 'flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4'
-                        : 'flex items-baseline gap-3'
-                    }
-                  >
-                    <span
-                      className={
-                        i === 0
-                          ? 'tnum shrink-0 font-display text-display font-extrabold leading-none text-royal'
-                          : 'tnum shrink-0 font-display text-num font-extrabold text-royal'
-                      }
-                    >
-                      {result.value}
-                    </span>
-                    <span
-                      className={
-                        i === 0 ? 'text-body text-ink' : 'text-body-sm text-ink-soft'
-                      }
-                    >
-                      {result.unit}
-                      {result.source && (
-                        <span className="block text-body-sm text-ink-soft">
-                          {result.source}
-                        </span>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </FadeIn>
-        )}
+        {/* A PROVA SAIU DAQUI e subiu para logo depois do cabeçalho. Ela fechava a
+            página, entre o método e o custo, e o argumento era de narrativa: os
+            números valem mais depois de o leitor saber o que foi construído. O que
+            derrubou isso foi a leitura real — quem chega por link de currículo
+            decide em segundos se continua, e a prova era a única coisa da página
+            capaz de segurar essa pessoa. Enterrada a três rolagens de distância, ela
+            só era encontrada por quem já tinha sido convencido. */}
 
         {build.tradeoff && (
           <FadeIn delay={0.06}>

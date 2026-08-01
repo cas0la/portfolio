@@ -154,7 +154,39 @@ export type Piece = {
    * números de OCR saem de release note, não de painel. Onde `source` falta, o
    * rodapé da seção ainda responde.
    */
-  results?: { value: string; unit: string; source?: string }[]
+  /*
+   * `lead` marca **o número que fala mais alto do bloco**, e existe porque a
+   * alternativa era pior: até 31/07/2026 quem levava o corpo de display era o
+   * primeiro do array, por `i === 0`. Regra posicional faz afirmação que ninguém
+   * escreveu — o Catálogo Digital tem um resultado só, e por ser o primeiro ganhava
+   * a mesma voz do NPS, ou seja, o módulo de prova mais fina era tipografado como a
+   * afirmação mais forte do case.
+   *
+   * **No máximo um por bloco, e nenhum é uma resposta válida.** Dois números em
+   * corpo de display no mesmo bloco começam a virar a faixa de métrica que o
+   * DESIGN.md proíbe. E bloco de resultado único **não leva `lead`**: é aí que a
+   * regra posicional errava mais feio, dando ao Catálogo Digital — um número, de
+   * contagem de uso — a mesma voz que o NPS do case inteiro. Sem `lead`, os três
+   * blocos de número único caem para o corpo de apoio, que é o tamanho do que eles
+   * afirmam.
+   *
+   * Quem leva `lead` hoje: o `+85` do `proof`, que o autor rankeou como o número
+   * mais importante do case, e o `80%+` da Cotação Ágil. **Na Cotação Ágil o lead
+   * não é o volume**, e isso é a regra do autor aplicada: conversão e retenção
+   * provam resultado de produto acima de contagem de uso, então `400+ cotações por
+   * mês` sustenta o percentual em vez de liderar.
+   *
+   * `spoken` só existe onde o valor tem sinal que não se lê em voz alta: `~200` sai
+   * como "til 200" e `15 → 200+` como "15 seta para a direita 200 mais" em leitor de
+   * tela. Não é tradução nem número novo — é o mesmo valor dito por extenso.
+   */
+  results?: {
+    value: string
+    unit: string
+    source?: string
+    lead?: boolean
+    spoken?: string
+  }[]
 }
 
 export type Build = {
@@ -962,7 +994,7 @@ const pt: Copy = {
           { value: 'Mobile first' },
           { value: 'Data driven' },
           { value: 'IA em produção' },
-          { value: '400+', label: 'usuários', measured: true },
+          { value: '500+', label: 'usuários', measured: true },
           { value: 'NPS +85', measured: true },
           { value: '80%+', label: 'de conversão', measured: true },
         ],
@@ -1183,7 +1215,11 @@ const pt: Copy = {
               },
             ],
             results: [
-              { value: '~200', unit: 'pedidos por dia saem das sugestões' },
+              {
+                value: '~200',
+                unit: 'pedidos por dia saem das sugestões',
+                spoken: 'cerca de 200',
+              },
               {
                 value: '5',
                 unit: 'tipos de objetivo, de venda total a produtos por PDV',
@@ -1251,8 +1287,8 @@ const pt: Copy = {
               },
             ],
             results: [
+              { value: '80%+', unit: 'de conversão em pedido', lead: true },
               { value: '400+', unit: 'cotações respondidas por mês' },
-              { value: '80%+', unit: 'de conversão em pedido' },
               { value: '1h+', unit: 'poupada por cotação, de 50 a 100 itens' },
               {
                 value: '47',
@@ -1450,7 +1486,13 @@ const pt: Copy = {
             'Depois que o produto subiu, a fila de melhorias parou de sair de reunião de roadmap. Passei a manter grupo aberto com os vendedores que usam a plataforma todo dia, a entrevistar quem tinha acabado de usar, e a olhar o dado de uso ao lado dos dois.',
             'Cada frente pega o que as outras não pegam. O grupo traz o incômodo que ninguém abre chamado para relatar. A entrevista mostra onde a pessoa hesita, que é diferente de onde ela reclama. O dado diz quantos passam pelo mesmo ponto, e é ele que separa o caso isolado do problema que vale corrigir. ++Trazer as três para a mesa é o que me deixa decidir a fila por evidência em vez de por palpite.++',
           ],
-          results: [{ value: '20+', unit: 'melhorias lançadas em 3 meses' }],
+          results: [
+            {
+              value: '20+',
+              unit: 'melhorias lançadas em 3 meses',
+              source: 'Release notes, Q2/2026',
+            },
+          ],
         },
         /*
          * Fontes, nesta ordem: o deck de lançamento de maio/2025, slide "Período de
@@ -1514,11 +1556,12 @@ const pt: Copy = {
               value: '+85',
               unit: 'de NPS do produto, numa escala de -100 a 100',
               source: 'Formbricks, Q3/2026',
+              lead: true,
             },
             {
-              value: '400+',
+              value: '500+',
               unit: 'vendedores usando em operação',
-              source: 'Power BI, jul/2026',
+              source: 'Power BI, ago/2026',
             },
             {
               value: '5',
@@ -1529,6 +1572,7 @@ const pt: Copy = {
               value: '15 → 200+',
               unit: 'usuários na primeira operação, do acesso antecipado às seis regionais',
               source: 'Power BI, abr/2026',
+              spoken: 'de 15 para mais de 200',
             },
           ],
         },
@@ -2020,7 +2064,7 @@ const en: Copy = {
           { value: 'Mobile first' },
           { value: 'Data driven' },
           { value: 'AI in production' },
-          { value: '400+', label: 'users', measured: true },
+          { value: '500+', label: 'users', measured: true },
           { value: 'NPS +85', measured: true },
           { value: '80%+', label: 'conversion', measured: true },
         ],
@@ -2168,7 +2212,11 @@ const en: Copy = {
               },
             ],
             results: [
-              { value: '~200', unit: 'orders a day come from the suggestions' },
+              {
+                value: '~200',
+                unit: 'orders a day come from the suggestions',
+                spoken: 'around 200',
+              },
               {
                 value: '5',
                 unit: 'goal types, from total sales to products per store',
@@ -2231,8 +2279,8 @@ const en: Copy = {
               },
             ],
             results: [
+              { value: '80%+', unit: 'converted into orders', lead: true },
               { value: '400+', unit: 'quotes answered per month' },
-              { value: '80%+', unit: 'converted into orders' },
               { value: '1h+', unit: 'saved per quote, at 50 to 100 items' },
               {
                 value: '47',
@@ -2345,7 +2393,13 @@ const en: Copy = {
             'Once the product was live, the improvement queue stopped coming out of roadmap meetings. I kept a standing group with the reps who use the platform every day, interviewed people right after they used it, and read the usage data alongside both.',
             'Each front catches what the others miss. The group surfaces the friction nobody files a ticket about. The interview shows where someone hesitates, which is not where they complain. The data says how many people hit the same spot, and that is what separates one bad day from a problem worth fixing. ++Bringing all three to the table is what lets me set the queue on evidence instead of on hunch.++',
           ],
-          results: [{ value: '20+', unit: 'improvements shipped in 3 months' }],
+          results: [
+            {
+              value: '20+',
+              unit: 'improvements shipped in 3 months',
+              source: 'Release notes, Q2/2026',
+            },
+          ],
         },
         convergence: {
           title: 'All three exits lead to the same place',
@@ -2377,11 +2431,12 @@ const en: Copy = {
               value: '+85',
               unit: 'product NPS, on a -100 to 100 scale',
               source: 'Formbricks, Q3/2026',
+              lead: true,
             },
             {
-              value: '400+',
+              value: '500+',
               unit: 'reps using it in live operations',
-              source: 'Power BI, Jul 2026',
+              source: 'Power BI, Aug 2026',
             },
             {
               value: '5',
@@ -2392,6 +2447,7 @@ const en: Copy = {
               value: '15 → 200+',
               unit: 'users at the first operation, from early access to all six regions',
               source: 'Power BI, Apr 2026',
+              spoken: 'from 15 to more than 200',
             },
           ],
         },
