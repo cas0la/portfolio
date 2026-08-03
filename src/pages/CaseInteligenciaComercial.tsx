@@ -212,30 +212,39 @@ function ModuleJourney({
 
   return (
     <div ref={stageRef} className="mj-stage">
-      <div
-        className="mj-device"
-        onPointerDown={onPointerDown}
-        onPointerUp={onPointerUp}
-        onPointerCancel={() => {
-          dragRef.current = null
-        }}
-      >
-        <div className="mj-frame relative">
-          {screens.map((screen, i) => (
-            <img
-              key={screen.src}
-              src={screen.src}
-              /* Só a tela ativa tem nome acessível. As outras são a mesma jornada
-               repetida para quem ouve a página, e a legenda abaixo já anuncia o
-               passo em região viva. */
-              alt={i === active ? screen.alt : ''}
-              aria-hidden={i === active ? undefined : true}
-              loading="lazy"
-              decoding="async"
-              className="mj-shot w-full bg-white"
-              data-active={i === active ? 'true' : undefined}
-            />
-          ))}
+      {/*
+       * O invólucro existe por uma razão de CSS, não de layout: ele é o contêiner
+       * de consulta que dá ao aparelho uma largura para medir o próprio bisel e os
+       * próprios cantos. Um elemento não pode escrever o próprio `padding` em
+       * `cqi` — as unidades de contêiner resolvem contra o ancestral —, então a
+       * largura máxima mora aqui e a forma, dentro. Ver `.mj-device-wrap`.
+       */}
+      <div className="mj-device-wrap">
+        <div
+          className="mj-device"
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={() => {
+            dragRef.current = null
+          }}
+        >
+          <div className="mj-frame relative">
+            {screens.map((screen, i) => (
+              <img
+                key={screen.src}
+                src={screen.src}
+                /* Só a tela ativa tem nome acessível. As outras são a mesma jornada
+                 repetida para quem ouve a página, e a legenda abaixo já anuncia o
+                 passo em região viva. */
+                alt={i === active ? screen.alt : ''}
+                aria-hidden={i === active ? undefined : true}
+                loading="lazy"
+                decoding="async"
+                className="mj-shot w-full bg-white"
+                data-active={i === active ? 'true' : undefined}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
